@@ -59,6 +59,7 @@ namespace Comparable.WeavingConsole
             Type myType = a.GetType("WithSingleProperty");
             var instance = a.CreateInstance("WithSingleProperty");
             var comparableInstance = instance as IComparable;
+            var result = comparableInstance.CompareTo(comparableInstance);
         }
     }
 }
