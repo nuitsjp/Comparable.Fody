@@ -10,6 +10,8 @@ namespace Comparable.Fody.Test
         public void WithSingleProperty()
         {
             var weavingTask = new ModuleWeaver();
+
+
             var testResult = weavingTask.ExecuteTestRun("AssemblyToProcess.dll", false);
 
             var obj = testResult.GetInstance("WithSingleProperty");

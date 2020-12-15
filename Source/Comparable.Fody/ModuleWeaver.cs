@@ -5,6 +5,7 @@ using System.Reflection;
 using Fody;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using MethodAttributes = Mono.Cecil.MethodAttributes;
 
 namespace Comparable.Fody
 {
@@ -25,10 +26,39 @@ namespace Comparable.Fody
         public override void Execute()
         {
             FindReferences();
-            foreach (var type in ModuleDefinition.Types)
+            foreach (var type in ModuleDefinition.Types.Where(x => !x.Name.Contains("Module")))
             {
-                
                 type.Interfaces.Add(IComparable);
+
+                var compareToDefinition =
+                    new MethodDefinition(
+                        CompareTo.Name,
+                        MethodAttributes.Public
+                        | MethodAttributes.Final
+                        | MethodAttributes.HideBySig
+                        | MethodAttributes.NewSlot
+                        | MethodAttributes.Virtual,
+                        CompareTo.ReturnType)
+                    {
+                        Body =
+                        {
+                            MaxStackSize = CompareTo.Parameters.Count + 1,
+                            InitLocals = true
+                        }
+                    };
+                
+                compareToDefinition.Parameters.Add(CompareTo.Parameters.First());
+
+                var processor = compareToDefinition.Body.GetILProcessor();
+                processor.Append(Instruction.Create(OpCodes.Nop));
+                processor.Append(Instruction.Create(OpCodes.Ldc_I4_0));
+                processor.Append(Instruction.Create(OpCodes.Stloc_0));
+                var bar = Instruction.Create(OpCodes.Ldloc_0);
+                processor.Append(Instruction.Create(OpCodes.Br_S, bar));
+                processor.Append(bar);
+                processor.Append(Instruction.Create(OpCodes.Ret));
+
+                type.Methods.Add(compareToDefinition);
             }
             //var methods = ModuleDefinition
             //    .Types
@@ -53,7 +83,6 @@ namespace Comparable.Fody
             var comparableType = FindTypeDefinition("System.IComparable");
             IComparable = new InterfaceImplementation(ModuleDefinition.ImportReference(comparableType));
             CompareTo = ModuleDefinition.ImportReference(comparableType.Methods.Single(x => x.Name == "CompareTo"));
-
         }
 
         public override IEnumerable<string> GetAssembliesForScanning()
@@ -67,4 +96,5 @@ namespace Comparable.Fody
             yield return "Comparable";
         }
     }
+
 }
