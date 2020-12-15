@@ -14,8 +14,6 @@ namespace Comparable.WeavingConsole
             var moduleFullName = Path.Combine(path, "AssemblyToProcess.dll");
             var module = ModuleDefinition.ReadModule(moduleFullName);
             var comparable = module.ImportReference(typeof(IComparable));
-            var intReference = module.ImportReference(typeof(int));
-            var objectReference = module.ImportReference(typeof(object));
             var type = module.Types.Single(x => x.Name == "WithSingleProperty");
 
             var compareTo2 = type.Methods.Single(x => x.Name == "CompareTo2");
@@ -30,7 +28,7 @@ namespace Comparable.WeavingConsole
                     | MethodAttributes.HideBySig
                     | MethodAttributes.NewSlot
                     | MethodAttributes.Virtual,
-                    intReference)
+                    module.TypeSystem.Int32)
                 {
                     Body =
                     {
@@ -38,7 +36,7 @@ namespace Comparable.WeavingConsole
                         InitLocals = true
                     }
                 };
-            compareToDefinition.Parameters.Add(new ParameterDefinition("obj", ParameterAttributes.None, objectReference));
+            compareToDefinition.Parameters.Add(new ParameterDefinition("obj", ParameterAttributes.None, module.TypeSystem.Object));
 
             compareToDefinition.Body.Variables.Add(new VariableDefinition(module.TypeSystem.Int32));
             var processor = compareToDefinition.Body.GetILProcessor();
