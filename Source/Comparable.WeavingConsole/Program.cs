@@ -1,8 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using MethodAttributes = Mono.Cecil.MethodAttributes;
+using ParameterAttributes = Mono.Cecil.ParameterAttributes;
 
 namespace Comparable.WeavingConsole
 {
@@ -49,6 +52,13 @@ namespace Comparable.WeavingConsole
             type.Methods.Add(compareToDefinition);
 
             module.Write(@"AssemblyToProcess.dll");
+
+            var assemblyPath = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "AssemblyToProcess.dll");
+            Assembly a = Assembly.Load(File.ReadAllBytes(assemblyPath));
+            // Get the type to use.
+            Type myType = a.GetType("WithSingleProperty");
+            var instance = a.CreateInstance("WithSingleProperty");
+            var comparableInstance = instance as IComparable;
         }
     }
 }
