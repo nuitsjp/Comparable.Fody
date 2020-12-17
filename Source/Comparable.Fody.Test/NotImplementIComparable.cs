@@ -6,17 +6,17 @@ using FluentAssertions;
 
 namespace Comparable.Fody.Test
 {
-    public class ComparableIsNotAdded : BaseTest
+    public class NotImplementIComparable : BaseTest
     {
         [Fact]
-        public void IsNotIComparableClass()
+        public void InClass()
         {
             var obj = (object)TestResult.GetInstance("AssemblyToProcess.ClassWithNoIComparableDefined");
             obj.Should().NotBeAssignableTo<IComparable>();
         }
 
         [Fact]
-        public void IsNotIComparableStruct()
+        public void InStruct()
         {
             var obj = (object)TestResult.GetInstance("AssemblyToProcess.StructWithNoIComparableDefined");
             obj.Should().NotBeAssignableTo<IComparable>();

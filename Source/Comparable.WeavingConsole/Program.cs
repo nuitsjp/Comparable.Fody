@@ -28,8 +28,6 @@ namespace Comparable.WeavingConsole
             var compareTo = module.ImportReference(compareToMethod);
 
 
-            var compareTo2 = concreteComparableType.Methods.Single(x => x.Name == "CompareTo2");
-
             concreteComparableType.Interfaces.Add(new InterfaceImplementation(comparable));
 
             var compareToDefinition =

@@ -6,11 +6,7 @@ namespace AssemblyToProcess
     [AddComparable]
     public class WithSingleProperty
     {
+        [CompareBy]
         public int Value { get; set; }
-
-        public int CompareTo2(object obj)
-        {
-            return 1;
-        }
     }
 }
