@@ -26,52 +26,50 @@ namespace Comparable.Fody
         public override void Execute()
         {
             FindReferences();
-            foreach (var type in ModuleDefinition.Types.Where(x => !x.Name.Contains("Module")))
+            foreach (var type in ModuleDefinition.Types.Where(IsDefinedForIComparable))
             {
-                type.Interfaces.Add(IComparable);
-
-                var compareToDefinition =
-                    new MethodDefinition(
-                        CompareTo.Name,
-                        MethodAttributes.Public
-                        | MethodAttributes.Final
-                        | MethodAttributes.HideBySig
-                        | MethodAttributes.NewSlot
-                        | MethodAttributes.Virtual,
-                        CompareTo.ReturnType)
-                    {
-                        Body =
-                        {
-                            MaxStackSize = CompareTo.Parameters.Count + 1,
-                            InitLocals = true
-                        }
-                    };
-                
-                compareToDefinition.Parameters.Add(CompareTo.Parameters.First());
-
-                var processor = compareToDefinition.Body.GetILProcessor();
-                processor.Append(Instruction.Create(OpCodes.Nop));
-                processor.Append(Instruction.Create(OpCodes.Ldc_I4_0));
-                processor.Append(Instruction.Create(OpCodes.Stloc_0));
-                var bar = Instruction.Create(OpCodes.Ldloc_0);
-                processor.Append(Instruction.Create(OpCodes.Br_S, bar));
-                processor.Append(bar);
-                processor.Append(Instruction.Create(OpCodes.Ret));
-
-                type.Methods.Add(compareToDefinition);
+                ImplementIComparable(type);
             }
-            //var methods = ModuleDefinition
-            //    .Types
-            //    .SelectMany(x => x.Methods);
-            //foreach (var method in methods)
-            //{
-            //    var processor = method.Body.GetILProcessor();
-            //    var current = method.Body.Instructions.First();
+        }
 
-            //    processor.InsertBefore(current, Instruction.Create(OpCodes.Nop));
-            //    processor.InsertBefore(current, Instruction.Create(OpCodes.Ldstr, $"DEBUG: {method.DeclaringType.Name}#{method.Name}()"));
-            //    processor.InsertBefore(current, Instruction.Create(OpCodes.Call, ModuleDefinition.ImportReference(DebugWriteLine)));
-            //}
+        private bool IsDefinedForIComparable(TypeDefinition typeDefinition)
+        {
+            return typeDefinition.CustomAttributes.Count(x => x.AttributeType.Name == "AddComparable") == 1;
+        }
+
+        private void ImplementIComparable(TypeDefinition type)
+        {
+            type.Interfaces.Add(IComparable);
+
+            var compareToDefinition =
+                new MethodDefinition(
+                    CompareTo.Name,
+                    MethodAttributes.Public
+                    | MethodAttributes.Final
+                    | MethodAttributes.HideBySig
+                    | MethodAttributes.NewSlot
+                    | MethodAttributes.Virtual,
+                    CompareTo.ReturnType)
+                {
+                    Body =
+                    {
+                        MaxStackSize = CompareTo.Parameters.Count + 1,
+                        InitLocals = true
+                    }
+                };
+
+            compareToDefinition.Parameters.Add(CompareTo.Parameters.First());
+
+            var processor = compareToDefinition.Body.GetILProcessor();
+            processor.Append(Instruction.Create(OpCodes.Nop));
+            processor.Append(Instruction.Create(OpCodes.Ldc_I4_0));
+            processor.Append(Instruction.Create(OpCodes.Stloc_0));
+            var bar = Instruction.Create(OpCodes.Ldloc_0);
+            processor.Append(Instruction.Create(OpCodes.Br_S, bar));
+            processor.Append(bar);
+            processor.Append(Instruction.Create(OpCodes.Ret));
+
+            type.Methods.Add(compareToDefinition);
         }
 
 

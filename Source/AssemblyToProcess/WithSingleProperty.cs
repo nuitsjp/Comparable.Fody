@@ -1,13 +1,16 @@
 ﻿using System;
 using Comparable;
 
-// ReSharper disable once CheckNamespace
-public class WithSingleProperty
+namespace AssemblyToProcess
 {
-    public int Value { get; set; }
-
-    public int CompareTo2(object obj)
+    [AddComparable]
+    public class WithSingleProperty
     {
-        return 1;
+        public int Value { get; set; }
+
+        public int CompareTo2(object obj)
+        {
+            return 1;
+        }
     }
 }
