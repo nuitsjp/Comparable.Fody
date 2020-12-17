@@ -115,11 +115,9 @@ namespace Comparable.WeavingConsole
             module.Write(@"AssemblyToProcess.dll");
 
             var assemblyPath = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "AssemblyToProcess.dll");
-            Assembly a = Assembly.Load(File.ReadAllBytes(assemblyPath));
-            // Get the type to use.
-            Type myType = a.GetType("WithSingleProperty");
-            var instance0 = (dynamic)a.CreateInstance("WithSingleProperty");
-            var instance1 = (dynamic)a.CreateInstance("WithSingleProperty");
+            var assembly = Assembly.Load(File.ReadAllBytes(assemblyPath));
+            var instance0 = (dynamic)assembly.CreateInstance("AssemblyToProcess.WithSingleProperty");
+            var instance1 = (dynamic)assembly.CreateInstance("AssemblyToProcess.WithSingleProperty");
             instance1.Value = 1;
             var result = instance0.CompareTo(instance1);
             instance0.CompareTo(null);

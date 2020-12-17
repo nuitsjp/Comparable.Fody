@@ -38,5 +38,18 @@ namespace Comparable.Fody.Test
                 .Should().Throw<ArgumentException>()
                 .WithMessage("Object is not a AssemblyToProcess.WithSingleProperty.");
         }
+
+        [Fact]
+        public void ReturnCompareToResultOfValue()
+        {
+            var instance0 = TestResult.GetInstance("AssemblyToProcess.WithSingleProperty");
+            instance0.Value = 1;
+            var instance1 = TestResult.GetInstance("AssemblyToProcess.WithSingleProperty");
+            instance1.Value = 2;
+
+            ((IComparable) instance0).CompareTo((object)instance1)
+                .Should().Be(instance0.Value.CompareTo(instance1.Value));
+
+        }
     }
 }

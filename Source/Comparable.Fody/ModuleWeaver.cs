@@ -47,9 +47,10 @@ namespace Comparable.Fody
 
             var targetTypeVariable = new VariableDefinition(target);
             compareToDefinition.Body.Variables.Add(targetTypeVariable);
-            compareToDefinition.Body.Variables.Add(new VariableDefinition(ModuleDefinition.TypeSystem.Int32));
+            var thisValueVariable = new VariableDefinition(IComparableInterface.InterfaceType);
+            compareToDefinition.Body.Variables.Add(thisValueVariable);
             compareToDefinition.Body.Variables.Add(new VariableDefinition(ModuleDefinition.TypeSystem.Boolean));
-            var argumentValueVariable = new VariableDefinition(ModuleDefinition.TypeSystem.Int32);
+            var argumentValueVariable = new VariableDefinition(IComparableInterface.InterfaceType);
             compareToDefinition.Body.Variables.Add(argumentValueVariable);
             var processor = compareToDefinition.Body.GetILProcessor();
 
@@ -83,30 +84,28 @@ namespace Comparable.Fody
 
             // throw new ArgumentException("Object is not a WithSingleProperty");
             processor.Append(Instruction.Create(OpCodes.Ldstr, $"Object is not a {target.FullName}."));
-            var argumentExceptionType = typeof(ArgumentException);
-            var constructorInfo = argumentExceptionType.GetConstructors()
-                .Single(x =>
-                    x.GetParameters().Length == 1
-                    && x.GetParameters().Single()?.ParameterType == typeof(string));
-            var constructor = ModuleDefinition.ImportReference(constructorInfo);
-            processor.Append(Instruction.Create(OpCodes.Newobj, constructor));
+            processor.Append(Instruction.Create(OpCodes.Newobj, ArgumentExceptionConstructor));
             processor.Append(Instruction.Create(OpCodes.Throw));
 
             processor.Append(argumentIsWithSinglePropertyType);
-            processor.Append(Instruction.Create(OpCodes.Ldc_I4_0));
-            processor.Append(Instruction.Create(OpCodes.Ret));
-            //// return Value.CompareTo(withSingleProperty.Value);
-            //var value = target.Properties.Single(x => x.Name == "Value");
-            //var getValue = value.GetMethod;
+            // return Value.CompareTo(withSingleProperty.Value);
+            var value = target.Properties.Single(x => x.Name == "Value");
+            var getValue = value.GetMethod;
 
-            //processor.Append(Instruction.Create(OpCodes.Ldarg_0));
-            //processor.Append(Instruction.Create(OpCodes.Call, getValue));
-            //processor.Append(Instruction.Create(OpCodes.Stloc_S, argumentValueVariable));
+            processor.Append(Instruction.Create(OpCodes.Ldarg_0));
+            processor.Append(Instruction.Create(OpCodes.Call, getValue));
+            processor.Append(Instruction.Create(OpCodes.Stloc_S, thisValueVariable));
             //processor.Append(Instruction.Create(OpCodes.Ldloca_S, argumentValueVariable));
-            //processor.Append(Instruction.Create(OpCodes.Ldloc_S, targetTypeVariable));
-            //processor.Append(Instruction.Create(OpCodes.Callvirt, getValue));
+            processor.Append(Instruction.Create(OpCodes.Ldloc_S, targetTypeVariable));
+            processor.Append(Instruction.Create(OpCodes.Callvirt, getValue));
+            processor.Append(Instruction.Create(OpCodes.Stloc_S, argumentValueVariable));
+            //processor.Append(Instruction.Create(OpCodes.Ldloca_S, thisValueVariable));
+            processor.Append(Instruction.Create(OpCodes.Ldloc_S, argumentValueVariable));
             //processor.Append(Instruction.Create(OpCodes.Call, CompareTo));
-            //processor.Append(Instruction.Create(OpCodes.Ret));
+            //processor.Append(Instruction.Create(OpCodes.Stloc_S, argumentValueVariable));
+            //processor.Append(Instruction.Create(OpCodes.Ldloc_S, argumentValueVariable));
+            //processor.Append(Instruction.Create(OpCodes.Ldc_I4_0));
+            processor.Append(Instruction.Create(OpCodes.Ret));
 
             target.Methods.Add(compareToDefinition);
         }
@@ -114,12 +113,20 @@ namespace Comparable.Fody
 
         private InterfaceImplementation IComparableInterface { get; set; }
         private MethodReference CompareTo { get; set; }
+        private MethodReference ArgumentExceptionConstructor { get; set; }
         
         private void FindReferences()
         {
             var comparableType = FindTypeDefinition("System.IComparable");
             IComparableInterface = new InterfaceImplementation(ModuleDefinition.ImportReference(comparableType));
             CompareTo = ModuleDefinition.ImportReference(comparableType.Methods.Single(x => x.Name == "CompareTo"));
+
+            var argumentExceptionType = typeof(ArgumentException);
+            var constructorInfo = argumentExceptionType.GetConstructors()
+                .Single(x =>
+                    x.GetParameters().Length == 1
+                    && x.GetParameters().Single()?.ParameterType == typeof(string));
+            ArgumentExceptionConstructor = ModuleDefinition.ImportReference(constructorInfo);
         }
 
         public override IEnumerable<string> GetAssembliesForScanning()
