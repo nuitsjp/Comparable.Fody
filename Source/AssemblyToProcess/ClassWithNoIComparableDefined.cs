@@ -1,6 +1,6 @@
 ﻿namespace AssemblyToProcess
 {
-    public class IsNotIComparable
+    public class ClassWithNoIComparableDefined
     {
 
     }

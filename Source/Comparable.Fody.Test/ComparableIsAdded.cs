@@ -9,14 +9,14 @@ namespace Comparable.Fody.Test
         [Fact]
         public void IsIComparableClass()
         {
-            var obj = (object)TestResult.GetInstance("AssemblyToProcess.IsIComparableClass");
+            var obj = (object)TestResult.GetInstance("AssemblyToProcess.ClassWithIComparableDefined");
             obj.Should().BeAssignableTo<IComparable>();
         }
 
         [Fact]
         public void IsIComparableStruct()
         {
-            var obj = (object)TestResult.GetInstance("AssemblyToProcess.IsIComparableStruct");
+            var obj = (object)TestResult.GetInstance("AssemblyToProcess.StructWithIComparableDefined");
             obj.Should().BeAssignableTo<IComparable>();
         }
     }

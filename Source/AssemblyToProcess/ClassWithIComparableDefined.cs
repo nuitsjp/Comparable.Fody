@@ -3,7 +3,7 @@
 namespace AssemblyToProcess
 {
     [AddComparable]
-    public class IsIComparableStruct
+    public class ClassWithIComparableDefined
     {
         [CompareBy]
         public int Value { get; set; }
