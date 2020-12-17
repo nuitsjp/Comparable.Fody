@@ -10,12 +10,13 @@ namespace ILSample
         {
             if (obj is null) return 1;
 
-            if (obj is WithSingleProperty withSingleProperty)
+            var comparable = obj as WithSingleProperty;
+            if (comparable is null)
             {
-                return Value.CompareTo(withSingleProperty.Value);
+                throw new ArgumentException("Object is not a WithSingleProperty");
             }
 
-            throw new ArgumentException("Object is not a WithSingleProperty");
+            return Value.CompareTo(comparable.Value);
         }
     }
 }
