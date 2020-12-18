@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
+using System.Reflection;
 using Fody;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using MethodAttributes = Mono.Cecil.MethodAttributes;
+using ParameterAttributes = Mono.Cecil.ParameterAttributes;
 
 namespace Comparable.Fody
 {
@@ -20,16 +24,36 @@ namespace Comparable.Fody
 
         private bool IsDefinedForIComparable(TypeDefinition typeDefinition)
         {
-            return typeDefinition.CustomAttributes.Count(x => x.AttributeType.Name == "AddComparable") == 1;
+            return typeDefinition.CustomAttributes.Count(x => x.AttributeType.Name == nameof(AddComparable)) == 1;
         }
 
         private void ImplementIComparable(TypeDefinition weavingTarget)
         {
             weavingTarget.Interfaces.Add(IComparableInterface);
+            var compareProperties = 
+                weavingTarget.Properties
+                    .Where(x => x.HasCompareBy())
+                    .Select(x =>
+                    {
+                        var propertyTypeReference = ModuleDefinition.ImportReference(x.PropertyType);
+                        var propertyTypeDefinition = FindTypeDefinition(x.PropertyType.FullName);
+                        var compareTo = ModuleDefinition.ImportReference(
+                            propertyTypeDefinition.Methods
+                                .Single(x =>
+                                    x.Name == nameof(IComparable.CompareTo)
+                                    && x.Parameters.Count == 1
+                                    && x.Parameters.Single().ParameterType.FullName == propertyTypeDefinition.FullName));
+                        return (
+                            GetValueDefinition : x.GetMethod,
+                            CompareToReference : compareTo,
+                            LocalVariable : new VariableDefinition(propertyTypeReference),
+                            Priority: x.GetPriority());
+                    })
+                    .ToList();
 
             var compareToDefinition =
                 new MethodDefinition(
-                    "CompareTo",
+                    nameof(IComparable.CompareTo),
                     MethodAttributes.Public
                     | MethodAttributes.Final
                     | MethodAttributes.HideBySig
@@ -39,25 +63,30 @@ namespace Comparable.Fody
                 {
                     Body =
                     {
-                        MaxStackSize = 3,
+                        MaxStackSize = 2,
                         InitLocals = true
                     }
                 };
 
+            // Init arguments.
             var argumentObj =
                 new ParameterDefinition("obj", ParameterAttributes.None, ModuleDefinition.TypeSystem.Object);
             compareToDefinition.Parameters.Add(argumentObj);
 
-            var localComparisonArgument = new VariableDefinition(weavingTarget);
-            var localComparisonMember0 = new VariableDefinition(ModuleDefinition.TypeSystem.Int32);
-            compareToDefinition.Body.Variables.Add(localComparisonArgument);
-            compareToDefinition.Body.Variables.Add(localComparisonMember0);
-            var processor = compareToDefinition.Body.GetILProcessor();
+            // Init local variables.
+            var localCastedObject = new VariableDefinition(weavingTarget);
+            compareToDefinition.Body.Variables.Add(localCastedObject);
+            foreach (var compareBy in compareProperties)
+            {
+                compareToDefinition.Body.Variables.Add(compareBy.LocalVariable);
+            }
 
             // Labels for goto.
             var labelArgumentIsNotNull = Instruction.Create(OpCodes.Nop);
             var labelArgumentTypeMatched = Instruction.Create(OpCodes.Nop);
             var labelReturn = Instruction.Create(OpCodes.Nop);
+
+            var processor = compareToDefinition.Body.GetILProcessor();
 
             // if (obj == null)
             processor.Append(Instruction.Create(OpCodes.Ldarg_S, argumentObj));
@@ -73,10 +102,10 @@ namespace Comparable.Fody
             processor.Append(labelArgumentIsNotNull);
             processor.Append(Instruction.Create(OpCodes.Ldarg_S, argumentObj));
             processor.Append(Instruction.Create(OpCodes.Isinst, weavingTarget));
-            processor.Append(Instruction.Create(OpCodes.Stloc_S, localComparisonArgument));
+            processor.Append(Instruction.Create(OpCodes.Stloc_S, localCastedObject));
 
             // if (withSingleProperty != null)
-            processor.Append(Instruction.Create(OpCodes.Ldloc_S, localComparisonArgument));
+            processor.Append(Instruction.Create(OpCodes.Ldloc_S, localCastedObject));
             processor.Append(Instruction.Create(OpCodes.Ldnull));
             processor.Append(Instruction.Create(OpCodes.Cgt_Un));
             processor.Append(Instruction.Create(OpCodes.Brtrue_S, labelArgumentTypeMatched));
@@ -87,26 +116,19 @@ namespace Comparable.Fody
             processor.Append(Instruction.Create(OpCodes.Throw));
 
             processor.Append(labelArgumentTypeMatched);
+            
             // return Value.CompareTo(withSingleProperty.Value);
-            var value = weavingTarget.Properties.Single(x => x.Name == "Value");
-            var valueType = value.PropertyType;
-            var getValue = value.GetMethod;
-
-            var compareToOfValue = FindTypeDefinition(valueType.FullName).Methods
-                .Single(x =>
-                    x.Name == "CompareTo"
-                    && x.Parameters.Count == 1
-                    && x.Parameters.Single().ParameterType.FullName == valueType.FullName);
-            var compareTo = ModuleDefinition.ImportReference(compareToOfValue);
-
-            processor.Append(Instruction.Create(OpCodes.Ldarg_0));
-            processor.Append(Instruction.Create(OpCodes.Call, getValue));
-            processor.Append(Instruction.Create(OpCodes.Stloc_S, localComparisonMember0));
-            processor.Append(Instruction.Create(OpCodes.Ldloca_S, localComparisonMember0));
-            processor.Append(Instruction.Create(OpCodes.Ldloc_S, localComparisonArgument));
-            processor.Append(Instruction.Create(OpCodes.Callvirt, getValue));
-            processor.Append(Instruction.Create(OpCodes.Call, compareTo));
-            processor.Append(Instruction.Create(OpCodes.Br_S, labelReturn));
+            foreach (var compareBy in compareProperties)
+            {
+                processor.Append(Instruction.Create(OpCodes.Ldarg_0));
+                processor.Append(Instruction.Create(OpCodes.Call, compareBy.GetValueDefinition));
+                processor.Append(Instruction.Create(OpCodes.Stloc_S, compareBy.LocalVariable));
+                processor.Append(Instruction.Create(OpCodes.Ldloca_S, compareBy.LocalVariable));
+                processor.Append(Instruction.Create(OpCodes.Ldloc_S, localCastedObject));
+                processor.Append(Instruction.Create(OpCodes.Callvirt, compareBy.GetValueDefinition));
+                processor.Append(Instruction.Create(OpCodes.Call, compareBy.CompareToReference));
+                processor.Append(Instruction.Create(OpCodes.Br_S, labelReturn));
+            }
 
             processor.Append(labelReturn);
             processor.Append(Instruction.Create(OpCodes.Ret));
@@ -120,7 +142,7 @@ namespace Comparable.Fody
         
         private void FindReferences()
         {
-            var comparableType = FindTypeDefinition("System.IComparable");
+            var comparableType = FindTypeDefinition(nameof(IComparable));
             IComparableInterface = new InterfaceImplementation(ModuleDefinition.ImportReference(comparableType));
 
             var argumentExceptionType = typeof(ArgumentException);
@@ -143,4 +165,23 @@ namespace Comparable.Fody
         }
     }
 
+    internal static class PropertyDefinitionExtensions
+    {
+        internal static bool HasCompareBy(this PropertyDefinition propertyDefinition)
+        {
+            return 0 != propertyDefinition.CustomAttributes.Count(x =>
+                x.AttributeType.Name == nameof(CompareBy));
+        }
+
+        internal static int GetPriority(this PropertyDefinition propertyDefinition)
+        {
+            var compareBy = propertyDefinition.CustomAttributes
+                .Single(x => x.AttributeType.Name == nameof(CompareBy));
+            if (!compareBy.HasProperties) return CompareBy.DefaultPriority;
+
+            return (int)compareBy.Properties
+                .Single(x => x.Name == nameof(CompareBy.Priority))
+                .Argument.Value;
+        }
+    }
 }
