@@ -23,9 +23,9 @@ namespace Comparable.Fody
             return typeDefinition.CustomAttributes.Count(x => x.AttributeType.Name == "AddComparable") == 1;
         }
 
-        private void ImplementIComparable(TypeDefinition target)
+        private void ImplementIComparable(TypeDefinition weavingTarget)
         {
-            target.Interfaces.Add(IComparableInterface);
+            weavingTarget.Interfaces.Add(IComparableInterface);
 
             var compareToDefinition =
                 new MethodDefinition(
@@ -43,59 +43,55 @@ namespace Comparable.Fody
                         InitLocals = true
                     }
                 };
-            compareToDefinition.Parameters.Add(new ParameterDefinition("obj", ParameterAttributes.None, ModuleDefinition.TypeSystem.Object));
 
-            var localVar0 = new VariableDefinition(target);
-            var localVar2 = new VariableDefinition(ModuleDefinition.TypeSystem.Int32);
-            var localVar4 = new VariableDefinition(ModuleDefinition.TypeSystem.Int32);
-            compareToDefinition.Body.Variables.Add(localVar0);
-            compareToDefinition.Body.Variables.Add(new VariableDefinition(ModuleDefinition.TypeSystem.Boolean));
-            compareToDefinition.Body.Variables.Add(localVar2);
-            compareToDefinition.Body.Variables.Add(localVar4);
+            var argumentObj =
+                new ParameterDefinition("obj", ParameterAttributes.None, ModuleDefinition.TypeSystem.Object);
+            compareToDefinition.Parameters.Add(argumentObj);
+
+            var localComparisonArgument = new VariableDefinition(weavingTarget);
+            var localComparisonMember0 = new VariableDefinition(ModuleDefinition.TypeSystem.Int32);
+            compareToDefinition.Body.Variables.Add(localComparisonArgument);
+            compareToDefinition.Body.Variables.Add(localComparisonMember0);
             var processor = compareToDefinition.Body.GetILProcessor();
 
-            // obj is not null.
-            var argumentIsNotNull = Instruction.Create(OpCodes.Nop);
-            // throw ArgumentException
-            var argumentIsWithSinglePropertyType = Instruction.Create(OpCodes.Nop);
-            // Return
-            var ret = Instruction.Create(OpCodes.Nop);
+            // Labels for goto.
+            var labelArgumentIsNotNull = Instruction.Create(OpCodes.Nop);
+            var labelArgumentTypeMatched = Instruction.Create(OpCodes.Nop);
+            var labelReturn = Instruction.Create(OpCodes.Nop);
 
-            processor.Append(Instruction.Create(OpCodes.Nop));
             // if (obj == null)
-            processor.Append(Instruction.Create(OpCodes.Ldarg_1));
+            processor.Append(Instruction.Create(OpCodes.Ldarg_S, argumentObj));
             processor.Append(Instruction.Create(OpCodes.Ldnull));
             processor.Append(Instruction.Create(OpCodes.Ceq));
-            processor.Append(Instruction.Create(OpCodes.Brfalse_S, argumentIsNotNull));
+            processor.Append(Instruction.Create(OpCodes.Brfalse_S, labelArgumentIsNotNull));
 
             // return 1;
             processor.Append(Instruction.Create(OpCodes.Ldc_I4_1));
             processor.Append(Instruction.Create(OpCodes.Ret));
 
             // WithSingleProperty withSingleProperty = obj as WithSingleProperty;
-            processor.Append(argumentIsNotNull);
-            processor.Append(Instruction.Create(OpCodes.Ldarg_1));
-            processor.Append(Instruction.Create(OpCodes.Isinst, target));
-            processor.Append(Instruction.Create(OpCodes.Stloc_S, localVar0));
+            processor.Append(labelArgumentIsNotNull);
+            processor.Append(Instruction.Create(OpCodes.Ldarg_S, argumentObj));
+            processor.Append(Instruction.Create(OpCodes.Isinst, weavingTarget));
+            processor.Append(Instruction.Create(OpCodes.Stloc_S, localComparisonArgument));
 
             // if (withSingleProperty != null)
-            processor.Append(Instruction.Create(OpCodes.Ldloc_S, localVar0));
+            processor.Append(Instruction.Create(OpCodes.Ldloc_S, localComparisonArgument));
             processor.Append(Instruction.Create(OpCodes.Ldnull));
             processor.Append(Instruction.Create(OpCodes.Cgt_Un));
-            processor.Append(Instruction.Create(OpCodes.Brtrue_S, argumentIsWithSinglePropertyType));
+            processor.Append(Instruction.Create(OpCodes.Brtrue_S, labelArgumentTypeMatched));
 
             // throw new ArgumentException("Object is not a WithSingleProperty");
-            processor.Append(Instruction.Create(OpCodes.Ldstr, $"Object is not a {target.FullName}."));
+            processor.Append(Instruction.Create(OpCodes.Ldstr, $"Object is not a {weavingTarget.FullName}."));
             processor.Append(Instruction.Create(OpCodes.Newobj, ArgumentExceptionConstructor));
             processor.Append(Instruction.Create(OpCodes.Throw));
 
-            processor.Append(argumentIsWithSinglePropertyType);
+            processor.Append(labelArgumentTypeMatched);
             // return Value.CompareTo(withSingleProperty.Value);
-            var value = target.Properties.Single(x => x.Name == "Value");
+            var value = weavingTarget.Properties.Single(x => x.Name == "Value");
             var valueType = value.PropertyType;
             var getValue = value.GetMethod;
 
-            var typedef = FindTypeDefinition(valueType.FullName);
             var compareToOfValue = FindTypeDefinition(valueType.FullName).Methods
                 .Single(x =>
                     x.Name == "CompareTo"
@@ -105,19 +101,17 @@ namespace Comparable.Fody
 
             processor.Append(Instruction.Create(OpCodes.Ldarg_0));
             processor.Append(Instruction.Create(OpCodes.Call, getValue));
-            processor.Append(Instruction.Create(OpCodes.Stloc_S, localVar4));
-            processor.Append(Instruction.Create(OpCodes.Ldloca_S, localVar4));
-            processor.Append(Instruction.Create(OpCodes.Ldloc_S, localVar0));
+            processor.Append(Instruction.Create(OpCodes.Stloc_S, localComparisonMember0));
+            processor.Append(Instruction.Create(OpCodes.Ldloca_S, localComparisonMember0));
+            processor.Append(Instruction.Create(OpCodes.Ldloc_S, localComparisonArgument));
             processor.Append(Instruction.Create(OpCodes.Callvirt, getValue));
             processor.Append(Instruction.Create(OpCodes.Call, compareTo));
-            processor.Append(Instruction.Create(OpCodes.Stloc_S, localVar2));
-            processor.Append(Instruction.Create(OpCodes.Br_S, ret));
+            processor.Append(Instruction.Create(OpCodes.Br_S, labelReturn));
 
-            processor.Append(ret);
-            processor.Append(Instruction.Create(OpCodes.Ldloc_2));
+            processor.Append(labelReturn);
             processor.Append(Instruction.Create(OpCodes.Ret));
 
-            target.Methods.Add(compareToDefinition);
+            weavingTarget.Methods.Add(compareToDefinition);
         }
 
 
