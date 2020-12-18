@@ -51,6 +51,11 @@ namespace Comparable.Fody
                     })
                     .ToArray();
 
+            if (!compareProperties.Any())
+            {
+                throw new WeavingException($"Specify CompareBy for the any property of Type {weavingTarget.FullName}.");
+            }
+
             var compareToDefinition =
                 new MethodDefinition(
                     nameof(IComparable.CompareTo),
@@ -130,10 +135,13 @@ namespace Comparable.Fody
                 processor.Append(Instruction.Create(OpCodes.Callvirt, compareBy.GetValueDefinition));
                 processor.Append(Instruction.Create(OpCodes.Call, compareBy.CompareToReference));
                 processor.Append(Instruction.Create(OpCodes.Stloc_S, localResult));
-                processor.Append(Instruction.Create(OpCodes.Ldloc_S, localResult));
-                processor.Append(Instruction.Create(OpCodes.Ldc_I4_0));
-                processor.Append(Instruction.Create(OpCodes.Ceq));
-                processor.Append(Instruction.Create(OpCodes.Brfalse_S, labelReturn));
+                if (compareProperties.Last() != compareBy)
+                {
+                    processor.Append(Instruction.Create(OpCodes.Ldloc_S, localResult));
+                    processor.Append(Instruction.Create(OpCodes.Ldc_I4_0));
+                    processor.Append(Instruction.Create(OpCodes.Ceq));
+                    processor.Append(Instruction.Create(OpCodes.Brfalse_S, labelReturn));
+                }
             }
 
             processor.Append(labelReturn);

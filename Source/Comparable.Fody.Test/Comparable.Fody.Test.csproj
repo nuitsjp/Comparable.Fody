@@ -25,6 +25,7 @@
     <ProjectReference Include="..\AssemblyToProcess\AssemblyToProcess.csproj" />
     <ProjectReference Include="..\Comparable.Fody\Comparable.Fody.csproj" />
     <ProjectReference Include="..\Comparable\Comparable.csproj" />
+    <ProjectReference Include="..\CompareByIsNotDefined\CompareByIsNotDefined.csproj" />
   </ItemGroup>
 
 </Project>
