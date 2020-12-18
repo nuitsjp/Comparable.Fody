@@ -45,19 +45,22 @@ namespace Comparable.Fody
                 };
             compareToDefinition.Parameters.Add(new ParameterDefinition("obj", ParameterAttributes.None, ModuleDefinition.TypeSystem.Object));
 
-            var targetTypeVariable = new VariableDefinition(target);
-            compareToDefinition.Body.Variables.Add(targetTypeVariable);
-            var thisValueVariable = new VariableDefinition(IComparableInterface.InterfaceType);
-            compareToDefinition.Body.Variables.Add(thisValueVariable);
+            var localVar0 = new VariableDefinition(target);
+            var localVar2 = new VariableDefinition(ModuleDefinition.TypeSystem.Int32);
+            var localVar4 = new VariableDefinition(ModuleDefinition.TypeSystem.Int32);
+            compareToDefinition.Body.Variables.Add(localVar0);
             compareToDefinition.Body.Variables.Add(new VariableDefinition(ModuleDefinition.TypeSystem.Boolean));
-            var argumentValueVariable = new VariableDefinition(IComparableInterface.InterfaceType);
-            compareToDefinition.Body.Variables.Add(argumentValueVariable);
+            compareToDefinition.Body.Variables.Add(localVar2);
+            compareToDefinition.Body.Variables.Add(new VariableDefinition(ModuleDefinition.TypeSystem.Boolean));
+            compareToDefinition.Body.Variables.Add(localVar4);
             var processor = compareToDefinition.Body.GetILProcessor();
 
             // obj is not null.
             var argumentIsNotNull = Instruction.Create(OpCodes.Nop);
             // throw ArgumentException
             var argumentIsWithSinglePropertyType = Instruction.Create(OpCodes.Nop);
+            // Return
+            var ret = Instruction.Create(OpCodes.Nop);
 
             processor.Append(Instruction.Create(OpCodes.Nop));
             // if (obj == null)
@@ -74,10 +77,10 @@ namespace Comparable.Fody
             processor.Append(argumentIsNotNull);
             processor.Append(Instruction.Create(OpCodes.Ldarg_1));
             processor.Append(Instruction.Create(OpCodes.Isinst, target));
-            processor.Append(Instruction.Create(OpCodes.Stloc_S, targetTypeVariable));
+            processor.Append(Instruction.Create(OpCodes.Stloc_S, localVar0));
 
             // if (withSingleProperty != null)
-            processor.Append(Instruction.Create(OpCodes.Ldloc_S, targetTypeVariable));
+            processor.Append(Instruction.Create(OpCodes.Ldloc_S, localVar0));
             processor.Append(Instruction.Create(OpCodes.Ldnull));
             processor.Append(Instruction.Create(OpCodes.Cgt_Un));
             processor.Append(Instruction.Create(OpCodes.Brtrue_S, argumentIsWithSinglePropertyType));
@@ -94,17 +97,31 @@ namespace Comparable.Fody
 
             processor.Append(Instruction.Create(OpCodes.Ldarg_0));
             processor.Append(Instruction.Create(OpCodes.Call, getValue));
-            processor.Append(Instruction.Create(OpCodes.Stloc_S, thisValueVariable));
-            //processor.Append(Instruction.Create(OpCodes.Ldloca_S, argumentValueVariable));
-            processor.Append(Instruction.Create(OpCodes.Ldloc_S, targetTypeVariable));
+            processor.Append(Instruction.Create(OpCodes.Stloc_S, localVar4));
+            processor.Append(Instruction.Create(OpCodes.Ldloca_S, localVar4));
+            processor.Append(Instruction.Create(OpCodes.Ldloc_0));
             processor.Append(Instruction.Create(OpCodes.Callvirt, getValue));
-            processor.Append(Instruction.Create(OpCodes.Stloc_S, argumentValueVariable));
-            //processor.Append(Instruction.Create(OpCodes.Ldloca_S, thisValueVariable));
-            processor.Append(Instruction.Create(OpCodes.Ldloc_S, argumentValueVariable));
-            //processor.Append(Instruction.Create(OpCodes.Call, CompareTo));
+            processor.Append(Instruction.Create(OpCodes.Call, CompareTo));
+            processor.Append(Instruction.Create(OpCodes.Stloc_2));
+            processor.Append(Instruction.Create(OpCodes.Br_S, ret));
+
+            //processor.Append(Instruction.Create(OpCodes.Ldarg_0));
+            //processor.Append(Instruction.Create(OpCodes.Call, getValue));
+            //processor.Append(Instruction.Create(OpCodes.Stloc_S, thisValueVariable));
+            ////processor.Append(Instruction.Create(OpCodes.Ldloca_S, argumentValueVariable));
+            //processor.Append(Instruction.Create(OpCodes.Ldloc_S, targetTypeVariable));
+            //processor.Append(Instruction.Create(OpCodes.Callvirt, getValue));
             //processor.Append(Instruction.Create(OpCodes.Stloc_S, argumentValueVariable));
+            ////processor.Append(Instruction.Create(OpCodes.Ldloca_S, thisValueVariable));
             //processor.Append(Instruction.Create(OpCodes.Ldloc_S, argumentValueVariable));
-            //processor.Append(Instruction.Create(OpCodes.Ldc_I4_0));
+            ////processor.Append(Instruction.Create(OpCodes.Call, CompareTo));
+            ////processor.Append(Instruction.Create(OpCodes.Stloc_S, argumentValueVariable));
+            ////processor.Append(Instruction.Create(OpCodes.Ldloc_S, argumentValueVariable));
+            ////processor.Append(Instruction.Create(OpCodes.Ldc_I4_0));
+
+
+            processor.Append(ret);
+            processor.Append(Instruction.Create(OpCodes.Ldloc_2));
             processor.Append(Instruction.Create(OpCodes.Ret));
 
             target.Methods.Add(compareToDefinition);
@@ -119,7 +136,13 @@ namespace Comparable.Fody
         {
             var comparableType = FindTypeDefinition("System.IComparable");
             IComparableInterface = new InterfaceImplementation(ModuleDefinition.ImportReference(comparableType));
-            CompareTo = ModuleDefinition.ImportReference(comparableType.Methods.Single(x => x.Name == "CompareTo"));
+
+            var int32TypeDefinition = FindTypeDefinition("System.Int32");
+            CompareTo = ModuleDefinition.ImportReference(
+                int32TypeDefinition.Methods.Single(
+                    x => x.Name == "CompareTo"
+                    && x.Parameters.Count == 1
+                    && x.Parameters.Single().ParameterType.FullName == "System.Int32"));
 
             var argumentExceptionType = typeof(ArgumentException);
             var constructorInfo = argumentExceptionType.GetConstructors()
