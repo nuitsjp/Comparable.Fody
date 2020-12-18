@@ -49,7 +49,7 @@ namespace Comparable.Fody
                             LocalVariable : new VariableDefinition(propertyTypeReference),
                             Priority: x.GetPriority());
                     })
-                    .ToList();
+                    .ToArray();
 
             var compareToDefinition =
                 new MethodDefinition(
@@ -76,6 +76,8 @@ namespace Comparable.Fody
             // Init local variables.
             var localCastedObject = new VariableDefinition(weavingTarget);
             compareToDefinition.Body.Variables.Add(localCastedObject);
+            var localResult = new VariableDefinition(ModuleDefinition.TypeSystem.Int32);
+            compareToDefinition.Body.Variables.Add(localResult);
             foreach (var compareBy in compareProperties)
             {
                 compareToDefinition.Body.Variables.Add(compareBy.LocalVariable);
@@ -127,10 +129,15 @@ namespace Comparable.Fody
                 processor.Append(Instruction.Create(OpCodes.Ldloc_S, localCastedObject));
                 processor.Append(Instruction.Create(OpCodes.Callvirt, compareBy.GetValueDefinition));
                 processor.Append(Instruction.Create(OpCodes.Call, compareBy.CompareToReference));
+                processor.Append(Instruction.Create(OpCodes.Stloc_S, localResult));
+                //processor.Append(Instruction.Create(OpCodes.Ldloc_S, localResult));
+                //processor.Append(Instruction.Create(OpCodes.Ldc_I4_0));
+                //processor.Append(Instruction.Create(OpCodes.Ceq));
                 processor.Append(Instruction.Create(OpCodes.Br_S, labelReturn));
             }
 
             processor.Append(labelReturn);
+            processor.Append(Instruction.Create(OpCodes.Ldloc_S, localResult));
             processor.Append(Instruction.Create(OpCodes.Ret));
 
             weavingTarget.Methods.Add(compareToDefinition);
