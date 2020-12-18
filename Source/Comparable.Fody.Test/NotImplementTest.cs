@@ -6,7 +6,7 @@ using FluentAssertions;
 
 namespace Comparable.Fody.Test
 {
-    public class NotImplementIComparable : BaseTest
+    public class NotImplementTest : BaseTest
     {
         [Fact]
         public void InClass()

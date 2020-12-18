@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Comparable.Fody.Test
 {
-    public class ImplementIComparable : BaseTest
+    public class ImplementTest : BaseTest
     {
         [Fact]
         public void InClass()
