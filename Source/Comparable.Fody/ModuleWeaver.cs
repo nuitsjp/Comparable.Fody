@@ -130,10 +130,10 @@ namespace Comparable.Fody
                 processor.Append(Instruction.Create(OpCodes.Callvirt, compareBy.GetValueDefinition));
                 processor.Append(Instruction.Create(OpCodes.Call, compareBy.CompareToReference));
                 processor.Append(Instruction.Create(OpCodes.Stloc_S, localResult));
-                //processor.Append(Instruction.Create(OpCodes.Ldloc_S, localResult));
-                //processor.Append(Instruction.Create(OpCodes.Ldc_I4_0));
-                //processor.Append(Instruction.Create(OpCodes.Ceq));
-                processor.Append(Instruction.Create(OpCodes.Br_S, labelReturn));
+                processor.Append(Instruction.Create(OpCodes.Ldloc_S, localResult));
+                processor.Append(Instruction.Create(OpCodes.Ldc_I4_0));
+                processor.Append(Instruction.Create(OpCodes.Ceq));
+                processor.Append(Instruction.Create(OpCodes.Brfalse_S, labelReturn));
             }
 
             processor.Append(labelReturn);

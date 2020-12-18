@@ -40,7 +40,7 @@ namespace Comparable.Fody.Test
         }
 
         [Fact]
-        public void ReturnCompareToResultOfValue()
+        public void ReturnCompareToResultOfSingleValue()
         {
             var instance0 = TestResult.GetInstance("AssemblyToProcess.WithSingleProperty");
             instance0.Value = 1;
@@ -49,6 +49,21 @@ namespace Comparable.Fody.Test
 
             ((IComparable) instance0).CompareTo((object)instance1)
                 .Should().Be(instance0.Value.CompareTo(instance1.Value));
+
+        }
+
+        [Fact]
+        public void ReturnCompareToResultOfDoubleValue()
+        {
+            var instance0 = TestResult.GetInstance("AssemblyToProcess.WithDoubleProperty");
+            instance0.Value0 = 1;
+            instance0.Value1 = "1";
+            var instance1 = TestResult.GetInstance("AssemblyToProcess.WithDoubleProperty");
+            instance1.Value0 = 2;
+            instance1.Value1 = "2";
+
+            ((IComparable)instance0).CompareTo((object)instance1)
+                .Should().Be(instance0.Value1.CompareTo(instance1.Value1));
 
         }
     }
