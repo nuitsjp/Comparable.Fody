@@ -49,13 +49,66 @@ namespace Comparable.Fody
                                     x.Name == nameof(IComparable.CompareTo)
                                     && x.Parameters.Count == 1
                                     && x.Parameters.Single().ParameterType.FullName == propertyTypeDefinition.FullName));
+
+                        var localVariable = new VariableDefinition(propertyTypeReference);
+
+
+                        void AppendLoadPropertyAddress(ILProcessor ilProcessor, VariableDefinition castedObject)
+                        {
+                            ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
+                            ilProcessor.Append(Instruction.Create(OpCodes.Call, x.GetMethod));
+                            ilProcessor.Append(Instruction.Create(OpCodes.Stloc_S, localVariable));
+                            ilProcessor.Append(Instruction.Create(OpCodes.Ldloca_S, localVariable));
+                            ilProcessor.Append(Instruction.Create(OpCodes.Ldloc_S, castedObject));
+                            ilProcessor.Append(Instruction.Create(OpCodes.Callvirt, x.GetMethod));
+                            ilProcessor.Append(Instruction.Create(OpCodes.Call, compareTo));
+                        }
+
                         return (
-                            GetValueDefinition : x.GetMethod,
-                            CompareToReference : compareTo,
-                            LocalVariable : new VariableDefinition(propertyTypeReference),
+                            AppendLoadPropertyAddress : (Action<ILProcessor, VariableDefinition>) AppendLoadPropertyAddress,
+                            LocalVariable : localVariable,
                             Priority: x.GetPriority());
                     })
                     .ToArray();
+            
+            //weavingTarget.Fields
+            //    .Where(x => x.HasCompareBy())
+            //    .Select(x =>
+            //    {
+            //        var propertyTypeReference = ModuleDefinition.ImportReference(x.FieldType);
+            //        var propertyTypeDefinition = propertyTypeReference.Resolve();
+            //        if (!propertyTypeDefinition.Interfaces
+            //            .Select(x => x.InterfaceType.FullName == nameof(IComparable)).Any())
+            //        {
+            //            throw new WeavingException(
+            //                $"Property {x.Name} of Type {weavingTarget.FullName} does not implement IComparable; the property that specifies CompareByAttribute should implement IComparable.");
+            //        }
+            //        var compareTo = ModuleDefinition.ImportReference(
+            //            propertyTypeDefinition.Methods
+            //                .Single(x =>
+            //                    x.Name == nameof(IComparable.CompareTo)
+            //                    && x.Parameters.Count == 1
+            //                    && x.Parameters.Single().ParameterType.FullName == propertyTypeDefinition.FullName));
+
+            //        var localVariable = new VariableDefinition(propertyTypeReference);
+
+            //        void AppendLoadPropertyAddress(ILProcessor ilProcessor, VariableDefinition castedObject)
+            //        {
+            //            ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
+            //            ilProcessor.Append(Instruction.Create(OpCodes.Call, x.GetMethod));
+            //            ilProcessor.Append(Instruction.Create(OpCodes.Stloc_S, localVariable));
+            //            ilProcessor.Append(Instruction.Create(OpCodes.Ldloca_S, localVariable));
+            //            ilProcessor.Append(Instruction.Create(OpCodes.Ldloc_S, castedObject));
+            //            ilProcessor.Append(Instruction.Create(OpCodes.Callvirt, x.GetMethod));
+            //            ilProcessor.Append(Instruction.Create(OpCodes.Call, compareTo));
+            //        }
+
+            //        return (
+            //            AppendLoadPropertyAddress: (Action<ILProcessor, VariableDefinition>)AppendLoadPropertyAddress,
+            //            LocalVariable: localVariable,
+            //            Priority: x.GetPriority());
+            //    })
+            //    .ToArray();
 
             if (!compareProperties.Any())
             {
@@ -141,13 +194,7 @@ namespace Comparable.Fody
             // return Value.CompareTo(withSingleProperty.Value);
             foreach (var compareBy in compareProperties)
             {
-                processor.Append(Instruction.Create(OpCodes.Ldarg_0));
-                processor.Append(Instruction.Create(OpCodes.Call, compareBy.GetValueDefinition));
-                processor.Append(Instruction.Create(OpCodes.Stloc_S, compareBy.LocalVariable));
-                processor.Append(Instruction.Create(OpCodes.Ldloca_S, compareBy.LocalVariable));
-                processor.Append(Instruction.Create(OpCodes.Ldloc_S, localCastedObject));
-                processor.Append(Instruction.Create(OpCodes.Callvirt, compareBy.GetValueDefinition));
-                processor.Append(Instruction.Create(OpCodes.Call, compareBy.CompareToReference));
+                compareBy.AppendLoadPropertyAddress(processor, localCastedObject);
                 processor.Append(Instruction.Create(OpCodes.Stloc_S, localResult));
                 if (compareProperties.Last() != compareBy)
                 {
@@ -193,15 +240,15 @@ namespace Comparable.Fody
         }
     }
 
-    internal static class PropertyDefinitionExtensions
+    internal static class MemberDefinitionExtensions
     {
-        internal static bool HasCompareBy(this PropertyDefinition propertyDefinition)
+        internal static bool HasCompareBy(this IMemberDefinition propertyDefinition)
         {
             return 0 != propertyDefinition.CustomAttributes.Count(x =>
                 x.AttributeType.Name == nameof(CompareByAttribute));
         }
 
-        internal static int GetPriority(this PropertyDefinition propertyDefinition)
+        internal static int GetPriority(this IMemberDefinition propertyDefinition)
         {
             var compareBy = propertyDefinition.CustomAttributes
                 .Single(x => x.AttributeType.Name == nameof(CompareByAttribute));
