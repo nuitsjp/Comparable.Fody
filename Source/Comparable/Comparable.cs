@@ -3,8 +3,7 @@
 namespace Comparable
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
-    public class AddComparable : Attribute
+    public class Comparable : Attribute
     {
-        public int Value { get; set; }
     }
 }

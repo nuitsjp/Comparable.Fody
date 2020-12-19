@@ -3,7 +3,7 @@ using Comparable;
 
 namespace AssemblyToProcess
 {
-    [AddComparable]
+    [Comparable.Comparable]
     public class WithSingleProperty
     {
         [CompareBy(Priority = 1)]

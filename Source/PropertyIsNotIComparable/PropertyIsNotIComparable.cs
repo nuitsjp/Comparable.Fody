@@ -3,7 +3,7 @@ using Comparable;
 
 namespace PropertyIsNotIComparable
 {
-    [AddComparable]
+    [Comparable.Comparable]
     public class PropertyIsNotIComparable
     {
         [CompareBy]

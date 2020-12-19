@@ -24,7 +24,7 @@ namespace Comparable.Fody
 
         private bool IsDefinedForIComparable(TypeDefinition typeDefinition)
         {
-            return typeDefinition.CustomAttributes.Count(x => x.AttributeType.Name == nameof(AddComparable)) == 1;
+            return typeDefinition.CustomAttributes.Count(x => x.AttributeType.Name == nameof(Comparable)) == 1;
         }
 
         private void ImplementIComparable(TypeDefinition weavingTarget)
