@@ -69,10 +69,10 @@ namespace Comparable.Fody.Test
         [Fact]
         public void ReturnCompareToResultOfDoubleValue()
         {
-            var instance0 = TestResult.GetInstance("AssemblyToProcess.WithDoubleProperty");
+            var instance0 = TestResult.GetInstance("AssemblyToProcess.WithDoubleValue");
             instance0.Value0 = 1;
             instance0.Value1 = "1";
-            var instance1 = TestResult.GetInstance("AssemblyToProcess.WithDoubleProperty");
+            var instance1 = TestResult.GetInstance("AssemblyToProcess.WithDoubleValue");
             instance1.Value0 = 2;
             instance1.Value1 = "2";
 
