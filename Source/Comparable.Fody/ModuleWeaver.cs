@@ -32,47 +32,9 @@ namespace Comparable.Fody
             weavingTarget.Interfaces.Add(IComparableInterface);
             var compareProperties = 
                 GetCompareByProperties(weavingTarget)
+                    .Union(GetCompareByFields(weavingTarget))
                     .ToArray();
             
-            //weavingTarget.Fields
-            //    .Where(x => x.HasCompareBy())
-            //    .Select(x =>
-            //    {
-            //        var propertyTypeReference = ModuleDefinition.ImportReference(x.FieldType);
-            //        var propertyTypeDefinition = propertyTypeReference.Resolve();
-            //        if (!propertyTypeDefinition.Interfaces
-            //            .Select(x => x.InterfaceType.FullName == nameof(IComparable)).Any())
-            //        {
-            //            throw new WeavingException(
-            //                $"Property {x.Name} of Type {weavingTarget.FullName} does not implement IComparable; the property that specifies CompareByAttribute should implement IComparable.");
-            //        }
-            //        var compareTo = ModuleDefinition.ImportReference(
-            //            propertyTypeDefinition.Methods
-            //                .Single(x =>
-            //                    x.Name == nameof(IComparable.CompareTo)
-            //                    && x.Parameters.Count == 1
-            //                    && x.Parameters.Single().ParameterType.FullName == propertyTypeDefinition.FullName));
-
-            //        var localVariable = new VariableDefinition(propertyTypeReference);
-
-            //        void AppendLoadPropertyAddress(ILProcessor ilProcessor, VariableDefinition castedObject)
-            //        {
-            //            ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
-            //            ilProcessor.Append(Instruction.Create(OpCodes.Call, x.GetMethod));
-            //            ilProcessor.Append(Instruction.Create(OpCodes.Stloc_S, localVariable));
-            //            ilProcessor.Append(Instruction.Create(OpCodes.Ldloca_S, localVariable));
-            //            ilProcessor.Append(Instruction.Create(OpCodes.Ldloc_S, castedObject));
-            //            ilProcessor.Append(Instruction.Create(OpCodes.Callvirt, x.GetMethod));
-            //            ilProcessor.Append(Instruction.Create(OpCodes.Call, compareTo));
-            //        }
-
-            //        return (
-            //            AppendLoadPropertyAddress: (Action<ILProcessor, VariableDefinition>)AppendLoadPropertyAddress,
-            //            LocalVariable: localVariable,
-            //            Priority: x.GetPriority());
-            //    })
-            //    .ToArray();
-
             if (!compareProperties.Any())
             {
                 throw new WeavingException($"Specify CompareByAttribute for the any property of Type {weavingTarget.FullName}.");
@@ -213,6 +175,46 @@ namespace Comparable.Fody
                     return (
                         AppendLoadPropertyAddress : (Action<ILProcessor, VariableDefinition>) AppendLoadPropertyAddress,
                         LocalVariable : localVariable,
+                        Priority: x.GetPriority());
+                });
+        }
+
+        private IEnumerable<(Action<ILProcessor, VariableDefinition> AppendLoadPropertyAddress, VariableDefinition LocalVariable, int Priority)> GetCompareByFields(TypeDefinition weavingTarget)
+        {
+            return weavingTarget.Fields
+                .Where(x => x.HasCompareBy())
+                .Select(x =>
+                {
+                    var propertyTypeReference = ModuleDefinition.ImportReference(x.FieldType);
+                    var propertyTypeDefinition = propertyTypeReference.Resolve();
+                    if (!propertyTypeDefinition.Interfaces
+                        .Select(x => x.InterfaceType.FullName == nameof(IComparable)).Any())
+                    {
+                        throw new WeavingException(
+                            $"Property {x.Name} of Type {weavingTarget.FullName} does not implement IComparable; the property that specifies CompareByAttribute should implement IComparable.");
+                    }
+                    var compareTo = ModuleDefinition.ImportReference(
+                        propertyTypeDefinition.Methods
+                            .Single(x =>
+                                x.Name == nameof(IComparable.CompareTo)
+                                && x.Parameters.Count == 1
+                                && x.Parameters.Single().ParameterType.FullName == propertyTypeDefinition.FullName));
+
+                    var localVariable = new VariableDefinition(propertyTypeReference);
+
+
+                    void AppendLoadPropertyAddress(ILProcessor ilProcessor, VariableDefinition castedObject)
+                    {
+                        ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
+                        ilProcessor.Append(Instruction.Create(OpCodes.Ldflda, x));
+                        ilProcessor.Append(Instruction.Create(OpCodes.Ldloc_S, castedObject));
+                        ilProcessor.Append(Instruction.Create(OpCodes.Ldfld, x));
+                        ilProcessor.Append(Instruction.Create(OpCodes.Call, compareTo));
+                    }
+
+                    return (
+                        AppendLoadPropertyAddress: (Action<ILProcessor, VariableDefinition>)AppendLoadPropertyAddress,
+                        LocalVariable: localVariable,
                         Priority: x.GetPriority());
                 });
         }
