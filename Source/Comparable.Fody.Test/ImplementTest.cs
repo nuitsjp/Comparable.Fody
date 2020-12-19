@@ -52,6 +52,20 @@ namespace Comparable.Fody.Test
 
         }
 
+
+        [Fact]
+        public void ReturnCompareToResultOfSingleField()
+        {
+            var instance0 = TestResult.GetInstance("AssemblyToProcess.WithSingleField");
+            instance0.Value = 1;
+            var instance1 = TestResult.GetInstance("AssemblyToProcess.WithSingleField");
+            instance1.Value = 2;
+
+            ((IComparable)instance0).CompareTo((object)instance1)
+                .Should().Be(instance0.Value.CompareTo(instance1.Value));
+
+        }
+
         [Fact]
         public void ReturnCompareToResultOfDoubleValue()
         {
