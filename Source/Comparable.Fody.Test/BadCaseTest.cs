@@ -23,5 +23,14 @@ namespace Comparable.Fody.Test
                 .Should().Throw<WeavingException>()
                 .WithMessage("Property Value of Type PropertyIsNotIComparable.PropertyIsNotIComparable does not implement IComparable; the property that specifies CompareByAttribute should implement IComparable.");
         }
+
+
+        [Fact]
+        public void MultipleCompareByWithEqualPriority()
+        {
+            _weavingTask.Invoking(x => x.ExecuteTestRun("MultipleCompareByWithEqualPriority.dll", false))
+                .Should().Throw<WeavingException>()
+                .WithMessage("Type MultipleCompareByWithEqualPriority.MultipleCompareByWithEqualPriority defines multiple CompareBy with equal priority.");
+        }
     }
 }

@@ -62,6 +62,14 @@ namespace Comparable.Fody
                 throw new WeavingException($"Specify CompareByAttribute for the any property of Type {weavingTarget.FullName}.");
             }
 
+            if (1 < compareProperties
+                .GroupBy(x => x.Priority)
+                .Select(x => (Priority: x.Key, Count: x.Count()))
+                .Max(x => x.Count))
+            {
+                throw new WeavingException($"Type {weavingTarget.FullName} defines multiple CompareBy with equal priority.");
+            }
+
             var compareToDefinition =
                 new MethodDefinition(
                     nameof(IComparable.CompareTo),
