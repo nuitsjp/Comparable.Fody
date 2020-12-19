@@ -32,6 +32,14 @@ namespace Comparable.Fody.Test
                 .WithMessage("Property Value of Type PropertyIsNotIComparable.PropertyIsNotIComparable does not implement IComparable; the property that specifies CompareByAttribute should implement IComparable.");
         }
 
+        [Fact]
+        public void CompareByFieldDoesNotImplementIComparable()
+        {
+            _weavingTask.Invoking(x => x.ExecuteTestRun("FieldIsNotIComparable.dll", false))
+                .Should().Throw<WeavingException>()
+                .WithMessage("Field _value of Type FieldIsNotIComparable.FieldIsNotIComparable does not implement IComparable; the property that specifies CompareByAttribute should implement IComparable.");
+        }
+
 
         [Fact]
         public void MultipleCompareByWithEqualPriority()

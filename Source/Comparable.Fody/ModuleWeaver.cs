@@ -196,7 +196,7 @@ namespace Comparable.Fody
                         .Select(@interface => @interface.InterfaceType.FullName == nameof(IComparable)).Any())
                     {
                         throw new WeavingException(
-                            $"Property {x.Name} of Type {weavingTarget.FullName} does not implement IComparable; the property that specifies CompareByAttribute should implement IComparable.");
+                            $"Field {x.Name} of Type {weavingTarget.FullName} does not implement IComparable; the property that specifies CompareByAttribute should implement IComparable.");
                     }
                     var compareTo = ModuleDefinition.ImportReference(
                         typeDefinition.Methods
