@@ -1,5 +1,5 @@
-﻿using System;
-using Comparable;
+﻿using Comparable;
+// ReSharper disable UnusedMember.Global
 
 namespace AssemblyToProcess
 {
@@ -12,6 +12,7 @@ namespace AssemblyToProcess
         [CompareBy]
         public int Value0 { get; set; }
 
+        // ReSharper disable once ConvertToAutoProperty
         public string Value1
         {
             get => _value1;

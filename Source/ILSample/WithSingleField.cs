@@ -4,7 +4,7 @@ namespace ILSample
 {
     public class WithSingleField : IComparable
     {
-        private int _value;
+        private readonly int _value;
 
         public int CompareTo(object obj)
         {

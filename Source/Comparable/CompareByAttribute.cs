@@ -15,6 +15,7 @@ namespace Comparable
         /// <summary>
         /// Priority in CompareTo.
         /// </summary>
+        // ReSharper disable once MemberInitializerValueIgnored
         public int Priority { get; set; } = DefaultPriority;
     }
 }

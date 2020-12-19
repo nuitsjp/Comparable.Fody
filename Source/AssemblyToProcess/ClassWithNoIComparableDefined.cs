@@ -1,4 +1,5 @@
-﻿namespace AssemblyToProcess
+﻿// ReSharper disable UnusedMember.Global
+namespace AssemblyToProcess
 {
     public class ClassWithNoIComparableDefined
     {

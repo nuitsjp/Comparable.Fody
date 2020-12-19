@@ -1,5 +1,4 @@
 ﻿using System;
-using AssemblyToProcess;
 using FluentAssertions;
 using Xunit;
 

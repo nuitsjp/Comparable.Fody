@@ -1,5 +1,5 @@
-﻿using System;
-using Comparable;
+﻿using Comparable;
+// ReSharper disable UnusedMember.Global
 
 namespace CompareByIsNotDefined
 {

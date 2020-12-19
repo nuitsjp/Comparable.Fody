@@ -1,5 +1,4 @@
 ﻿using System;
-using Fody;
 using Xunit;
 using FluentAssertions;
 

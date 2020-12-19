@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Mail;
-using System.Reflection;
-using System.Runtime.InteropServices.ComTypes;
-using System.Security.Cryptography.X509Certificates;
 using Fody;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -36,14 +32,9 @@ namespace Comparable.Fody
             }
         }
 
-        private bool IsDefinedForIComparable(TypeDefinition typeDefinition)
-        {
-            return typeDefinition.CustomAttributes.Count(x => x.AttributeType.Name == nameof(ComparableAttribute)) == 1;
-        }
-
         private void ImplementIComparable(TypeDefinition weavingTarget)
         {
-            weavingTarget.Interfaces.Add(IComparableInterface);
+            weavingTarget.Interfaces.Add(ComparableInterface);
             var compareProperties = 
                 GetCompareByProperties(weavingTarget)
                     .Union(GetCompareByFields(weavingTarget))
@@ -160,17 +151,17 @@ namespace Comparable.Fody
                     var propertyTypeReference = ModuleDefinition.ImportReference(x.PropertyType);
                     var propertyTypeDefinition = propertyTypeReference.Resolve();
                     if (!propertyTypeDefinition.Interfaces
-                        .Select(x => x.InterfaceType.FullName == nameof(IComparable)).Any())
+                        .Select(@interface => @interface.InterfaceType.FullName == nameof(IComparable)).Any())
                     {
                         throw new WeavingException(
                             $"Property {x.Name} of Type {weavingTarget.FullName} does not implement IComparable; the property that specifies CompareByAttribute should implement IComparable.");
                     }
                     var compareTo = ModuleDefinition.ImportReference(
                         propertyTypeDefinition.Methods
-                            .Single(x =>
-                                x.Name == nameof(IComparable.CompareTo)
-                                && x.Parameters.Count == 1
-                                && x.Parameters.Single().ParameterType.FullName == propertyTypeDefinition.FullName));
+                            .Single(methodDefinition =>
+                                methodDefinition.Name == nameof(IComparable.CompareTo)
+                                && methodDefinition.Parameters.Count == 1
+                                && methodDefinition.Parameters.Single().ParameterType.FullName == propertyTypeDefinition.FullName));
 
                     var localVariable = new VariableDefinition(propertyTypeReference);
 
@@ -202,17 +193,17 @@ namespace Comparable.Fody
                     var typeReference = ModuleDefinition.ImportReference(x.FieldType);
                     var typeDefinition = typeReference.Resolve();
                     if (!typeDefinition.Interfaces
-                        .Select(x => x.InterfaceType.FullName == nameof(IComparable)).Any())
+                        .Select(@interface => @interface.InterfaceType.FullName == nameof(IComparable)).Any())
                     {
                         throw new WeavingException(
                             $"Property {x.Name} of Type {weavingTarget.FullName} does not implement IComparable; the property that specifies CompareByAttribute should implement IComparable.");
                     }
                     var compareTo = ModuleDefinition.ImportReference(
                         typeDefinition.Methods
-                            .Single(x =>
-                                x.Name == nameof(IComparable.CompareTo)
-                                && x.Parameters.Count == 1
-                                && x.Parameters.Single().ParameterType.FullName == typeDefinition.FullName));
+                            .Single(methodDefinition =>
+                                methodDefinition.Name == nameof(IComparable.CompareTo)
+                                && methodDefinition.Parameters.Count == 1
+                                && methodDefinition.Parameters.Single().ParameterType.FullName == typeDefinition.FullName));
 
                     var localVariable = new VariableDefinition(typeReference);
 
@@ -233,13 +224,13 @@ namespace Comparable.Fody
                 });
         }
 
-        private InterfaceImplementation IComparableInterface { get; set; }
+        private InterfaceImplementation ComparableInterface { get; set; }
         private MethodReference ArgumentExceptionConstructor { get; set; }
         
         private void FindReferences()
         {
-            var comparableType = FindTypeDefinition(nameof(IComparable));
-            IComparableInterface = new InterfaceImplementation(ModuleDefinition.ImportReference(comparableType));
+            ComparableInterface = new InterfaceImplementation(
+                ModuleDefinition.ImportReference(FindTypeDefinition(nameof(IComparable))));
 
             var argumentExceptionType = typeof(ArgumentException);
             var constructorInfo = argumentExceptionType.GetConstructors()

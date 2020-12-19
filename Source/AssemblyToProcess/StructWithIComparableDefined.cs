@@ -1,4 +1,5 @@
 ﻿using Comparable;
+// ReSharper disable UnusedMember.Global
 
 namespace AssemblyToProcess
 {
