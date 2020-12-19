@@ -119,7 +119,7 @@ namespace Comparable.Fody
             // return Value.CompareTo(withSingleProperty.Value);
             foreach (var compareBy in compareProperties)
             {
-                compareBy.AppendLoadPropertyAddress(processor, localCastedObject);
+                compareBy.AppendCompareTo(processor, localCastedObject);
                 processor.Append(Instruction.Create(OpCodes.Stloc_S, localResult));
                 if (compareProperties.Last() != compareBy)
                 {
@@ -137,7 +137,7 @@ namespace Comparable.Fody
             weavingTarget.Methods.Add(compareToDefinition);
         }
 
-        private IEnumerable<(Action<ILProcessor, VariableDefinition> AppendLoadPropertyAddress, VariableDefinition LocalVariable, int Priority)> GetCompareByProperties(TypeDefinition weavingTarget)
+        private IEnumerable<(Action<ILProcessor, VariableDefinition> AppendCompareTo, VariableDefinition LocalVariable, int Priority)> GetCompareByProperties(TypeDefinition weavingTarget)
         {
             return weavingTarget.Properties
                 .Where(x => x.HasCompareBy())
@@ -161,7 +161,7 @@ namespace Comparable.Fody
                     var localVariable = new VariableDefinition(propertyTypeReference);
 
 
-                    void AppendLoadPropertyAddress(ILProcessor ilProcessor, VariableDefinition castedObject)
+                    void AppendCompareTo(ILProcessor ilProcessor, VariableDefinition castedObject)
                     {
                         ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
                         ilProcessor.Append(Instruction.Create(OpCodes.Call, x.GetMethod));
@@ -173,37 +173,37 @@ namespace Comparable.Fody
                     }
 
                     return (
-                        AppendLoadPropertyAddress : (Action<ILProcessor, VariableDefinition>) AppendLoadPropertyAddress,
+                        AppendCompareTo: (Action<ILProcessor, VariableDefinition>) AppendCompareTo,
                         LocalVariable : localVariable,
                         Priority: x.GetPriority());
                 });
         }
 
-        private IEnumerable<(Action<ILProcessor, VariableDefinition> AppendLoadPropertyAddress, VariableDefinition LocalVariable, int Priority)> GetCompareByFields(TypeDefinition weavingTarget)
+        private IEnumerable<(Action<ILProcessor, VariableDefinition> AppendCompareTo, VariableDefinition LocalVariable, int Priority)> GetCompareByFields(TypeDefinition weavingTarget)
         {
             return weavingTarget.Fields
                 .Where(x => x.HasCompareBy())
                 .Select(x =>
                 {
-                    var propertyTypeReference = ModuleDefinition.ImportReference(x.FieldType);
-                    var propertyTypeDefinition = propertyTypeReference.Resolve();
-                    if (!propertyTypeDefinition.Interfaces
+                    var typeReference = ModuleDefinition.ImportReference(x.FieldType);
+                    var typeDefinition = typeReference.Resolve();
+                    if (!typeDefinition.Interfaces
                         .Select(x => x.InterfaceType.FullName == nameof(IComparable)).Any())
                     {
                         throw new WeavingException(
                             $"Property {x.Name} of Type {weavingTarget.FullName} does not implement IComparable; the property that specifies CompareByAttribute should implement IComparable.");
                     }
                     var compareTo = ModuleDefinition.ImportReference(
-                        propertyTypeDefinition.Methods
+                        typeDefinition.Methods
                             .Single(x =>
                                 x.Name == nameof(IComparable.CompareTo)
                                 && x.Parameters.Count == 1
-                                && x.Parameters.Single().ParameterType.FullName == propertyTypeDefinition.FullName));
+                                && x.Parameters.Single().ParameterType.FullName == typeDefinition.FullName));
 
-                    var localVariable = new VariableDefinition(propertyTypeReference);
+                    var localVariable = new VariableDefinition(typeReference);
 
 
-                    void AppendLoadPropertyAddress(ILProcessor ilProcessor, VariableDefinition castedObject)
+                    void AppendCompareTo(ILProcessor ilProcessor, VariableDefinition castedObject)
                     {
                         ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
                         ilProcessor.Append(Instruction.Create(OpCodes.Ldflda, x));
@@ -213,7 +213,7 @@ namespace Comparable.Fody
                     }
 
                     return (
-                        AppendLoadPropertyAddress: (Action<ILProcessor, VariableDefinition>)AppendLoadPropertyAddress,
+                        AppendCompareTo: (Action<ILProcessor, VariableDefinition>)AppendCompareTo,
                         LocalVariable: localVariable,
                         Priority: x.GetPriority());
                 });
