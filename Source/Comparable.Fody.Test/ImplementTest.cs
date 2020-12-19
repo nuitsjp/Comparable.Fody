@@ -40,7 +40,7 @@ namespace Comparable.Fody.Test
         }
 
         [Fact]
-        public void ReturnCompareToResultOfSingleValue()
+        public void ReturnCompareToResultOfSingleProperty()
         {
             var instance0 = TestResult.GetInstance("AssemblyToProcess.WithSingleProperty");
             instance0.Value = 1;
