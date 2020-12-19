@@ -16,5 +16,12 @@ namespace Comparable.Fody.Test
                 .WithMessage("Specify CompareBy for the any property of Type CompareByIsNotDefined.CompareByIsNotDefined.");
         }
 
+        [Fact]
+        public void CompareByPropertyDoesNotImplementIComparable()
+        {
+            _weavingTask.Invoking(x => x.ExecuteTestRun("PropertyIsNotIComparable.dll", false))
+                .Should().Throw<WeavingException>()
+                .WithMessage("Property Value of Type PropertyIsNotIComparable.PropertyIsNotIComparable does not implement IComparable; the property that specifies CompareBy should implement IComparable.");
+        }
     }
 }

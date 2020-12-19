@@ -36,7 +36,13 @@ namespace Comparable.Fody
                     .Select(x =>
                     {
                         var propertyTypeReference = ModuleDefinition.ImportReference(x.PropertyType);
-                        var propertyTypeDefinition = FindTypeDefinition(x.PropertyType.FullName);
+                        var propertyTypeDefinition = propertyTypeReference.Resolve();
+                        if (!propertyTypeDefinition.Interfaces
+                            .Select(x => x.InterfaceType.FullName == nameof(IComparable)).Any())
+                        {
+                            throw new WeavingException(
+                                $"Property {x.Name} of Type {weavingTarget.FullName} does not implement IComparable; the property that specifies CompareBy should implement IComparable.");
+                        }
                         var compareTo = ModuleDefinition.ImportReference(
                             propertyTypeDefinition.Methods
                                 .Single(x =>
@@ -150,7 +156,6 @@ namespace Comparable.Fody
 
             weavingTarget.Methods.Add(compareToDefinition);
         }
-
 
         private InterfaceImplementation IComparableInterface { get; set; }
         private MethodReference ArgumentExceptionConstructor { get; set; }
