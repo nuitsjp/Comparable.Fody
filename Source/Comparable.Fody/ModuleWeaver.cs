@@ -24,7 +24,7 @@ namespace Comparable.Fody
 
         private bool IsDefinedForIComparable(TypeDefinition typeDefinition)
         {
-            return typeDefinition.CustomAttributes.Count(x => x.AttributeType.Name == nameof(Comparable)) == 1;
+            return typeDefinition.CustomAttributes.Count(x => x.AttributeType.Name == nameof(ComparableAttribute)) == 1;
         }
 
         private void ImplementIComparable(TypeDefinition weavingTarget)
@@ -41,7 +41,7 @@ namespace Comparable.Fody
                             .Select(x => x.InterfaceType.FullName == nameof(IComparable)).Any())
                         {
                             throw new WeavingException(
-                                $"Property {x.Name} of Type {weavingTarget.FullName} does not implement IComparable; the property that specifies CompareBy should implement IComparable.");
+                                $"Property {x.Name} of Type {weavingTarget.FullName} does not implement IComparable; the property that specifies CompareByAttribute should implement IComparable.");
                         }
                         var compareTo = ModuleDefinition.ImportReference(
                             propertyTypeDefinition.Methods
@@ -59,7 +59,7 @@ namespace Comparable.Fody
 
             if (!compareProperties.Any())
             {
-                throw new WeavingException($"Specify CompareBy for the any property of Type {weavingTarget.FullName}.");
+                throw new WeavingException($"Specify CompareByAttribute for the any property of Type {weavingTarget.FullName}.");
             }
 
             var compareToDefinition =
@@ -181,7 +181,7 @@ namespace Comparable.Fody
             yield return "System.Diagnostics.Tools";
             yield return "System.Diagnostics.Debug";
             yield return "System.Runtime";
-            yield return "Comparable";
+            yield return "ComparableAttribute";
         }
     }
 
@@ -190,17 +190,17 @@ namespace Comparable.Fody
         internal static bool HasCompareBy(this PropertyDefinition propertyDefinition)
         {
             return 0 != propertyDefinition.CustomAttributes.Count(x =>
-                x.AttributeType.Name == nameof(CompareBy));
+                x.AttributeType.Name == nameof(CompareByAttribute));
         }
 
         internal static int GetPriority(this PropertyDefinition propertyDefinition)
         {
             var compareBy = propertyDefinition.CustomAttributes
-                .Single(x => x.AttributeType.Name == nameof(CompareBy));
-            if (!compareBy.HasProperties) return CompareBy.DefaultPriority;
+                .Single(x => x.AttributeType.Name == nameof(CompareByAttribute));
+            if (!compareBy.HasProperties) return CompareByAttribute.DefaultPriority;
 
             return (int)compareBy.Properties
-                .Single(x => x.Name == nameof(CompareBy.Priority))
+                .Single(x => x.Name == nameof(CompareByAttribute.Priority))
                 .Argument.Value;
         }
     }

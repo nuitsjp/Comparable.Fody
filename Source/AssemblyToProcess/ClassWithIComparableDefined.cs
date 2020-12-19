@@ -2,7 +2,7 @@
 
 namespace AssemblyToProcess
 {
-    [Comparable.Comparable]
+    [Comparable]
     public class ClassWithIComparableDefined
     {
         [CompareBy]

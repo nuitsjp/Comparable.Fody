@@ -3,7 +3,7 @@
 namespace Comparable
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-    public sealed class CompareBy : Attribute
+    public sealed class CompareByAttribute : Attribute
     {
         public const int DefaultPriority = 0;
         /// <summary>

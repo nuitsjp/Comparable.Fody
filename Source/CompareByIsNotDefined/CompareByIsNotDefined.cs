@@ -3,7 +3,7 @@ using Comparable;
 
 namespace CompareByIsNotDefined
 {
-    [Comparable.Comparable]
+    [Comparable]
     public class CompareByIsNotDefined
     {
     }

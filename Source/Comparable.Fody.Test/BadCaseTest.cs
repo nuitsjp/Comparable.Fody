@@ -13,7 +13,7 @@ namespace Comparable.Fody.Test
         {
             _weavingTask.Invoking(x => x.ExecuteTestRun("CompareByIsNotDefined.dll", false))
                 .Should().Throw<WeavingException>()
-                .WithMessage("Specify CompareBy for the any property of Type CompareByIsNotDefined.CompareByIsNotDefined.");
+                .WithMessage("Specify CompareByAttribute for the any property of Type CompareByIsNotDefined.CompareByIsNotDefined.");
         }
 
         [Fact]
@@ -21,7 +21,7 @@ namespace Comparable.Fody.Test
         {
             _weavingTask.Invoking(x => x.ExecuteTestRun("PropertyIsNotIComparable.dll", false))
                 .Should().Throw<WeavingException>()
-                .WithMessage("Property Value of Type PropertyIsNotIComparable.PropertyIsNotIComparable does not implement IComparable; the property that specifies CompareBy should implement IComparable.");
+                .WithMessage("Property Value of Type PropertyIsNotIComparable.PropertyIsNotIComparable does not implement IComparable; the property that specifies CompareByAttribute should implement IComparable.");
         }
     }
 }

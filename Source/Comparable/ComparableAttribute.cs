@@ -3,7 +3,7 @@
 namespace Comparable
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
-    public class Comparable : Attribute
+    public class ComparableAttribute : Attribute
     {
     }
 }
