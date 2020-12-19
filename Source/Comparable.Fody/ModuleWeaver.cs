@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mail;
 using System.Reflection;
+using System.Runtime.InteropServices.ComTypes;
+using System.Security.Cryptography.X509Certificates;
 using Fody;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -16,7 +18,19 @@ namespace Comparable.Fody
         public override void Execute()
         {
             FindReferences();
-            foreach (var type in ModuleDefinition.Types.Where(IsDefinedForIComparable))
+
+            var memberDefinition = ModuleDefinition
+                .Types
+                .SelectMany(x => x.Fields.Cast<IMemberDefinition>())
+                .Union(ModuleDefinition.Types.SelectMany(x => x.Properties.Cast<IMemberDefinition>()))
+                .Where(x => x.HasCompareByAttribute())
+                .FirstOrDefault(x => !x.DeclaringType.HasCompareAttribute());
+            if (memberDefinition != null)
+            {
+                throw new WeavingException("Specify CompareAttribute for Type of CompareByIsNotDefined.CompareByIsNotDefined.");
+            }
+            
+            foreach (var type in ModuleDefinition.Types.Where(x => x.HasCompareAttribute()))
             {
                 ImplementIComparable(type);
             }
@@ -39,7 +53,7 @@ namespace Comparable.Fody
             {
                 throw new WeavingException($"Specify CompareByAttribute for the any property of Type {weavingTarget.FullName}.");
             }
-
+            
             if (1 < compareProperties
                 .GroupBy(x => x.Priority)
                 .Select(x => (Priority: x.Key, Count: x.Count()))
@@ -140,7 +154,7 @@ namespace Comparable.Fody
         private IEnumerable<(Action<ILProcessor, VariableDefinition> AppendCompareTo, VariableDefinition LocalVariable, int Priority)> GetCompareByProperties(TypeDefinition weavingTarget)
         {
             return weavingTarget.Properties
-                .Where(x => x.HasCompareBy())
+                .Where(x => x.HasCompareByAttribute())
                 .Select(x =>
                 {
                     var propertyTypeReference = ModuleDefinition.ImportReference(x.PropertyType);
@@ -182,7 +196,7 @@ namespace Comparable.Fody
         private IEnumerable<(Action<ILProcessor, VariableDefinition> AppendCompareTo, VariableDefinition LocalVariable, int Priority)> GetCompareByFields(TypeDefinition weavingTarget)
         {
             return weavingTarget.Fields
-                .Where(x => x.HasCompareBy())
+                .Where(x => x.HasCompareByAttribute())
                 .Select(x =>
                 {
                     var typeReference = ModuleDefinition.ImportReference(x.FieldType);
@@ -247,9 +261,19 @@ namespace Comparable.Fody
         }
     }
 
+    internal static class TypeDefinitionExtensions
+    {
+        internal static bool HasCompareAttribute(this TypeDefinition typeDefinition)
+        {
+            return 0 != typeDefinition.CustomAttributes.Count(x => 
+                x.AttributeType.Name == nameof(ComparableAttribute));
+        }
+    }
+
+
     internal static class MemberDefinitionExtensions
     {
-        internal static bool HasCompareBy(this IMemberDefinition propertyDefinition)
+        internal static bool HasCompareByAttribute(this IMemberDefinition propertyDefinition)
         {
             return 0 != propertyDefinition.CustomAttributes.Count(x =>
                 x.AttributeType.Name == nameof(CompareByAttribute));

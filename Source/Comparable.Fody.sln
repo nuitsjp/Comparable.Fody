@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PropertyIsNotIComparable", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultipleCompareByWithEqualPriority", "MultipleCompareByWithEqualPriority\MultipleCompareByWithEqualPriority.csproj", "{51D31B99-55E4-4A9E-A3C8-A41840ABA0B6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CompareIsNotDefined", "CompareIsNotDefined\CompareIsNotDefined.csproj", "{DE2A57A3-BCA9-4933-90BA-9B0048DB1609}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,10 @@ Global
 		{51D31B99-55E4-4A9E-A3C8-A41840ABA0B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{51D31B99-55E4-4A9E-A3C8-A41840ABA0B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{51D31B99-55E4-4A9E-A3C8-A41840ABA0B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE2A57A3-BCA9-4933-90BA-9B0048DB1609}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE2A57A3-BCA9-4933-90BA-9B0048DB1609}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE2A57A3-BCA9-4933-90BA-9B0048DB1609}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE2A57A3-BCA9-4933-90BA-9B0048DB1609}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -67,6 +73,7 @@ Global
 		{04F54013-ADB1-4485-B4AB-73C86BC13F90} = {FA202CDC-B76C-4D1C-91B9-D574C7D6920D}
 		{F7AA9422-5F67-4D34-9887-F197242F5BE3} = {FA202CDC-B76C-4D1C-91B9-D574C7D6920D}
 		{51D31B99-55E4-4A9E-A3C8-A41840ABA0B6} = {FA202CDC-B76C-4D1C-91B9-D574C7D6920D}
+		{DE2A57A3-BCA9-4933-90BA-9B0048DB1609} = {FA202CDC-B76C-4D1C-91B9-D574C7D6920D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {325C1088-B4A0-46FD-B6AC-48EADD8654B1}

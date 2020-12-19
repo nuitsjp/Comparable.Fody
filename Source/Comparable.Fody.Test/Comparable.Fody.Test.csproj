@@ -26,6 +26,7 @@
     <ProjectReference Include="..\Comparable.Fody\Comparable.Fody.csproj" />
     <ProjectReference Include="..\Comparable\Comparable.csproj" />
     <ProjectReference Include="..\CompareByIsNotDefined\CompareByIsNotDefined.csproj" />
+    <ProjectReference Include="..\CompareIsNotDefined\CompareIsNotDefined.csproj" />
     <ProjectReference Include="..\MultipleCompareByWithEqualPriority\MultipleCompareByWithEqualPriority.csproj" />
     <ProjectReference Include="..\PropertyIsNotIComparable\PropertyIsNotIComparable.csproj" />
   </ItemGroup>
