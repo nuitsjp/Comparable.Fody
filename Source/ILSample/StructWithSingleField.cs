@@ -2,7 +2,7 @@
 
 namespace ILSample
 {
-    public class StructWithSingleField : IComparable
+    public struct StructWithSingleField : IComparable
     {
         private readonly int _value;
 
