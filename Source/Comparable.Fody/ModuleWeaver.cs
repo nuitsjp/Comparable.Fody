@@ -102,17 +102,15 @@ namespace Comparable.Fody
             processor.Append(Instruction.Create(OpCodes.Ldc_I4_1));
             processor.Append(Instruction.Create(OpCodes.Ret));
 
-            // WithSingleProperty withSingleProperty = obj as WithSingleProperty;
+            // if (!(obj is StructWithSingleField))
             processor.Append(labelArgumentIsNotNull);
             processor.Append(Instruction.Create(OpCodes.Ldarg_S, argumentObj));
             processor.Append(Instruction.Create(OpCodes.Isinst, weavingTarget));
-            processor.Append(Instruction.Create(OpCodes.Stloc_S, localCastedObject));
-
-            // if (withSingleProperty != null)
-            processor.Append(Instruction.Create(OpCodes.Ldloc_S, localCastedObject));
             processor.Append(Instruction.Create(OpCodes.Ldnull));
             processor.Append(Instruction.Create(OpCodes.Cgt_Un));
-            processor.Append(Instruction.Create(OpCodes.Brtrue_S, labelArgumentTypeMatched));
+            processor.Append(Instruction.Create(OpCodes.Ldc_I4_0));
+            processor.Append(Instruction.Create(OpCodes.Ceq));
+            processor.Append(Instruction.Create(OpCodes.Brfalse_S, labelArgumentTypeMatched));
 
             // throw new ArgumentException("Object is not a WithSingleProperty");
             processor.Append(Instruction.Create(OpCodes.Ldstr, $"Object is not a {weavingTarget.FullName}."));
@@ -120,7 +118,12 @@ namespace Comparable.Fody
             processor.Append(Instruction.Create(OpCodes.Throw));
 
             processor.Append(labelArgumentTypeMatched);
-            
+            // ImplementType implementType = (ImplementType)obj;
+            processor.Append(Instruction.Create(OpCodes.Ldarg_S, argumentObj));
+            processor.Append(Instruction.Create(OpCodes.Castclass, weavingTarget));
+            processor.Append(Instruction.Create(OpCodes.Stloc_S, localCastedObject));
+
+
             // return Value.CompareTo(withSingleProperty.Value);
             foreach (var compareBy in compareProperties)
             {
@@ -211,7 +214,9 @@ namespace Comparable.Fody
                     void AppendCompareTo(ILProcessor ilProcessor, VariableDefinition castedObject)
                     {
                         ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
-                        ilProcessor.Append(Instruction.Create(OpCodes.Ldflda, x));
+                        ilProcessor.Append(Instruction.Create(OpCodes.Ldfld, x));
+                        ilProcessor.Append(Instruction.Create(OpCodes.Stloc_S, localVariable));
+                        ilProcessor.Append(Instruction.Create(OpCodes.Ldloca_S, localVariable));
                         ilProcessor.Append(Instruction.Create(OpCodes.Ldloc_S, castedObject));
                         ilProcessor.Append(Instruction.Create(OpCodes.Ldfld, x));
                         ilProcessor.Append(Instruction.Create(OpCodes.Call, compareTo));

@@ -4,7 +4,7 @@
 namespace AssemblyToProcess
 {
     [Comparable]
-    public class WithDoubleValue
+    public class ClassWithDoubleValue
     {
         [CompareBy(Priority = 2)]
         private string _value1;

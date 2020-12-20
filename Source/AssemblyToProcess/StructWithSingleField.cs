@@ -4,8 +4,8 @@
 namespace AssemblyToProcess
 {
     [Comparable]
-    public class WithSingleField
-    
+    public struct StructWithSingleField
+
     {
         [CompareBy]
         private int _value;

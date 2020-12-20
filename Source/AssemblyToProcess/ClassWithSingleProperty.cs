@@ -4,7 +4,7 @@
 namespace AssemblyToProcess
 {
     [Comparable]
-    public class WithSingleProperty
+    public class ClassWithSingleProperty
     {
         [CompareBy(Priority = 1)]
         public int Value { get; set; }
