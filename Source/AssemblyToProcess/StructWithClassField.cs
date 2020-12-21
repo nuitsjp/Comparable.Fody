@@ -4,14 +4,14 @@
 namespace AssemblyToProcess
 {
     [Comparable]
-    public struct StructWithSingleField
+    public struct StructWithClassField
 
     {
         [CompareBy]
-        private int _value;
+        private string _value;
 
         // ReSharper disable once ConvertToAutoProperty
-        public int Value
+        public string Value
         {
             get => _value;
             set => _value = value;

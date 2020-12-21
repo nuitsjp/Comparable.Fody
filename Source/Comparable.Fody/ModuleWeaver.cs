@@ -120,7 +120,7 @@ namespace Comparable.Fody
             processor.Append(labelArgumentTypeMatched);
             // ImplementType implementType = (ImplementType)obj;
             processor.Append(Instruction.Create(OpCodes.Ldarg_S, argumentObj));
-            if (weavingTarget.IsClass)
+            if (weavingTarget.BaseType.FullName == nameof(ValueType))
             {
                 processor.Append(Instruction.Create(OpCodes.Castclass, weavingTarget));
             }
@@ -158,33 +158,38 @@ namespace Comparable.Fody
                 .Where(x => x.HasCompareByAttribute())
                 .Select(x =>
                 {
-                    var propertyTypeReference = ModuleDefinition.ImportReference(x.PropertyType);
-                    var propertyTypeDefinition = propertyTypeReference.Resolve();
-                    if (!propertyTypeDefinition.Interfaces
+                    var typeReference = ModuleDefinition.ImportReference(x.PropertyType);
+                    var typeDefinition = typeReference.Resolve();
+                    if (!typeDefinition.Interfaces
                         .Select(@interface => @interface.InterfaceType.FullName == nameof(IComparable)).Any())
                     {
                         throw new WeavingException(
                             $"Property {x.Name} of Type {weavingTarget.FullName} does not implement IComparable; the property that specifies CompareByAttribute should implement IComparable.");
                     }
                     var compareTo = ModuleDefinition.ImportReference(
-                        propertyTypeDefinition.Methods
+                        typeDefinition.Methods
                             .Single(methodDefinition =>
                                 methodDefinition.Name == nameof(IComparable.CompareTo)
                                 && methodDefinition.Parameters.Count == 1
-                                && methodDefinition.Parameters.Single().ParameterType.FullName == propertyTypeDefinition.FullName));
+                                && methodDefinition.Parameters.Single().ParameterType.FullName == typeDefinition.FullName));
 
-                    var localVariable = new VariableDefinition(propertyTypeReference);
+                    var localVariable = new VariableDefinition(typeReference);
 
 
                     void AppendCompareTo(ILProcessor ilProcessor, VariableDefinition castedObject)
                     {
                         ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
                         ilProcessor.Append(Instruction.Create(OpCodes.Call, x.GetMethod));
-                        ilProcessor.Append(Instruction.Create(OpCodes.Stloc_S, localVariable));
-                        ilProcessor.Append(Instruction.Create(OpCodes.Ldloca_S, localVariable));
+                        if (typeDefinition.BaseType.FullName == nameof(ValueType))
+                        {
+                            ilProcessor.Append(Instruction.Create(OpCodes.Stloc_S, localVariable));
+                            ilProcessor.Append(Instruction.Create(OpCodes.Ldloca_S, localVariable));
+                        }
                         ilProcessor.Append(Instruction.Create(OpCodes.Ldloc_S, castedObject));
                         ilProcessor.Append(Instruction.Create(OpCodes.Callvirt, x.GetMethod));
-                        ilProcessor.Append(Instruction.Create(OpCodes.Call, compareTo));
+                        ilProcessor.Append(typeDefinition.BaseType.FullName == nameof(ValueType)
+                            ? Instruction.Create(OpCodes.Call, compareTo)
+                            : Instruction.Create(OpCodes.Callvirt, compareTo));
                     }
 
                     return (
@@ -222,11 +227,16 @@ namespace Comparable.Fody
                     {
                         ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
                         ilProcessor.Append(Instruction.Create(OpCodes.Ldfld, x));
-                        ilProcessor.Append(Instruction.Create(OpCodes.Stloc_S, localVariable));
-                        ilProcessor.Append(Instruction.Create(OpCodes.Ldloca_S, localVariable));
+                        if (typeDefinition.BaseType.FullName == nameof(ValueType))
+                        {
+                            ilProcessor.Append(Instruction.Create(OpCodes.Stloc_S, localVariable));
+                            ilProcessor.Append(Instruction.Create(OpCodes.Ldloca_S, localVariable));
+                        }
                         ilProcessor.Append(Instruction.Create(OpCodes.Ldloc_S, castedObject));
                         ilProcessor.Append(Instruction.Create(OpCodes.Ldfld, x));
-                        ilProcessor.Append(Instruction.Create(OpCodes.Call, compareTo));
+                        ilProcessor.Append(typeDefinition.BaseType.FullName == nameof(System.ValueType)
+                            ? Instruction.Create(OpCodes.Call, compareTo)
+                            : Instruction.Create(OpCodes.Callvirt, compareTo));
                     }
 
                     return (
