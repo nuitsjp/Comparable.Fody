@@ -120,7 +120,14 @@ namespace Comparable.Fody
             processor.Append(labelArgumentTypeMatched);
             // ImplementType implementType = (ImplementType)obj;
             processor.Append(Instruction.Create(OpCodes.Ldarg_S, argumentObj));
-            processor.Append(Instruction.Create(OpCodes.Castclass, weavingTarget));
+            if (weavingTarget.IsClass)
+            {
+                processor.Append(Instruction.Create(OpCodes.Castclass, weavingTarget));
+            }
+            else
+            {
+                processor.Append(Instruction.Create(OpCodes.Unbox_Any, weavingTarget));
+            }
             processor.Append(Instruction.Create(OpCodes.Stloc_S, localCastedObject));
 
 

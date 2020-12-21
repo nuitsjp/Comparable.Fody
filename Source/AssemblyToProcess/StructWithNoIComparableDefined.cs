@@ -1,7 +1,7 @@
 ﻿// ReSharper disable UnusedMember.Global
 namespace AssemblyToProcess
 {
-    public class StructWithNoIComparableDefined
+    public struct StructWithNoIComparableDefined
     {
         public int Value { get; set; }
     }

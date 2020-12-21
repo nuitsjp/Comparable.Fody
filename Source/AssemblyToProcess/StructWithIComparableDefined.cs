@@ -4,7 +4,7 @@
 namespace AssemblyToProcess
 {
     [Comparable]
-    public class StructWithIComparableDefined
+    public struct StructWithIComparableDefined
     {
         [CompareBy]
         public int Value { get; set; }
