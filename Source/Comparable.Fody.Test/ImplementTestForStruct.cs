@@ -37,9 +37,9 @@ namespace Comparable.Fody.Test
             public void ReturnCompareToResultOfSingleProperty()
             {
                 var instance0 = TestResult.GetInstance("AssemblyToProcess.StructWithSingleProperty");
-                instance0.Value = 1;
+                instance0.Value = "1";
                 var instance1 = TestResult.GetInstance("AssemblyToProcess.StructWithSingleProperty");
-                instance1.Value = 2;
+                instance1.Value = "2";
 
                 ((IComparable)instance0).CompareTo((object)instance1)
                     .Should().Be(instance0.Value.CompareTo(instance1.Value));

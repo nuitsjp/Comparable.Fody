@@ -7,7 +7,7 @@ namespace AssemblyToProcess
     public class ClassWithSingleProperty
     {
         [CompareBy(Priority = 1)]
-        public int Value { get; set; }
+        public string Value { get; set; }
         public int NotCompareValue { get; set; }
     }
 }
