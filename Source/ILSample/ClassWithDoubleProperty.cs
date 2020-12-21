@@ -2,7 +2,7 @@
 
 namespace ILSample
 {
-    public class WithDoubleProperty : IComparable
+    public class ClassWithDoubleProperty : IComparable
     {
         public int Value0 { get; set; }
 
@@ -12,10 +12,10 @@ namespace ILSample
         {
             if (obj is null) return 1;
 
-            var comparable = obj as WithDoubleProperty;
+            var comparable = obj as ClassWithDoubleProperty;
             if (comparable is null)
             {
-                throw new ArgumentException("Object is not a WithSingleProperty");
+                throw new ArgumentException("Object is not a ClassWithDoubleProperty");
             }
 
             var compared = Value0.CompareTo(comparable.Value0);

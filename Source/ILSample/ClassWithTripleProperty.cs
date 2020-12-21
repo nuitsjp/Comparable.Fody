@@ -3,7 +3,7 @@
 
 namespace ILSample
 {
-    public class WithTripleProperty : IComparable
+    public class ClassWithTripleProperty : IComparable
     {
         public int Value0 { get; set; }
 
@@ -14,10 +14,10 @@ namespace ILSample
         {
             if (obj is null) return 1;
 
-            var comparable = obj as WithTripleProperty;
+            var comparable = obj as ClassWithTripleProperty;
             if (comparable is null)
             {
-                throw new ArgumentException("Object is not a WithSingleProperty");
+                throw new ArgumentException("Object is not a ClassWithTripleProperty");
             }
 
             var compared = Value0.CompareTo(comparable.Value0);
