@@ -2,7 +2,7 @@
 
 namespace ILSample.Classes
 {
-    public class ClassWithSingleProperty : IComparable
+    public class ClassProperty : IComparable
     {
         public string Value { get; set; }
 
@@ -10,11 +10,11 @@ namespace ILSample.Classes
         {
             if (obj is null) return 1;
 
-            var comparable = obj as ClassWithSingleProperty;
-            if (comparable is null)
+            if (!(obj is ClassProperty))
             {
-                throw new ArgumentException("Object is not a ClassWithSingleProperty");
+                throw new ArgumentException("Object is not a ClassProperty");
             }
+            var comparable = (ClassProperty)obj;
 
             return Value.CompareTo(comparable.Value);
         }

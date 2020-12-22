@@ -2,7 +2,7 @@
 
 namespace ILSample.Classes
 {
-    public class ClassWithSingleField : IComparable
+    public class StructField : IComparable
     {
         private readonly int _value;
 
@@ -10,11 +10,11 @@ namespace ILSample.Classes
         {
             if (obj is null) return 1;
 
-            var comparable = obj as ClassWithSingleField;
-            if (comparable is null)
+            if (!(obj is StructField))
             {
-                throw new ArgumentException("Object is not a ClassWithSingleField");
+                throw new ArgumentException("Object is not a StructField");
             }
+            var comparable = (StructField)obj;
 
             return _value.CompareTo(comparable._value);
         }

@@ -2,7 +2,7 @@
 
 namespace ILSample.Structs
 {
-    public readonly struct StructWithSingleField : IComparable
+    public readonly struct StructField : IComparable
     {
         private readonly int _value;
 
@@ -10,11 +10,11 @@ namespace ILSample.Structs
         {
             if (obj is null) return 1;
 
-            if (!(obj is StructWithSingleField))
+            if (!(obj is StructField))
             {
-                throw new ArgumentException("Object is not a StructWithSingleField");
+                throw new ArgumentException("Object is not a StructField");
             }
-            var comparable = (StructWithSingleField)obj;
+            var comparable = (StructField)obj;
 
             return _value.CompareTo(comparable._value);
         }
