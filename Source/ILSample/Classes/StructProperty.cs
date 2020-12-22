@@ -4,7 +4,7 @@ namespace ILSample.Classes
 {
     public class StructProperty : IComparable
     {
-        public string Value { get; set; }
+        public int Value { get; set; }
 
         public int CompareTo(object obj)
         {

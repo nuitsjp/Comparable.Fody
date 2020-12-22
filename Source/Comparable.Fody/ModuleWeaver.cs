@@ -180,8 +180,11 @@ namespace Comparable.Fody
                     {
                         ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
                         ilProcessor.Append(Instruction.Create(OpCodes.Call, x.GetMethod));
-                        ilProcessor.Append(Instruction.Create(OpCodes.Stloc_S, localVariable));
-                        ilProcessor.Append(Instruction.Create(OpCodes.Ldloca_S, localVariable));
+                        if (typeDefinition.IsStruct())
+                        {
+                            ilProcessor.Append(Instruction.Create(OpCodes.Stloc_S, localVariable));
+                            ilProcessor.Append(Instruction.Create(OpCodes.Ldloca_S, localVariable));
+                        }
                         ilProcessor.Append(Instruction.Create(OpCodes.Ldloc_S, castedObject));
                         ilProcessor.Append(Instruction.Create(OpCodes.Callvirt, x.GetMethod));
                         ilProcessor.Append(Instruction.Create(OpCodes.Call, compareTo));
@@ -222,8 +225,11 @@ namespace Comparable.Fody
                     {
                         ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
                         ilProcessor.Append(Instruction.Create(OpCodes.Ldfld, x));
-                        ilProcessor.Append(Instruction.Create(OpCodes.Stloc_S, localVariable));
-                        ilProcessor.Append(Instruction.Create(OpCodes.Ldloca_S, localVariable));
+                        if (typeDefinition.IsStruct())
+                        {
+                            ilProcessor.Append(Instruction.Create(OpCodes.Stloc_S, localVariable));
+                            ilProcessor.Append(Instruction.Create(OpCodes.Ldloca_S, localVariable));
+                        }
                         ilProcessor.Append(Instruction.Create(OpCodes.Ldloc_S, castedObject));
                         ilProcessor.Append(Instruction.Create(OpCodes.Ldfld, x));
                         ilProcessor.Append(Instruction.Create(OpCodes.Call, compareTo));
@@ -270,6 +276,11 @@ namespace Comparable.Fody
         {
             return 0 != typeDefinition.CustomAttributes.Count(x => 
                 x.AttributeType.Name == nameof(ComparableAttribute));
+        }
+
+        internal static bool IsStruct(this TypeDefinition typeDefinition)
+        {
+            return typeDefinition.BaseType.Name == nameof(ValueType);
         }
     }
 
