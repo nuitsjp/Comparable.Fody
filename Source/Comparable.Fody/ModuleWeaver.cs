@@ -158,22 +158,22 @@ namespace Comparable.Fody
                 .Where(x => x.HasCompareByAttribute())
                 .Select(x =>
                 {
-                    var propertyTypeReference = ModuleDefinition.ImportReference(x.PropertyType);
-                    var propertyTypeDefinition = propertyTypeReference.Resolve();
-                    if (!propertyTypeDefinition.Interfaces
+                    var typeReference = ModuleDefinition.ImportReference(x.PropertyType);
+                    var typeDefinition = typeReference.Resolve();
+                    if (!typeDefinition.Interfaces
                         .Select(@interface => @interface.InterfaceType.FullName == nameof(IComparable)).Any())
                     {
                         throw new WeavingException(
                             $"Property {x.Name} of Type {weavingTarget.FullName} does not implement IComparable; the property that specifies CompareByAttribute should implement IComparable.");
                     }
                     var compareTo = ModuleDefinition.ImportReference(
-                        propertyTypeDefinition.Methods
+                        typeDefinition.Methods
                             .Single(methodDefinition =>
                                 methodDefinition.Name == nameof(IComparable.CompareTo)
                                 && methodDefinition.Parameters.Count == 1
-                                && methodDefinition.Parameters.Single().ParameterType.FullName == propertyTypeDefinition.FullName));
+                                && methodDefinition.Parameters.Single().ParameterType.FullName == typeDefinition.FullName));
 
-                    var localVariable = new VariableDefinition(propertyTypeReference);
+                    var localVariable = new VariableDefinition(typeReference);
 
 
                     void AppendCompareTo(ILProcessor ilProcessor, VariableDefinition castedObject)
