@@ -1,10 +1,11 @@
 ﻿using Comparable;
+
 // ReSharper disable UnusedMember.Global
 
-namespace AssemblyToProcess
+namespace AssemblyToProcess.Class
 {
     [Comparable]
-    public struct StructWithIComparableDefined
+    public class IsDefinedCompareAttribute
     {
         [CompareBy]
         public int Value { get; set; }

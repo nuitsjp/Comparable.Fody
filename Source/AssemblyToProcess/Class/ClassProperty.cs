@@ -1,13 +1,16 @@
 ﻿using Comparable;
+
 // ReSharper disable UnusedMember.Global
 
-namespace AssemblyToProcess
+namespace AssemblyToProcess.Class
 {
     [Comparable]
-    public class ClassWithSingleProperty
+    public class ClassProperty
+
     {
-        [CompareBy(Priority = 1)]
+        [CompareBy]
         public string Value { get; set; }
+
         public int NotCompareValue { get; set; }
     }
 }

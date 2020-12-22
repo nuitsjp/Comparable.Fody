@@ -1,7 +1,7 @@
 ﻿// ReSharper disable UnusedMember.Global
-namespace AssemblyToProcess
+namespace AssemblyToProcess.Struct
 {
-    public struct StructWithNoIComparableDefined
+    public struct IsNotDefinedCompareAttribute
     {
         public int Value { get; set; }
     }

@@ -1,7 +1,7 @@
 ﻿// ReSharper disable UnusedMember.Global
-namespace AssemblyToProcess
+namespace AssemblyToProcess.Class
 {
-    public class ClassWithNoIComparableDefined
+    public class IsNotDefinedCompareAttribute
     {
         public int Value { get; set; }
     }

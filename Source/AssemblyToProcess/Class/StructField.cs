@@ -1,11 +1,12 @@
 ﻿using Comparable;
+
 // ReSharper disable UnusedMember.Global
 
-namespace AssemblyToProcess
+namespace AssemblyToProcess.Class
 {
     [Comparable]
-    public class ClassWithSingleField
-    
+    public class StructField
+
     {
         [CompareBy]
         private int _value;

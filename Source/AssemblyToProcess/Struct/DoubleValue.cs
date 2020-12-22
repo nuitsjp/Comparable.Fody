@@ -1,10 +1,11 @@
 ﻿using Comparable;
+
 // ReSharper disable UnusedMember.Global
 
-namespace AssemblyToProcess
+namespace AssemblyToProcess.Struct
 {
     [Comparable]
-    public struct StructWithDoubleValue
+    public struct DoubleValue
     {
         [CompareBy(Priority = 2)]
         private string _value1;

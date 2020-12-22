@@ -1,10 +1,11 @@
 ﻿using Comparable;
+
 // ReSharper disable UnusedMember.Global
 
-namespace AssemblyToProcess
+namespace AssemblyToProcess.Class
 {
     [Comparable]
-    public class ClassWithDoubleValue
+    public class DoubleValue
     {
         [CompareBy(Priority = 2)]
         private string _value1;
