@@ -4,11 +4,11 @@
 namespace AssemblyToProcess
 {
     [Comparable]
-    public struct StructWithStructProperty
+    public struct StructWithSingleProperty
 
     {
         [CompareBy]
-        public int Value { get; set; }
+        public string Value { get; set; }
 
         public int NotCompareValue { get; set; }
     }

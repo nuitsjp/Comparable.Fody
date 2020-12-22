@@ -18,7 +18,7 @@ namespace Comparable.Fody.Test
             [Fact]
             public void Return1WhenComparedToNull()
             {
-                var comparable = (IComparable)TestResult.GetInstance("AssemblyToProcess.StructWithClassProperty");
+                var comparable = (IComparable)TestResult.GetInstance("AssemblyToProcess.StructWithSingleProperty");
                 comparable.CompareTo(null)
                     .Should().Be(1);
             }
@@ -26,19 +26,19 @@ namespace Comparable.Fody.Test
             [Fact]
             public void ThrowArgumentExceptionWhenComparedToDifferentType()
             {
-                var comparable = (IComparable)TestResult.GetInstance("AssemblyToProcess.StructWithClassProperty");
+                var comparable = (IComparable)TestResult.GetInstance("AssemblyToProcess.StructWithSingleProperty");
                 var instanceOfDifferentType = string.Empty;
                 comparable.Invoking(x => x.CompareTo(instanceOfDifferentType))
                     .Should().Throw<ArgumentException>()
-                    .WithMessage("Object is not a AssemblyToProcess.StructWithClassProperty.");
+                    .WithMessage("Object is not a AssemblyToProcess.StructWithSingleProperty.");
             }
 
             [Fact]
             public void ReturnCompareToResultOfSingleProperty()
             {
-                var instance0 = TestResult.GetInstance("AssemblyToProcess.StructWithClassProperty");
+                var instance0 = TestResult.GetInstance("AssemblyToProcess.StructWithSingleProperty");
                 instance0.Value = "1";
-                var instance1 = TestResult.GetInstance("AssemblyToProcess.StructWithClassProperty");
+                var instance1 = TestResult.GetInstance("AssemblyToProcess.StructWithSingleProperty");
                 instance1.Value = "2";
 
                 ((IComparable)instance0).CompareTo((object)instance1)
@@ -50,9 +50,9 @@ namespace Comparable.Fody.Test
             [Fact]
             public void ReturnCompareToResultOfSingleField()
             {
-                var instance0 = TestResult.GetInstance("AssemblyToProcess.StructWithStructField");
+                var instance0 = TestResult.GetInstance("AssemblyToProcess.StructWithSingleField");
                 instance0.Value = 1;
-                var instance1 = TestResult.GetInstance("AssemblyToProcess.StructWithStructField");
+                var instance1 = TestResult.GetInstance("AssemblyToProcess.StructWithSingleField");
                 instance1.Value = 2;
 
                 ((IComparable)instance0).CompareTo((object)instance1)
