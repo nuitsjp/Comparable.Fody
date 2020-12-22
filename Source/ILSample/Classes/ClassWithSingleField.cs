@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ILSample
+namespace ILSample.Classes
 {
     public class ClassWithSingleField : IComparable
     {

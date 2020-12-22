@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ILSample
+namespace ILSample.Structs
 {
     public struct StructWithSingleProperty : IComparable
     {

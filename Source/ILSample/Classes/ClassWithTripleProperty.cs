@@ -1,7 +1,8 @@
 ﻿using System;
+
 // ReSharper disable UnusedMember.Global
 
-namespace ILSample
+namespace ILSample.Classes
 {
     public class ClassWithTripleProperty : IComparable
     {
