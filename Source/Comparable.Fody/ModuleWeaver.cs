@@ -283,39 +283,4 @@ namespace Comparable.Fody
             yield return "ComparableAttribute";
         }
     }
-
-    internal static class TypeDefinitionExtensions
-    {
-        internal static bool HasCompareAttribute(this TypeDefinition typeDefinition)
-        {
-            return 0 != typeDefinition.CustomAttributes.Count(x => 
-                x.AttributeType.Name == nameof(ComparableAttribute));
-        }
-
-        internal static bool IsStruct(this TypeDefinition typeDefinition)
-        {
-            return typeDefinition.BaseType.Name == nameof(ValueType);
-        }
-    }
-
-
-    internal static class MemberDefinitionExtensions
-    {
-        internal static bool HasCompareByAttribute(this IMemberDefinition propertyDefinition)
-        {
-            return 0 != propertyDefinition.CustomAttributes.Count(x =>
-                x.AttributeType.Name == nameof(CompareByAttribute));
-        }
-
-        internal static int GetPriority(this IMemberDefinition propertyDefinition)
-        {
-            var compareBy = propertyDefinition.CustomAttributes
-                .Single(x => x.AttributeType.Name == nameof(CompareByAttribute));
-            if (!compareBy.HasProperties) return CompareByAttribute.DefaultPriority;
-
-            return (int)compareBy.Properties
-                .Single(x => x.Name == nameof(CompareByAttribute.Priority))
-                .Argument.Value;
-        }
-    }
 }
