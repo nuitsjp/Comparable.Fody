@@ -120,13 +120,13 @@ namespace Comparable.Fody
             processor.Append(labelArgumentTypeMatched);
             // ImplementType implementType = (ImplementType)obj;
             processor.Append(Instruction.Create(OpCodes.Ldarg_S, argumentObj));
-            if (weavingTarget.IsClass)
+            if (weavingTarget.IsStruct())
             {
-                processor.Append(Instruction.Create(OpCodes.Castclass, weavingTarget));
+                processor.Append(Instruction.Create(OpCodes.Unbox_Any, weavingTarget));
             }
             else
             {
-                processor.Append(Instruction.Create(OpCodes.Unbox_Any, weavingTarget));
+                processor.Append(Instruction.Create(OpCodes.Castclass, weavingTarget));
             }
             processor.Append(Instruction.Create(OpCodes.Stloc_S, localCastedObject));
 
@@ -185,9 +185,21 @@ namespace Comparable.Fody
                             ilProcessor.Append(Instruction.Create(OpCodes.Stloc_S, localVariable));
                             ilProcessor.Append(Instruction.Create(OpCodes.Ldloca_S, localVariable));
                         }
-                        ilProcessor.Append(Instruction.Create(OpCodes.Ldloc_S, castedObject));
-                        ilProcessor.Append(Instruction.Create(OpCodes.Callvirt, x.GetMethod));
-                        ilProcessor.Append(Instruction.Create(OpCodes.Call, compareTo));
+
+                        ilProcessor.Append(weavingTarget.IsStruct()
+                            ? Instruction.Create(OpCodes.Ldloca_S, castedObject)
+                            : Instruction.Create(OpCodes.Ldloc_S, castedObject));
+                        ilProcessor.Append(typeDefinition.IsStruct()
+                            ? Instruction.Create(OpCodes.Call, x.GetMethod)
+                            : Instruction.Create(OpCodes.Callvirt, x.GetMethod));
+                        if (typeDefinition.IsStruct())
+                        {
+                            ilProcessor.Append(Instruction.Create(OpCodes.Call, compareTo));
+                        }
+                        else
+                        {
+                            ilProcessor.Append(Instruction.Create(OpCodes.Callvirt, compareTo));
+                        }
                     }
 
                     return (
@@ -232,7 +244,9 @@ namespace Comparable.Fody
                         }
                         ilProcessor.Append(Instruction.Create(OpCodes.Ldloc_S, castedObject));
                         ilProcessor.Append(Instruction.Create(OpCodes.Ldfld, x));
-                        ilProcessor.Append(Instruction.Create(OpCodes.Call, compareTo));
+                        ilProcessor.Append(typeDefinition.IsStruct()
+                            ? Instruction.Create(OpCodes.Call, compareTo)
+                            : Instruction.Create(OpCodes.Callvirt, compareTo));
                     }
 
                     return (
