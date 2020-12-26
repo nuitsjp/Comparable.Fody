@@ -158,8 +158,7 @@ namespace Comparable.Fody
                 .Where(x => x.HasCompareByAttribute())
                 .Select(x =>
                 {
-                    var typeReference = ModuleDefinition.ImportReference(x.PropertyType);
-                    var typeDefinition = typeReference.Resolve();
+                    var typeDefinition = ModuleDefinition.ImportReference(x.PropertyType).Resolve();
                     if (typeDefinition.IsNotImplementIComparable())
                     {
                         throw new WeavingException(
@@ -172,7 +171,7 @@ namespace Comparable.Fody
                                 && methodDefinition.Parameters.Count == 1
                                 && methodDefinition.Parameters.Single().ParameterType.FullName == typeDefinition.FullName));
 
-                    var localVariable = new VariableDefinition(typeReference);
+                    var localVariable = new VariableDefinition(typeDefinition);
 
 
                     void AppendCompareTo(ILProcessor ilProcessor, VariableDefinition castedObject)
@@ -214,8 +213,7 @@ namespace Comparable.Fody
                 .Where(x => x.HasCompareByAttribute())
                 .Select(x =>
                 {
-                    var typeReference = ModuleDefinition.ImportReference(x.FieldType);
-                    var typeDefinition = typeReference.Resolve();
+                    var typeDefinition = ModuleDefinition.ImportReference(x.FieldType).Resolve();
                     if (typeDefinition.IsNotImplementIComparable())
                     {
                         throw new WeavingException(
@@ -228,7 +226,7 @@ namespace Comparable.Fody
                                 && methodDefinition.Parameters.Count == 1
                                 && methodDefinition.Parameters.Single().ParameterType.FullName == typeDefinition.FullName));
 
-                    var localVariable = new VariableDefinition(typeReference);
+                    var localVariable = new VariableDefinition(typeDefinition);
 
 
                     void AppendCompareTo(ILProcessor ilProcessor, VariableDefinition castedObject)
