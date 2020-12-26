@@ -35,17 +35,17 @@ namespace Comparable.Fody
         private void ImplementIComparable(TypeDefinition weavingTarget)
         {
             weavingTarget.Interfaces.Add(ComparableInterface);
-            var compareProperties = 
+            var compareMembers = 
                 GetCompareByProperties(weavingTarget)
                     .Union(GetCompareByFields(weavingTarget))
                     .ToArray();
             
-            if (!compareProperties.Any())
+            if (!compareMembers.Any())
             {
                 throw new WeavingException($"Specify CompareByAttribute for the any property of Type {weavingTarget.FullName}.");
             }
             
-            if (1 < compareProperties
+            if (1 < compareMembers
                 .GroupBy(x => x.Priority)
                 .Select(x => (Priority: x.Key, Count: x.Count()))
                 .Max(x => x.Count))
@@ -53,6 +53,13 @@ namespace Comparable.Fody
                 throw new WeavingException($"Type {weavingTarget.FullName} defines multiple CompareBy with equal priority.");
             }
 
+            AddCompareToByConcreteType(weavingTarget, compareMembers);
+            AddCompareToByObject(weavingTarget, compareMembers);
+        }
+
+        private void AddCompareToByObject(TypeDefinition weavingTarget,
+            (Action<ILProcessor, VariableDefinition> AppendCompareTo, VariableDefinition LocalVariable, int Priority)[] compareMembers)
+        {
             var compareToDefinition =
                 new MethodDefinition(
                     nameof(IComparable.CompareTo),
@@ -80,7 +87,7 @@ namespace Comparable.Fody
             compareToDefinition.Body.Variables.Add(localCastedObject);
             var localResult = new VariableDefinition(ModuleDefinition.TypeSystem.Int32);
             compareToDefinition.Body.Variables.Add(localResult);
-            foreach (var compareBy in compareProperties)
+            foreach (var compareBy in compareMembers)
             {
                 compareToDefinition.Body.Variables.Add(compareBy.LocalVariable);
             }
@@ -128,15 +135,102 @@ namespace Comparable.Fody
             {
                 processor.Append(Instruction.Create(OpCodes.Castclass, weavingTarget));
             }
+
             processor.Append(Instruction.Create(OpCodes.Stloc_S, localCastedObject));
 
 
             // return Value.CompareTo(withSingleProperty.Value);
-            foreach (var compareBy in compareProperties)
+            foreach (var compareBy in compareMembers)
             {
                 compareBy.AppendCompareTo(processor, localCastedObject);
                 processor.Append(Instruction.Create(OpCodes.Stloc_S, localResult));
-                if (compareProperties.Last() != compareBy)
+                if (compareMembers.Last() != compareBy)
+                {
+                    processor.Append(Instruction.Create(OpCodes.Ldloc_S, localResult));
+                    processor.Append(Instruction.Create(OpCodes.Ldc_I4_0));
+                    processor.Append(Instruction.Create(OpCodes.Ceq));
+                    processor.Append(Instruction.Create(OpCodes.Brfalse_S, labelReturn));
+                }
+            }
+
+            processor.Append(labelReturn);
+            processor.Append(Instruction.Create(OpCodes.Ldloc_S, localResult));
+            processor.Append(Instruction.Create(OpCodes.Ret));
+
+            weavingTarget.Methods.Add(compareToDefinition);
+        }
+
+        private void AddCompareToByConcreteType(TypeDefinition weavingTarget,
+            (Action<ILProcessor, VariableDefinition> AppendCompareTo, VariableDefinition LocalVariable, int Priority)[] compareMembers)
+        {
+            var compareToDefinition =
+                new MethodDefinition(
+                    nameof(IComparable.CompareTo),
+                    MethodAttributes.Public
+                    | MethodAttributes.Final
+                    | MethodAttributes.HideBySig
+                    | MethodAttributes.NewSlot
+                    | MethodAttributes.Virtual,
+                    ModuleDefinition.TypeSystem.Int32)
+                {
+                    Body =
+                    {
+                        MaxStackSize = 2,
+                        InitLocals = true
+                    }
+                };
+
+            // Init arguments.
+            var argumentObj =
+                new ParameterDefinition("obj", ParameterAttributes.None, weavingTarget);
+            compareToDefinition.Parameters.Add(argumentObj);
+
+            // Init local variables.
+            var localCastedObject = new VariableDefinition(weavingTarget);
+            compareToDefinition.Body.Variables.Add(localCastedObject);
+            var localResult = new VariableDefinition(ModuleDefinition.TypeSystem.Int32);
+            compareToDefinition.Body.Variables.Add(localResult);
+            foreach (var compareBy in compareMembers)
+            {
+                compareToDefinition.Body.Variables.Add(compareBy.LocalVariable);
+            }
+
+            // Labels for goto.
+            var labelArgumentIsNotNull = Instruction.Create(OpCodes.Nop);
+            var labelReturn = Instruction.Create(OpCodes.Nop);
+
+            var processor = compareToDefinition.Body.GetILProcessor();
+
+            // if (obj == null)
+            processor.Append(Instruction.Create(OpCodes.Ldarg_S, argumentObj));
+            processor.Append(Instruction.Create(OpCodes.Ldnull));
+            processor.Append(Instruction.Create(OpCodes.Ceq));
+            processor.Append(Instruction.Create(OpCodes.Brfalse_S, labelArgumentIsNotNull));
+
+            // return 1;
+            processor.Append(Instruction.Create(OpCodes.Ldc_I4_1));
+            processor.Append(Instruction.Create(OpCodes.Ret));
+
+            // ImplementType implementType = (ImplementType)obj;
+            processor.Append(Instruction.Create(OpCodes.Ldarg_S, argumentObj));
+            if (weavingTarget.IsStruct())
+            {
+                processor.Append(Instruction.Create(OpCodes.Unbox_Any, weavingTarget));
+            }
+            else
+            {
+                processor.Append(Instruction.Create(OpCodes.Castclass, weavingTarget));
+            }
+
+            processor.Append(Instruction.Create(OpCodes.Stloc_S, localCastedObject));
+
+
+            // return Value.CompareTo(withSingleProperty.Value);
+            foreach (var compareBy in compareMembers)
+            {
+                compareBy.AppendCompareTo(processor, localCastedObject);
+                processor.Append(Instruction.Create(OpCodes.Stloc_S, localResult));
+                if (compareMembers.Last() != compareBy)
                 {
                     processor.Append(Instruction.Create(OpCodes.Ldloc_S, localResult));
                     processor.Append(Instruction.Create(OpCodes.Ldc_I4_0));
