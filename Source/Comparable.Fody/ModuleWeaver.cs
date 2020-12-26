@@ -160,8 +160,7 @@ namespace Comparable.Fody
                 {
                     var typeReference = ModuleDefinition.ImportReference(x.PropertyType);
                     var typeDefinition = typeReference.Resolve();
-                    if (!typeDefinition.Interfaces
-                        .Select(@interface => @interface.InterfaceType.FullName == nameof(IComparable)).Any())
+                    if (typeDefinition.IsNotImplementIComparable())
                     {
                         throw new WeavingException(
                             $"Property {x.Name} of Type {weavingTarget.FullName} does not implement IComparable; the property that specifies CompareByAttribute should implement IComparable.");
@@ -217,8 +216,7 @@ namespace Comparable.Fody
                 {
                     var typeReference = ModuleDefinition.ImportReference(x.FieldType);
                     var typeDefinition = typeReference.Resolve();
-                    if (!typeDefinition.Interfaces
-                        .Select(@interface => @interface.InterfaceType.FullName == nameof(IComparable)).Any())
+                    if (typeDefinition.IsNotImplementIComparable())
                     {
                         throw new WeavingException(
                             $"Field {x.Name} of Type {weavingTarget.FullName} does not implement IComparable; the property that specifies CompareByAttribute should implement IComparable.");

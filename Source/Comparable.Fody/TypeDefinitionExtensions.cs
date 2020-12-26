@@ -16,5 +16,21 @@ namespace Comparable.Fody
         {
             return typeDefinition.BaseType.Name == nameof(ValueType);
         }
+
+        internal static bool IsNotImplementIComparable(this TypeDefinition typeDefinition)
+        {
+            if (typeDefinition.Interfaces
+                .Select(@interface => @interface.InterfaceType.FullName == nameof(IComparable)).Any())
+            {
+                return false;
+            }
+
+            if (typeDefinition.HasCompareAttribute())
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }
