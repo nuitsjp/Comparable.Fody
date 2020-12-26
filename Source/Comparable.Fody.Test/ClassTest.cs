@@ -34,5 +34,8 @@ namespace Comparable.Fody.Test
 
         public override void Should_return_CompareTo_result_for_double_value()
             => Invoke_should_return_CompareTo_result_for_double_value();
+
+        public override void Should_return_CompareTo_result_for_composite_object()
+            => Invoke_should_return_CompareTo_result_for_composite_object();
     }
 }

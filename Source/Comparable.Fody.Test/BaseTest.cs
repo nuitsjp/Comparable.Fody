@@ -68,6 +68,17 @@ namespace Comparable.Fody.Test
         [Fact]
         public abstract void Should_return_CompareTo_result_for_struct_field();
 
+        protected void Invoke_should_return_CompareTo_result_for<T>(string className, T value0, T value1)
+        {
+            var instance0 = TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.{className}");
+            instance0.Value = value0;
+            var instance1 = TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.{className}");
+            instance1.Value = value1;
+
+            ((IComparable)instance0).CompareTo((object)instance1)
+                .Should().Be(instance0.Value.CompareTo(instance1.Value));
+        }
+
         [Fact]
         public abstract void Should_return_CompareTo_result_for_double_value();
 
@@ -84,15 +95,23 @@ namespace Comparable.Fody.Test
                 .Should().Be(instance0.Value1.CompareTo(instance1.Value1));
         }
 
-        protected void Invoke_should_return_CompareTo_result_for<T>(string className, T value0, T value1)
-        {
-            var instance0 = TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.{className}");
-            instance0.Value = value0;
-            var instance1 = TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.{className}");
-            instance1.Value = value1;
+        [Fact]
+        public abstract void Should_return_CompareTo_result_for_composite_object();
 
-            ((IComparable) instance0).CompareTo((object) instance1)
-                .Should().Be(instance0.Value.CompareTo(instance1.Value));
+        protected void Invoke_should_return_CompareTo_result_for_composite_object()
+        {
+            //var inner0 = TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.InnerObject");
+            //inner0.Value = 1;
+            //var instance0 = TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.CompositeObject");
+            //instance0.Value = inner0;
+
+            //var inner1 = TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.InnerObject");
+            //inner1.Value = 2;
+            //var instance1 = TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.DoubleValue");
+            //instance1.Value = inner1;
+
+            //((IComparable)instance0).CompareTo((object)instance1)
+            //    .Should().Be(inner0.Value.CompareTo(inner1.Value));
         }
     }
 }
