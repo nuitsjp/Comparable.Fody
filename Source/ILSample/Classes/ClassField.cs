@@ -19,9 +19,14 @@ namespace ILSample.Classes
             {
                 throw new ArgumentException("Object is not a ClassField");
             }
-            var comparable = (ClassField)obj;
+            return CompareTo((ClassField)obj);
+        }
 
-            return _value.CompareTo(comparable._value);
+        public int CompareTo(ClassField obj)
+        {
+            if (obj is null) return 1;
+
+            return _value.CompareTo(obj._value);
         }
     }
 }

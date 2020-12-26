@@ -16,7 +16,12 @@ namespace ILSample.Classes
             {
                 throw new ArgumentException("Object is not a DoubleValue");
             }
-            var comparable = (DoubleValue)obj;
+            return CompareTo((DoubleValue)obj);
+        }
+
+        public int CompareTo(DoubleValue comparable)
+        {
+            if (comparable is null) return 1;
 
             var compared = _value0.CompareTo(comparable._value0);
             if (compared != 0) return compared;

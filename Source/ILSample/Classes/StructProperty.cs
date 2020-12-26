@@ -14,9 +14,14 @@ namespace ILSample.Classes
             {
                 throw new ArgumentException("Object is not a StructProperty");
             }
-            var comparable = (StructProperty)obj;
+            return CompareTo((StructProperty)obj);
+        }
 
-            return Value.CompareTo(comparable.Value);
+        public int CompareTo(StructProperty obj)
+        {
+            if (obj is null) return 1;
+
+            return Value.CompareTo(obj.Value);
         }
     }
 }

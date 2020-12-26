@@ -14,9 +14,14 @@ namespace ILSample.Classes
             {
                 throw new ArgumentException("Object is not a StructField");
             }
-            var comparable = (StructField)obj;
+            return CompareTo((StructField)obj);
+        }
 
-            return _value.CompareTo(comparable._value);
+        public int CompareTo(StructField obj)
+        {
+            if (obj is null) return 1;
+
+            return _value.CompareTo(obj._value);
         }
     }
 }

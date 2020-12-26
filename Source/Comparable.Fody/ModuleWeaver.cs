@@ -255,10 +255,13 @@ namespace Comparable.Fody
         private InterfaceImplementation ComparableInterface { get; set; }
         private MethodReference ArgumentExceptionConstructor { get; set; }
         
+        private MethodReference CompareTo { get; set; }
+        
         private void FindReferences()
         {
-            ComparableInterface = new InterfaceImplementation(
-                ModuleDefinition.ImportReference(FindTypeDefinition(nameof(IComparable))));
+            var comparable = ModuleDefinition.ImportReference(FindTypeDefinition(nameof(IComparable)));
+            ComparableInterface = new InterfaceImplementation(comparable);
+            CompareTo = ModuleDefinition.ImportReference(comparable.Resolve().Methods.Single(x => x.Name == nameof(IComparable.CompareTo)));
 
             var argumentExceptionType = typeof(ArgumentException);
             var constructorInfo = argumentExceptionType.GetConstructors()
