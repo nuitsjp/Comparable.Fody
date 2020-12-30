@@ -3,7 +3,7 @@
 
 namespace CompareIsNotDefined
 {
-    public class CompareByIsNotDefined
+    public class CompareIsNotDefined
     {
         [CompareBy]
         public int Value { get; set; }

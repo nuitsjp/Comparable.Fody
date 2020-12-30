@@ -23,7 +23,7 @@ namespace Comparable.Fody
                 .FirstOrDefault(x => !x.DeclaringType.HasCompareAttribute());
             if (memberDefinition != null)
             {
-                throw new WeavingException("Specify CompareAttribute for Type of CompareByIsNotDefined.CompareByIsNotDefined.");
+                throw new WeavingException($"Specify CompareAttribute for Type of {memberDefinition.DeclaringType.FullName}.");
             }
             
             foreach (var type in ModuleDefinition.Types.Where(x => x.HasCompareAttribute()))

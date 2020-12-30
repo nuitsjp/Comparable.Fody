@@ -100,18 +100,30 @@ namespace Comparable.Fody.Test
 
         protected void Invoke_should_return_CompareTo_result_for_composite_object()
         {
-            //var inner0 = TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.InnerObject");
-            //inner0.Value = 1;
-            //var instance0 = TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.CompositeObject");
-            //instance0.Value = inner0;
+            var inner0 = TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.InnerObject");
+            inner0.Value = 1;
+            var instance0 = TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.CompositeObject");
+            instance0.Value = inner0;
 
-            //var inner1 = TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.InnerObject");
-            //inner1.Value = 2;
-            //var instance1 = TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.DoubleValue");
-            //instance1.Value = inner1;
+            var inner1 = TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.InnerObject");
+            inner1.Value = 2;
+            var instance1 = TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.DoubleValue");
+            instance1.Value = inner1;
 
-            //((IComparable)instance0).CompareTo((object)instance1)
-            //    .Should().Be(inner0.Value.CompareTo(inner1.Value));
+            ((IComparable)instance0).CompareTo((object)instance1)
+                .Should().Be(inner0.Value.CompareTo(inner1.Value));
+        }
+
+        [Fact]
+        public void Should_return_CompareTo_with_object_argument()
+        {
+            Assert.True(false);
+        }
+
+        [Fact]
+        public void Should_return_added_CompareTo_result_When_CompareTo_exists()
+        {
+            Assert.True(false);
         }
     }
 }

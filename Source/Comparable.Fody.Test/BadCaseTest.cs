@@ -21,7 +21,7 @@ namespace Comparable.Fody.Test
         {
             _weavingTask.Invoking(x => x.ExecuteTestRun("CompareIsNotDefined.dll", false))
                 .Should().Throw<WeavingException>()
-                .WithMessage("Specify CompareAttribute for Type of CompareByIsNotDefined.CompareByIsNotDefined.");
+                .WithMessage("Specify CompareAttribute for Type of CompareIsNotDefined.CompareIsNotDefined.");
         }
 
         [Fact]
