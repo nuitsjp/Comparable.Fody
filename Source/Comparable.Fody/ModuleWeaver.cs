@@ -9,11 +9,17 @@ using ParameterAttributes = Mono.Cecil.ParameterAttributes;
 
 namespace Comparable.Fody
 {
-    public class ModuleWeaver : BaseModuleWeaver
+    public class ModuleWeaver : BaseModuleWeaver, IComparableModuleDefine
     {
         public override void Execute()
         {
             FindReferences();
+
+            var typesOfComparable =
+                ModuleDefinition
+                    .Types
+                    .Where(x => x.HasCompareAttribute())
+                    .Select(x => new TypeOfComparable(x));
 
             var memberDefinition = ModuleDefinition
                 .Types
@@ -25,122 +31,40 @@ namespace Comparable.Fody
             {
                 throw new WeavingException($"Specify CompareAttribute for Type of {memberDefinition.DeclaringType.FullName}.");
             }
-            
-            foreach (var type in ModuleDefinition.Types.Where(x => x.HasCompareAttribute()))
+
+            foreach (var type in typesOfComparable)
             {
                 ImplementIComparable(type);
             }
         }
 
-        private void ImplementIComparable(TypeDefinition weavingTarget)
+        private void ImplementIComparable(TypeOfComparable typeOfComparable)
         {
-            weavingTarget.Interfaces.Add(ComparableInterface);
+            typeOfComparable.ImplementIComparable(ComparableInterface);
             var compareMembers = 
-                GetCompareByProperties(weavingTarget)
-                    .Union(GetCompareByFields(weavingTarget))
+                GetCompareByProperties(typeOfComparable._typeDefinition)
+                    .Union(GetCompareByFields(typeOfComparable._typeDefinition))
                     .ToArray();
             
-            if (!compareMembers.Any())
+            if (!typeOfComparable.Members.Any())
             {
-                throw new WeavingException($"Specify CompareByAttribute for the any property of Type {weavingTarget.FullName}.");
+                throw new WeavingException($"Specify CompareByAttribute for the any property of Type {typeOfComparable.FullName}.");
             }
             
-            if (1 < compareMembers
+            if (1 < typeOfComparable.Members
                 .GroupBy(x => x.Priority)
                 .Select(x => (Priority: x.Key, Count: x.Count()))
                 .Max(x => x.Count))
             {
-                throw new WeavingException($"Type {weavingTarget.FullName} defines multiple CompareBy with equal priority.");
+                throw new WeavingException($"Type {typeOfComparable.FullName} defines multiple CompareBy with equal priority.");
             }
 
-            var compareToByConcreteType = AddCompareToByConcreteType(weavingTarget, compareMembers);
-            AddCompareToByObject(weavingTarget, compareMembers, compareToByConcreteType);
+            var compareToByConcreteType = AddCompareToByConcreteType(typeOfComparable, compareMembers);
+            typeOfComparable.ImplementCompareToByObject(this, compareMembers, compareToByConcreteType);
+            //AddCompareToByObject(typeOfComparable, compareMembers, compareToByConcreteType);
         }
 
-        private void AddCompareToByObject(
-            TypeDefinition weavingTarget,
-            (Action<ILProcessor, ParameterDefinition> AppendCompareTo, VariableDefinition LocalVariable, int Priority)[] compareMembers,
-            MethodDefinition compareToByConcreteType)
-        {
-            var compareToDefinition =
-                new MethodDefinition(
-                    nameof(IComparable.CompareTo),
-                    MethodAttributes.Public
-                    | MethodAttributes.Final
-                    | MethodAttributes.HideBySig
-                    | MethodAttributes.NewSlot
-                    | MethodAttributes.Virtual,
-                    ModuleDefinition.TypeSystem.Int32)
-                {
-                    Body =
-                    {
-                        MaxStackSize = 2,
-                        InitLocals = true
-                    }
-                };
-
-            // Init arguments.
-            var argumentObj =
-                new ParameterDefinition("obj", ParameterAttributes.None, ModuleDefinition.TypeSystem.Object);
-            compareToDefinition.Parameters.Add(argumentObj);
-
-            // Init local variables.
-            var localResult = new VariableDefinition(ModuleDefinition.TypeSystem.Int32);
-            compareToDefinition.Body.Variables.Add(localResult);
-            foreach (var compareBy in compareMembers)
-            {
-                compareToDefinition.Body.Variables.Add(compareBy.LocalVariable);
-            }
-
-            // Labels for goto.
-            var labelArgumentIsNotNull = Instruction.Create(OpCodes.Nop);
-            var labelArgumentTypeMatched = Instruction.Create(OpCodes.Nop);
-            var labelReturn = Instruction.Create(OpCodes.Nop);
-
-            var processor = compareToDefinition.Body.GetILProcessor();
-
-            // if (obj == null)
-            processor.Append(Instruction.Create(OpCodes.Ldarg_S, argumentObj));
-            processor.Append(Instruction.Create(OpCodes.Ldnull));
-            processor.Append(Instruction.Create(OpCodes.Ceq));
-            processor.Append(Instruction.Create(OpCodes.Brfalse_S, labelArgumentIsNotNull));
-
-            // return 1;
-            processor.Append(Instruction.Create(OpCodes.Ldc_I4_1));
-            processor.Append(Instruction.Create(OpCodes.Ret));
-
-            // if (!(obj is StructWithSingleField))
-            processor.Append(labelArgumentIsNotNull);
-            processor.Append(Instruction.Create(OpCodes.Ldarg_S, argumentObj));
-            processor.Append(Instruction.Create(OpCodes.Isinst, weavingTarget));
-            processor.Append(Instruction.Create(OpCodes.Ldnull));
-            processor.Append(Instruction.Create(OpCodes.Cgt_Un));
-            processor.Append(Instruction.Create(OpCodes.Ldc_I4_0));
-            processor.Append(Instruction.Create(OpCodes.Ceq));
-            processor.Append(Instruction.Create(OpCodes.Brfalse_S, labelArgumentTypeMatched));
-
-            // throw new ArgumentException("Object is not a WithSingleProperty");
-            processor.Append(Instruction.Create(OpCodes.Ldstr, $"Object is not a {weavingTarget.FullName}."));
-            processor.Append(Instruction.Create(OpCodes.Newobj, ArgumentExceptionConstructor));
-            processor.Append(Instruction.Create(OpCodes.Throw));
-
-            processor.Append(labelArgumentTypeMatched);
-            // ImplementType implementType = (ImplementType)obj;
-            processor.Append(Instruction.Create(OpCodes.Ldarg_0));
-            processor.Append(Instruction.Create(OpCodes.Ldarg_S, argumentObj));
-            processor.Append(weavingTarget.IsStruct()
-                ? Instruction.Create(OpCodes.Unbox_Any, weavingTarget)
-                : Instruction.Create(OpCodes.Castclass, weavingTarget));
-
-            processor.Append(Instruction.Create(OpCodes.Call, compareToByConcreteType));
-            processor.Append(Instruction.Create(OpCodes.Stloc_S, localResult));
-            processor.Append(Instruction.Create(OpCodes.Ldloc_S, localResult));
-            processor.Append(Instruction.Create(OpCodes.Ret));
-
-            weavingTarget.Methods.Add(compareToDefinition);
-        }
-
-        private MethodDefinition AddCompareToByConcreteType(TypeDefinition weavingTarget,
+        private MethodDefinition AddCompareToByConcreteType(TypeOfComparable weavingTarget,
             (Action<ILProcessor, ParameterDefinition> AppendCompareTo, VariableDefinition LocalVariable, int Priority)[] compareMembers)
         {
             var compareToDefinition =
@@ -161,8 +85,7 @@ namespace Comparable.Fody
                 };
 
             // Init arguments.
-            var argumentObj =
-                new ParameterDefinition("value", ParameterAttributes.None, weavingTarget);
+            var argumentObj = weavingTarget.CreateParameterDefinition("value");
             compareToDefinition.Parameters.Add(argumentObj);
 
             // Init local variables.
@@ -179,7 +102,7 @@ namespace Comparable.Fody
 
             var processor = compareToDefinition.Body.GetILProcessor();
 
-            if (!weavingTarget.IsStruct())
+            if (weavingTarget.IsClass)
             {
                 // if (obj == null)
                 processor.Append(Instruction.Create(OpCodes.Ldarg_S, argumentObj));
@@ -220,7 +143,7 @@ namespace Comparable.Fody
             processor.Append(Instruction.Create(OpCodes.Ldloc_S, localResult));
             processor.Append(Instruction.Create(OpCodes.Ret));
 
-            weavingTarget.Methods.Add(compareToDefinition);
+            weavingTarget.AddMethod(compareToDefinition);
 
             return compareToDefinition;
         }
@@ -324,7 +247,12 @@ namespace Comparable.Fody
         }
 
         private InterfaceImplementation ComparableInterface { get; set; }
-        private MethodReference ArgumentExceptionConstructor { get; set; }
+        
+        public TypeReference Int32 => ModuleDefinition.TypeSystem.Int32;
+
+        public TypeReference Object => ModuleDefinition.TypeSystem.Object;
+
+        public MethodReference ArgumentExceptionConstructor { get; private set; }
         
         private MethodReference CompareTo { get; set; }
         
@@ -350,7 +278,147 @@ namespace Comparable.Fody
             yield return "System.Diagnostics.Tools";
             yield return "System.Diagnostics.Debug";
             yield return "System.Runtime";
-            yield return "ComparableAttribute";
+            yield return "Comparable";
         }
+    }
+
+    public interface IComparableModuleDefine
+    {
+        TypeReference Int32 { get; }
+        
+        TypeReference Object { get; }
+
+        MethodReference ArgumentExceptionConstructor { get; }
+    }
+
+    public class TypeOfComparable
+    {
+        public readonly TypeDefinition _typeDefinition;
+        private readonly List<MemberOfCompareBy> _members;
+
+        public TypeOfComparable(TypeDefinition typeDefinition)
+        {
+            _typeDefinition = typeDefinition;
+            _members = _typeDefinition
+                .Fields
+                .Union(_typeDefinition.Properties.Cast<IMemberDefinition>())
+                .Where(x => x.HasCompareByAttribute())
+                .Select(x => new MemberOfCompareBy(x))
+                .ToList();
+        }
+
+        public IEnumerable<MemberOfCompareBy> Members => _members;
+
+        public bool HasNotCompareBy => !_members.Any();
+
+        public string FullName => _typeDefinition.FullName;
+
+        public bool IsClass => !_typeDefinition.IsStruct();
+
+        public void ImplementIComparable(InterfaceImplementation comparable)
+        {
+            _typeDefinition.Interfaces.Add(comparable);
+        }
+
+        public ParameterDefinition CreateParameterDefinition(string name)
+            => new (name, ParameterAttributes.None, _typeDefinition);
+
+        public void AddMethod(MethodDefinition methodDefinition) => _typeDefinition.Methods.Add(methodDefinition);
+
+        public void ImplementCompareToByObject(
+            IComparableModuleDefine comparableModuleDefine,
+            (Action<ILProcessor, ParameterDefinition> AppendCompareTo, VariableDefinition LocalVariable, int Priority)[] compareMembers,
+            MethodDefinition compareToByConcreteType)
+        {
+            var compareToDefinition =
+                new MethodDefinition(
+                    nameof(IComparable.CompareTo),
+                    MethodAttributes.Public
+                    | MethodAttributes.Final
+                    | MethodAttributes.HideBySig
+                    | MethodAttributes.NewSlot
+                    | MethodAttributes.Virtual,
+                    comparableModuleDefine.Int32)
+                {
+                    Body =
+                    {
+                        MaxStackSize = 2,
+                        InitLocals = true
+                    }
+                };
+
+            // Init arguments.
+            var argumentObj =
+                new ParameterDefinition("obj", ParameterAttributes.None, comparableModuleDefine.Object);
+            compareToDefinition.Parameters.Add(argumentObj);
+
+            // Init local variables.
+            var localResult = new VariableDefinition(comparableModuleDefine.Int32);
+            compareToDefinition.Body.Variables.Add(localResult);
+            foreach (var compareBy in compareMembers)
+            {
+                compareToDefinition.Body.Variables.Add(compareBy.LocalVariable);
+            }
+
+            // Labels for goto.
+            var labelArgumentIsNotNull = Instruction.Create(OpCodes.Nop);
+            var labelArgumentTypeMatched = Instruction.Create(OpCodes.Nop);
+            var labelReturn = Instruction.Create(OpCodes.Nop);
+
+            var processor = compareToDefinition.Body.GetILProcessor();
+
+            // if (obj == null)
+            processor.Append(Instruction.Create(OpCodes.Ldarg_S, argumentObj));
+            processor.Append(Instruction.Create(OpCodes.Ldnull));
+            processor.Append(Instruction.Create(OpCodes.Ceq));
+            processor.Append(Instruction.Create(OpCodes.Brfalse_S, labelArgumentIsNotNull));
+
+            // return 1;
+            processor.Append(Instruction.Create(OpCodes.Ldc_I4_1));
+            processor.Append(Instruction.Create(OpCodes.Ret));
+
+            // if (!(obj is StructWithSingleField))
+            processor.Append(labelArgumentIsNotNull);
+            processor.Append(Instruction.Create(OpCodes.Ldarg_S, argumentObj));
+            processor.Append(Instruction.Create(OpCodes.Isinst, _typeDefinition));
+            processor.Append(Instruction.Create(OpCodes.Ldnull));
+            processor.Append(Instruction.Create(OpCodes.Cgt_Un));
+            processor.Append(Instruction.Create(OpCodes.Ldc_I4_0));
+            processor.Append(Instruction.Create(OpCodes.Ceq));
+            processor.Append(Instruction.Create(OpCodes.Brfalse_S, labelArgumentTypeMatched));
+
+            // throw new ArgumentException("Object is not a WithSingleProperty");
+            processor.Append(Instruction.Create(OpCodes.Ldstr, $"Object is not a {FullName}."));
+            processor.Append(Instruction.Create(OpCodes.Newobj, comparableModuleDefine.ArgumentExceptionConstructor));
+            processor.Append(Instruction.Create(OpCodes.Throw));
+
+            processor.Append(labelArgumentTypeMatched);
+            // ImplementType implementType = (ImplementType)obj;
+            processor.Append(Instruction.Create(OpCodes.Ldarg_0));
+            processor.Append(Instruction.Create(OpCodes.Ldarg_S, argumentObj));
+            processor.Append(IsClass
+                ? Instruction.Create(OpCodes.Castclass, _typeDefinition)
+                : Instruction.Create(OpCodes.Unbox_Any, _typeDefinition));
+
+            processor.Append(Instruction.Create(OpCodes.Call, compareToByConcreteType));
+            processor.Append(Instruction.Create(OpCodes.Stloc_S, localResult));
+            processor.Append(Instruction.Create(OpCodes.Ldloc_S, localResult));
+            processor.Append(Instruction.Create(OpCodes.Ret));
+
+            AddMethod(compareToDefinition);
+        }
+    }
+
+    public class MemberOfCompareBy
+    {
+        private readonly IMemberDefinition _memberDefinition;
+
+        public MemberOfCompareBy(IMemberDefinition memberDefinition)
+        {
+            _memberDefinition = memberDefinition;
+            
+        }
+
+        public int Priority => _memberDefinition.GetPriority();
     }
 }

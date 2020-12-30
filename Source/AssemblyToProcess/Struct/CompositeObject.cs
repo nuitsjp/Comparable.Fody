@@ -9,13 +9,13 @@
 
 //    {
 //        [CompareBy]
-//        public AInnerObject Value { get; set; }
+//        public InnerObject Value { get; set; }
 
 //        public int NotCompareValue { get; set; }
 //    }
 
 //    [Comparable]
-//    public struct AInnerObject
+//    public struct InnerObject
 
 //    {
 //        [CompareBy]

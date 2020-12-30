@@ -107,7 +107,7 @@ namespace Comparable.Fody.Test
 
             var inner1 = TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.InnerObject");
             inner1.Value = 2;
-            var instance1 = TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.DoubleValue");
+            var instance1 = TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.CompositeObject");
             instance1.Value = inner1;
 
             ((IComparable)instance0).CompareTo((object)instance1)
