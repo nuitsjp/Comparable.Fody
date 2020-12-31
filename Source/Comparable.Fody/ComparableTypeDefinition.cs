@@ -161,14 +161,9 @@ namespace Comparable.Fody
                 new ParameterDefinition("obj", ParameterAttributes.None, ComparableModuleDefine.Object);
             compareToDefinition.Parameters.Add(argumentObj);
 
-            // Init local variables.
-            var localResult = new VariableDefinition(ComparableModuleDefine.Int32);
-            compareToDefinition.Body.Variables.Add(localResult);
-
             // Labels for goto.
             var labelArgumentIsNotNull = Instruction.Create(OpCodes.Nop);
             var labelArgumentTypeMatched = Instruction.Create(OpCodes.Nop);
-            var labelReturn = Instruction.Create(OpCodes.Nop);
 
             var processor = compareToDefinition.Body.GetILProcessor();
 
