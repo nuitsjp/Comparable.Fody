@@ -206,8 +206,6 @@ namespace Comparable.Fody
                 : Instruction.Create(OpCodes.Unbox_Any, TypeDefinition));
 
             processor.Append(Instruction.Create(OpCodes.Call, CompareToByObject));
-            processor.Append(Instruction.Create(OpCodes.Stloc_S, localResult));
-            processor.Append(Instruction.Create(OpCodes.Ldloc_S, localResult));
             processor.Append(Instruction.Create(OpCodes.Ret));
 
             AddMethod(compareToDefinition);
