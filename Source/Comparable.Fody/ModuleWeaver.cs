@@ -40,24 +40,10 @@ namespace Comparable.Fody
 
         private void ImplementIComparable(ComparableTypeDefinition comparableTypeDefinition)
         {
-            comparableTypeDefinition.ImplementIComparable(ComparableInterface);
-            if (!comparableTypeDefinition.Members.Any())
-            {
-                throw new WeavingException($"Specify CompareByAttribute for the any property of Type {comparableTypeDefinition.FullName}.");
-            }
-            
-            if (1 < comparableTypeDefinition.Members
-                .GroupBy(x => x.Priority)
-                .Select(x => (Priority: x.Key, Count: x.Count()))
-                .Max(x => x.Count))
-            {
-                throw new WeavingException($"Type {comparableTypeDefinition.FullName} defines multiple CompareBy with equal priority.");
-            }
-
             comparableTypeDefinition.ImplementCompareTo();
         }
 
-        private InterfaceImplementation ComparableInterface { get; set; }
+        public InterfaceImplementation ComparableInterface { get; private set; }
         
         public TypeReference Int32 => ModuleDefinition.TypeSystem.Int32;
 
@@ -107,7 +93,7 @@ namespace Comparable.Fody
         TypeReference Int32 { get; }
         
         TypeReference Object { get; }
-
+        InterfaceImplementation ComparableInterface { get; }
         MethodReference ArgumentExceptionConstructor { get; }
 
         TypeReference ImportReference(TypeReference typeReference);
@@ -150,6 +136,21 @@ namespace Comparable.Fody
 
         public void ImplementCompareTo()
         {
+            ImplementIComparable(ComparableModuleDefine.ComparableInterface);
+            if (!Members.Any())
+            {
+                throw new WeavingException($"Specify CompareByAttribute for the any property of Type {FullName}.");
+            }
+
+            if (1 < Members
+                .GroupBy(x => x.Priority)
+                .Select(x => (Priority: x.Key, Count: x.Count()))
+                .Max(x => x.Count))
+            {
+                throw new WeavingException($"Type {FullName} defines multiple CompareBy with equal priority.");
+            }
+
+
             ImplementCompareToByConcreteType();
             ImplementCompareToByObject();
         }
