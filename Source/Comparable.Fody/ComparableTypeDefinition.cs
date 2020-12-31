@@ -16,7 +16,7 @@ namespace Comparable.Fody
             ComparableModuleDefine = comparableModuleDefine;
             TypeDefinition = typeDefinition;
             _members = TypeDefinition
-                .Fields.Where(x => MemberDefinitionExtensions.HasCompareByAttribute(x)).Select(x => new CompareByFieldDefinition(ComparableModuleDefine, x)).Cast<ICompareByMemberDefinition>()
+                .Fields.Where(x => x.HasCompareByAttribute()).Select(x => new CompareByFieldDefinition(ComparableModuleDefine, x)).Cast<ICompareByMemberDefinition>()
                 .Union(TypeDefinition.Properties.Where(x => x.HasCompareByAttribute()).Select(x => new CompareByPropertyDefinition(ComparableModuleDefine, x)))
                 .ToList();
         }
