@@ -13,14 +13,6 @@ namespace Comparable.Fody
     {
         public override void Execute()
         {
-            FindReferences();
-
-            var typesOfComparable =
-                ModuleDefinition
-                    .Types
-                    .Where(x => x.HasCompareAttribute())
-                    .Select(x => new ComparableTypeDefinition(this, x));
-
             var memberDefinition = ModuleDefinition
                 .Types
                 .SelectMany(x => x.Fields.Cast<IMemberDefinition>())
@@ -31,6 +23,14 @@ namespace Comparable.Fody
             {
                 throw new WeavingException($"Specify CompareAttribute for Type of {memberDefinition.DeclaringType.FullName}.");
             }
+
+            FindReferences();
+
+            var typesOfComparable =
+                ModuleDefinition
+                    .Types
+                    .Where(x => x.HasCompareAttribute())
+                    .Select(x => new ComparableTypeDefinition(this, x));
 
             foreach (var type in typesOfComparable)
             {
