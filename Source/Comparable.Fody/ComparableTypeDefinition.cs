@@ -19,6 +19,21 @@ namespace Comparable.Fody
                 .Fields.Where(x => x.HasCompareByAttribute()).Select(x => new CompareByFieldDefinition(ComparableModuleDefine, x)).Cast<ICompareByMemberDefinition>()
                 .Union(TypeDefinition.Properties.Where(x => x.HasCompareByAttribute()).Select(x => new CompareByPropertyDefinition(ComparableModuleDefine, x)))
                 .ToList();
+
+            if (!_members.Any())
+            {
+                throw new WeavingException($"Specify CompareByAttribute for the any property of Type {FullName}.");
+            }
+
+            if (1 < _members
+                .GroupBy(x => x.Priority)
+                .Select(x => (Priority: x.Key, Count: x.Count()))
+                .Max(x => x.Count))
+            {
+                throw new WeavingException($"Type {FullName} defines multiple CompareBy with equal priority.");
+            }
+
+
         }
         public IComparableModuleDefine ComparableModuleDefine { get; }
         public TypeDefinition TypeDefinition { get; }
@@ -41,19 +56,6 @@ namespace Comparable.Fody
         public void ImplementCompareTo()
         {
             ImplementIComparable(ComparableModuleDefine.ComparableInterface);
-            if (!Members.Any())
-            {
-                throw new WeavingException($"Specify CompareByAttribute for the any property of Type {FullName}.");
-            }
-
-            if (1 < Members
-                .GroupBy(x => x.Priority)
-                .Select(x => (Priority: x.Key, Count: x.Count()))
-                .Max(x => x.Count))
-            {
-                throw new WeavingException($"Type {FullName} defines multiple CompareBy with equal priority.");
-            }
-
 
             ImplementCompareToByConcreteType();
             ImplementCompareToByObject();
