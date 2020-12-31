@@ -6,6 +6,9 @@ using Mono.Cecil;
 
 namespace Comparable.Fody
 {
+    /// <summary>
+    /// Happy New Year 2021!
+    /// </summary>
     public class ModuleWeaver : BaseModuleWeaver, IComparableModuleDefine
     {
         public override void Execute()
