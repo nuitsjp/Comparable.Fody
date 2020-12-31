@@ -26,21 +26,12 @@ namespace Comparable.Fody
 
             FindReferences();
 
-            var typesOfComparable =
-                ModuleDefinition
-                    .Types
-                    .Where(x => x.HasCompareAttribute())
-                    .Select(x => new ComparableTypeDefinition(this, x));
-
-            foreach (var type in typesOfComparable)
-            {
-                ImplementIComparable(type);
-            }
-        }
-
-        private void ImplementIComparable(ComparableTypeDefinition comparableTypeDefinition)
-        {
-            comparableTypeDefinition.ImplementCompareTo();
+            ModuleDefinition
+                .Types
+                .Where(x => x.HasCompareAttribute())
+                .Select(x => new ComparableTypeDefinition(this, x))
+                .ToList()
+                .ForEach(x => x.ImplementCompareTo());
         }
 
         public InterfaceImplementation ComparableInterface { get; private set; }
