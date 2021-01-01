@@ -11,25 +11,22 @@ namespace Comparable.Fody
         public CompareByPropertyDefinition(IComparableModuleDefine comparableModuleDefine, PropertyDefinition propertyDefinition)
         {
             PropertyDefinition = propertyDefinition;
-            TypeDefinition = comparableModuleDefine.ImportReference(propertyDefinition.PropertyType).Resolve();
-            if (TypeDefinition.IsNotImplementIComparable())
+            PropertyTypeDefinition = comparableModuleDefine.FindComparableTypeDefinition(propertyDefinition.PropertyType);
+            if (PropertyTypeDefinition.IsNotImplementIComparable)
             {
                 throw new WeavingException(
                     $"Property {propertyDefinition.Name} of Type {propertyDefinition.DeclaringType.FullName} does not implement IComparable; the property that specifies CompareByAttribute should implement IComparable.");
             }
+            
             CompareTo = comparableModuleDefine.ImportReference(
-                TypeDefinition.Methods
-                    .Single(methodDefinition =>
-                        methodDefinition.Name == nameof(IComparable.CompareTo)
-                        && methodDefinition.Parameters.Count == 1
-                        && methodDefinition.Parameters.Single().ParameterType.FullName == TypeDefinition.FullName));
+                PropertyTypeDefinition.GetCompareToMethodReference());
 
-            LocalVariable = new VariableDefinition(TypeDefinition);
+            LocalVariable = PropertyTypeDefinition.CreateVariableDefinition();
         }
 
         private PropertyDefinition PropertyDefinition { get; set; }
 
-        private TypeDefinition TypeDefinition { get; }
+        private IComparableTypeDefinition PropertyTypeDefinition { get; }
 
         private MethodReference CompareTo { get; }
 
@@ -41,22 +38,24 @@ namespace Comparable.Fody
         {
             ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
             ilProcessor.Append(Instruction.Create(OpCodes.Call, PropertyDefinition.GetMethod));
-            if (TypeDefinition.IsStruct())
+            if (PropertyTypeDefinition.IsStruct)
             {
                 ilProcessor.Append(Instruction.Create(OpCodes.Stloc_S, LocalVariable));
                 ilProcessor.Append(Instruction.Create(OpCodes.Ldloca_S, LocalVariable));
             }
 
+            if (PropertyDefinition.DeclaringType.IsStruct())
+            {
+                ilProcessor.Append(Instruction.Create(OpCodes.Ldarga_S, parameterDefinition));
+                ilProcessor.Append(Instruction.Create(OpCodes.Call, PropertyDefinition.GetMethod));
+            }
+            else
+            {
+                ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_1));
+                ilProcessor.Append(Instruction.Create(OpCodes.Callvirt, PropertyDefinition.GetMethod));
+            }
 
-            ilProcessor.Append(PropertyDefinition.DeclaringType.IsStruct()
-                ? Instruction.Create(OpCodes.Ldarga_S, parameterDefinition)
-                : Instruction.Create(OpCodes.Ldarg_1));
-
-            ilProcessor.Append(PropertyDefinition.DeclaringType.IsStruct()
-                ? Instruction.Create(OpCodes.Call, PropertyDefinition.GetMethod)
-                : Instruction.Create(OpCodes.Callvirt, PropertyDefinition.GetMethod));
-
-            ilProcessor.Append(TypeDefinition.IsStruct()
+            ilProcessor.Append(PropertyTypeDefinition.IsStruct
                 ? Instruction.Create(OpCodes.Call, CompareTo)
                 : Instruction.Create(OpCodes.Callvirt, CompareTo));
         }

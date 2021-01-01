@@ -11,6 +11,8 @@ namespace Comparable.Fody
     /// </summary>
     public class ModuleWeaver : BaseModuleWeaver, IComparableModuleDefine
     {
+        private Dictionary<string, ComparableTypeDefinition> _comparableTypeDefinitions;
+
         public override void Execute()
         {
             var memberDefinition = ModuleDefinition
@@ -26,12 +28,14 @@ namespace Comparable.Fody
 
             FindReferences();
 
-            ModuleDefinition
+
+            _comparableTypeDefinitions = ModuleDefinition
                 .Types
                 .Where(x => x.HasCompareAttribute())
                 .Select(x => new ComparableTypeDefinition(this, x))
-                .ToList()
-                .ForEach(x => x.ImplementCompareTo());
+                .ToDictionary(x => x.FullName, x => x);
+            
+            _comparableTypeDefinitions.ToList().ForEach(x => x.Value.ImplementCompareTo());
         }
 
         public InterfaceImplementation ComparableInterface { get; private set; }
@@ -41,6 +45,18 @@ namespace Comparable.Fody
         public TypeReference Object => ModuleDefinition.TypeSystem.Object;
 
         public MethodReference ArgumentExceptionConstructor { get; private set; }
+
+        public IComparableTypeDefinition FindComparableTypeDefinition(TypeReference typeReference)
+        {
+            //if (_comparableTypeDefinitions.TryGetValue(typeReference.FullName, out var comparableTypeDefinition))
+            //{
+            //    return comparableTypeDefinition;
+            //}
+            
+            return new ImplementedComparableTypeDefinition(
+                ModuleDefinition.ImportReference(typeReference).Resolve());
+        }
+        
         public TypeReference ImportReference(TypeReference typeReference)
         {
             return ModuleDefinition.ImportReference(typeReference);

@@ -32,5 +32,12 @@ namespace Comparable.Fody
 
             return true;
         }
+
+        internal static MethodReference GetCompareToMethodReference(this TypeDefinition typeDefinition)
+            => typeDefinition.Methods
+                .Single(methodDefinition =>
+                    methodDefinition.Name == nameof(IComparable.CompareTo)
+                    && methodDefinition.Parameters.Count == 1
+                    && methodDefinition.Parameters.Single().ParameterType.FullName == typeDefinition.FullName);
     }
 }

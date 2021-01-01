@@ -10,6 +10,8 @@ namespace Comparable.Fody
         InterfaceImplementation ComparableInterface { get; }
         MethodReference ArgumentExceptionConstructor { get; }
 
+        IComparableTypeDefinition FindComparableTypeDefinition(TypeReference typeReference);
+
         TypeReference ImportReference(TypeReference typeReference);
 
         MethodReference ImportReference(MethodReference methodReference);
