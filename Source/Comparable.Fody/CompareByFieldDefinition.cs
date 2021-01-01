@@ -16,7 +16,7 @@ namespace Comparable.Fody
             if (FieldTypeDefinition.IsNotImplementIComparable)
             {
                 throw new WeavingException(
-                    $"{fieldDefinition.Name} of {fieldDefinition.DeclaringType.FullName} does not implement IComparable; {fieldDefinition.Name} that specifies CompareByAttribute should implement IComparable.");
+                    $"{fieldDefinition.Name} of {fieldDefinition.DeclaringType.FullName} does not implement IComparable. Members that specifies CompareByAttribute should implement IComparable.");
             }
             CompareToMethodReference = comparableModuleDefine.ImportReference(
                 FieldTypeDefinition.GetCompareToMethodReference());
