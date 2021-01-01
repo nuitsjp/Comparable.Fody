@@ -2,17 +2,17 @@
 
 // ReSharper disable UnusedMember.Global
 
-namespace AssemblyToProcess.Class
+namespace AssemblyToProcess.Class.ComparedInConcreteClass
 {
     [Comparable]
-    public class StructField
+    public class ClassField
 
     {
         [CompareBy]
-        private int _value;
+        private string _value;
 
         // ReSharper disable once ConvertToAutoProperty
-        public int Value
+        public string Value
         {
             get => _value;
             set => _value = value;

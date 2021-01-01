@@ -34,10 +34,19 @@ namespace Comparable.Fody
         }
 
         internal static MethodReference GetCompareToMethodReference(this TypeDefinition typeDefinition)
-            => typeDefinition.Methods
-                .Single(methodDefinition =>
+        {
+            var compareTo = typeDefinition.Methods
+                .SingleOrDefault(methodDefinition =>
                     methodDefinition.Name == nameof(IComparable.CompareTo)
                     && methodDefinition.Parameters.Count == 1
                     && methodDefinition.Parameters.Single().ParameterType.FullName == typeDefinition.FullName);
+            if (compareTo is not null) return compareTo;
+
+            return typeDefinition.Methods
+                .Single(methodDefinition =>
+                    methodDefinition.Name == nameof(IComparable.CompareTo)
+                    && methodDefinition.Parameters.Count == 1
+                    && methodDefinition.Parameters.Single().ParameterType.FullName == typeof(Object).FullName);
+        }
     }
 }

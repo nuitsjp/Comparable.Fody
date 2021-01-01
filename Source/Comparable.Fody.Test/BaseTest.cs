@@ -117,7 +117,18 @@ namespace Comparable.Fody.Test
         [Fact]
         public void Should_return_CompareTo_with_object_argument()
         {
-            Assert.True(false);
+            var inner0 = TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.CompareByObjectValue");
+            inner0.Value = 1;
+            var instance0 = TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.CompareByObject");
+            instance0.Value = inner0;
+
+            var inner1 = TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.CompareByObjectValue");
+            inner1.Value = 2;
+            var instance1 = TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.CompareByObject");
+            instance1.Value = inner1;
+
+            ((IComparable)instance0).CompareTo((object)instance1)
+                .Should().Be(inner0.Value.CompareTo(inner1.Value));
         }
 
         [Fact]

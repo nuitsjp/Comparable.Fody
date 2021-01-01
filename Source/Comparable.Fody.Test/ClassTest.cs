@@ -6,7 +6,7 @@ namespace Comparable.Fody.Test
 {
     public class ClassTest : BaseTest
     {
-        protected override string NameSpace => "Class";
+        protected override string NameSpace => "Class.ComparedInConcreteClass";
 
         public override void Should_implement_ICompare_for_CompareAttribute_is_defined()
             => Invoke_should_implement_ICompare_for_CompareAttribute_is_defined();

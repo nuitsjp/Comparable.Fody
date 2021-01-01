@@ -36,7 +36,7 @@ namespace Comparable.Fody
 
         protected IComparableTypeDefinition MemberTypeDefinition => _lazyMemberTypeDefinition.Value;
 
-        protected MethodReference CompareToMethodReference => MemberTypeDefinition.GetCompareTo();
+        protected MethodReference CompareTo => MemberTypeDefinition.GetCompareTo();
 
         public VariableDefinition LocalVariable => _lazyLocalVariable.Value;
         

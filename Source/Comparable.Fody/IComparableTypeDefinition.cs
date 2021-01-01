@@ -14,5 +14,7 @@ namespace Comparable.Fody
         MethodReference GetCompareTo();
 
         VariableDefinition CreateVariableDefinition();
+
+        Instruction Box();
     }
 }

@@ -1,5 +1,5 @@
 ﻿// ReSharper disable UnusedMember.Global
-namespace AssemblyToProcess.Class
+namespace AssemblyToProcess.Class.ComparedInConcreteClass
 {
     public class IsNotDefinedCompareAttribute
     {

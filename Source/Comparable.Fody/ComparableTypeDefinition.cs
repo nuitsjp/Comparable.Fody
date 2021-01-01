@@ -69,6 +69,8 @@ namespace Comparable.Fody
 
         public VariableDefinition CreateVariableDefinition() => new(_thisType);
 
+        public Instruction Box() => Instruction.Create(OpCodes.Box, _thisType);
+
 
         public void ImplementCompareTo()
         {
@@ -132,7 +134,7 @@ namespace Comparable.Fody
             // ImplementType implementType = (ImplementType)obj;
             processor.Append(labelArgumentIsNotNull);
 
-            // return Value.CompareToMethodReference(withSingleProperty.Value);
+            // return Value.CompareTo(withSingleProperty.Value);
             foreach (var member in _members)
             {
                 member.AppendCompareTo(processor, argumentObj);

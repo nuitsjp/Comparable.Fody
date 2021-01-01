@@ -38,9 +38,22 @@ namespace Comparable.Fody
                 ilProcessor.Append(Instruction.Create(OpCodes.Callvirt, _thisProperty.GetMethod));
             }
 
+            if (MemberTypeDefinition.IsStruct
+                && CompareTo.ByObject())
+            {
+                ilProcessor.Append(MemberTypeDefinition.Box());
+            }
+
+
             ilProcessor.Append(MemberTypeDefinition.IsStruct
-                ? Instruction.Create(OpCodes.Call, CompareToMethodReference)
-                : Instruction.Create(OpCodes.Callvirt, CompareToMethodReference));
+                ? Instruction.Create(OpCodes.Call, CompareTo)
+                : Instruction.Create(OpCodes.Callvirt, CompareTo));
         }
+    }
+
+    public static class MethodReferenceExtensions
+    {
+        public static bool ByObject(this MethodReference methodReference)
+            => methodReference.Parameters.Single().ParameterType.FullName == typeof(object).FullName;
     }
 }

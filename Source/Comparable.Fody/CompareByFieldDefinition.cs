@@ -29,8 +29,8 @@ namespace Comparable.Fody
             ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_1));
             ilProcessor.Append(Instruction.Create(OpCodes.Ldfld, _thisField));
             ilProcessor.Append(MemberTypeDefinition.IsStruct
-                ? Instruction.Create(OpCodes.Call, CompareToMethodReference)
-                : Instruction.Create(OpCodes.Callvirt, CompareToMethodReference));
+                ? Instruction.Create(OpCodes.Call, CompareTo)
+                : Instruction.Create(OpCodes.Callvirt, CompareTo));
         }
     }
 }
