@@ -64,7 +64,8 @@ namespace Comparable.Fody
                 return comparableTypeDefinition;
             }
 
-            return new ImplementedComparableTypeDefinition(
+            return new ComparableTypeDefinition(
+                this,
                 ModuleDefinition.ImportReference(memberTypeReference).Resolve());
         }
 

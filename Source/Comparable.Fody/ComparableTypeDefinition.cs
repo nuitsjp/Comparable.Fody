@@ -7,24 +7,6 @@ using Mono.Cecil.Cil;
 
 namespace Comparable.Fody
 {
-    public class ImplementedComparableTypeDefinition : IComparableTypeDefinition
-    {
-        private readonly TypeDefinition _typeDefinition;
-
-        public ImplementedComparableTypeDefinition(TypeDefinition typeDefinition)
-        {
-            _typeDefinition = typeDefinition;
-        }
-
-        public string FullName => _typeDefinition.FullName;
-        public bool IsClass => !IsStruct;
-        public bool IsStruct => _typeDefinition.IsStruct();
-        public int DepthOfDependency => 0;
-        public bool IsNotImplementIComparable => _typeDefinition.IsNotImplementIComparable();
-        public MethodReference GetCompareToMethodReference() => _typeDefinition.GetCompareToMethodReference();
-        public VariableDefinition CreateVariableDefinition() => new(_typeDefinition);
-    }
-    
     public class ComparableTypeDefinition : IComparableTypeDefinition
     {
         public ComparableTypeDefinition(IComparableModuleDefine comparableModuleDefine, TypeDefinition typeDefinition)
@@ -32,32 +14,39 @@ namespace Comparable.Fody
             ComparableModuleDefine = comparableModuleDefine;
             TypeDefinition = typeDefinition;
 
-            var fieldDefinitions =
-                TypeDefinition
-                    .Fields
-                    .Where(x => x.HasCompareByAttribute())
-                    .Select(x => new CompareByFieldDefinition(ComparableModuleDefine, x))
-                    .Cast<ICompareByMemberDefinition>();
-            
-            var propertyDefinitions =
-                TypeDefinition
-                    .Properties
-                    .Where(x => x.HasCompareByAttribute())
-                    .Select(x => new CompareByPropertyDefinition(ComparableModuleDefine, x))
-                    .Cast<ICompareByMemberDefinition>();
-
-            MemberDefinitions = fieldDefinitions.Union(propertyDefinitions).ToList();
-
-            if (!MemberDefinitions.Any())
+            if (TypeDefinition.HasCompareAttribute())
             {
-                throw new WeavingException($"Specify CompareByAttribute for the any property of Type {FullName}.");
+                var fieldDefinitions =
+                    TypeDefinition
+                        .Fields
+                        .Where(x => x.HasCompareByAttribute())
+                        .Select(x => new CompareByFieldDefinition(ComparableModuleDefine, x))
+                        .Cast<ICompareByMemberDefinition>();
+
+                var propertyDefinitions =
+                    TypeDefinition
+                        .Properties
+                        .Where(x => x.HasCompareByAttribute())
+                        .Select(x => new CompareByPropertyDefinition(ComparableModuleDefine, x))
+                        .Cast<ICompareByMemberDefinition>();
+
+                MemberDefinitions = fieldDefinitions.Union(propertyDefinitions).ToList();
+
+                if (!MemberDefinitions.Any())
+                {
+                    throw new WeavingException($"Specify CompareByAttribute for the any property of Type {FullName}.");
+                }
+
+                if (1 < MemberDefinitions
+                    .GroupBy(x => x.Priority)
+                    .Max(x => x.Count()))
+                {
+                    throw new WeavingException($"Type {FullName} defines multiple CompareBy with equal priority.");
+                }
             }
-
-            if (1 < MemberDefinitions
-                .GroupBy(x => x.Priority)
-                .Max(x => x.Count()))
+            else
             {
-                throw new WeavingException($"Type {FullName} defines multiple CompareBy with equal priority.");
+                MemberDefinitions = new ();
             }
         }
         
@@ -71,7 +60,10 @@ namespace Comparable.Fody
         public bool IsClass => !IsStruct;
         public bool IsStruct => TypeDefinition.IsStruct();
 
-        public int DepthOfDependency => MemberDefinitions.Max(x => x.DepthOfDependency) + 1;
+        public int DepthOfDependency =>
+            MemberDefinitions.Any()
+                ? MemberDefinitions.Max(x => x.DepthOfDependency) + 1
+                : 0;
 
         public bool IsNotImplementIComparable => TypeDefinition.IsNotImplementIComparable();
         public MethodReference GetCompareToMethodReference() => TypeDefinition.GetCompareToMethodReference();
