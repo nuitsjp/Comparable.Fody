@@ -7,8 +7,6 @@ namespace Comparable.Fody
     {
         string FullName { get; }
 
-        bool IsClass { get; }
-        
         bool IsStruct { get; }
         
         int DepthOfDependency { get; }

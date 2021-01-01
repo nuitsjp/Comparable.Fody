@@ -57,7 +57,7 @@ namespace Comparable.Fody
 
         public string FullName => _typeDefinition.FullName;
 
-        public bool IsClass => !IsStruct;
+        private bool IsClass => !IsStruct;
         public bool IsStruct => _typeDefinition.IsStruct();
 
         public int DepthOfDependency =>
