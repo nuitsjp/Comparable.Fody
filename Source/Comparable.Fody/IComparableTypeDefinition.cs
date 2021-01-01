@@ -13,8 +13,6 @@ namespace Comparable.Fody
         
         int DepthOfDependency { get; }
 
-        bool IsNotImplementIComparable { get; }
-
         MethodReference GetCompareToMethodReference();
 
         VariableDefinition CreateVariableDefinition();
