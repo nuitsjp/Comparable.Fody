@@ -68,11 +68,6 @@ namespace Comparable.Fody
                 ModuleDefinition.ImportReference(memberTypeReference).Resolve());
         }
 
-        public TypeReference ImportReference(TypeReference typeReference)
-        {
-            return ModuleDefinition.ImportReference(typeReference);
-        }
-
         public MethodReference ImportReference(MethodReference methodReference)
         {
             return ModuleDefinition.ImportReference(methodReference);
