@@ -8,33 +8,34 @@ namespace Comparable.Fody
 {
     public class CompareByPropertyDefinition : CompareByMemberDefinitionBase
     {
+
+        private readonly PropertyDefinition _propertyDefinition;
+
         public CompareByPropertyDefinition(IComparableModuleDefine comparableModuleDefine, PropertyDefinition propertyDefinition)
             : base(comparableModuleDefine, propertyDefinition, propertyDefinition.PropertyType)
         {
-            PropertyDefinition = propertyDefinition;
+            _propertyDefinition = propertyDefinition;
         }
-
-        private PropertyDefinition PropertyDefinition { get; set; }
 
         public override void AppendCompareTo(ILProcessor ilProcessor, ParameterDefinition parameterDefinition)
         {
             ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
-            ilProcessor.Append(Instruction.Create(OpCodes.Call, PropertyDefinition.GetMethod));
+            ilProcessor.Append(Instruction.Create(OpCodes.Call, _propertyDefinition.GetMethod));
             if (MemberTypeDefinition.IsStruct)
             {
                 ilProcessor.Append(Instruction.Create(OpCodes.Stloc_S, LocalVariable));
                 ilProcessor.Append(Instruction.Create(OpCodes.Ldloca_S, LocalVariable));
             }
 
-            if (PropertyDefinition.DeclaringType.IsStruct())
+            if (_propertyDefinition.DeclaringType.IsStruct())
             {
                 ilProcessor.Append(Instruction.Create(OpCodes.Ldarga_S, parameterDefinition));
-                ilProcessor.Append(Instruction.Create(OpCodes.Call, PropertyDefinition.GetMethod));
+                ilProcessor.Append(Instruction.Create(OpCodes.Call, _propertyDefinition.GetMethod));
             }
             else
             {
                 ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_1));
-                ilProcessor.Append(Instruction.Create(OpCodes.Callvirt, PropertyDefinition.GetMethod));
+                ilProcessor.Append(Instruction.Create(OpCodes.Callvirt, _propertyDefinition.GetMethod));
             }
 
             ilProcessor.Append(MemberTypeDefinition.IsStruct
