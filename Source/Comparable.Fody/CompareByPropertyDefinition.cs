@@ -15,7 +15,7 @@ namespace Comparable.Fody
             if (PropertyTypeDefinition.IsNotImplementIComparable)
             {
                 throw new WeavingException(
-                    $"Property {propertyDefinition.Name} of Type {propertyDefinition.DeclaringType.FullName} does not implement IComparable; the property that specifies CompareByAttribute should implement IComparable.");
+                    $"{propertyDefinition.Name} of {propertyDefinition.DeclaringType.FullName} does not implement IComparable; {propertyDefinition.Name} that specifies CompareByAttribute should implement IComparable.");
             }
             
             CompareTo = comparableModuleDefine.ImportReference(

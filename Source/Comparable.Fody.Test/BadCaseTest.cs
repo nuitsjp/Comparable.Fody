@@ -29,7 +29,7 @@ namespace Comparable.Fody.Test
         {
             _weavingTask.Invoking(x => x.ExecuteTestRun("PropertyIsNotIComparable.dll", false))
                 .Should().Throw<WeavingException>()
-                .WithMessage("Property Value of Type PropertyIsNotIComparable.PropertyIsNotIComparable does not implement IComparable; the property that specifies CompareByAttribute should implement IComparable.");
+                .WithMessage("Value of PropertyIsNotIComparable.PropertyIsNotIComparable does not implement IComparable; Value that specifies CompareByAttribute should implement IComparable.");
         }
 
         [Fact]
@@ -37,7 +37,7 @@ namespace Comparable.Fody.Test
         {
             _weavingTask.Invoking(x => x.ExecuteTestRun("FieldIsNotIComparable.dll", false))
                 .Should().Throw<WeavingException>()
-                .WithMessage("Field _value of Type FieldIsNotIComparable.FieldIsNotIComparable does not implement IComparable; the property that specifies CompareByAttribute should implement IComparable.");
+                .WithMessage("_value of FieldIsNotIComparable.FieldIsNotIComparable does not implement IComparable; _value that specifies CompareByAttribute should implement IComparable.");
         }
 
 
