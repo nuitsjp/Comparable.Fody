@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
@@ -6,28 +7,44 @@ namespace Comparable.Fody
 {
     public abstract class CompareByMemberDefinitionBase : ICompareByMemberDefinition
     {
-        private readonly IMemberDefinition _propertyDefinition;
-        private readonly Lazy<IComparableTypeDefinition> _lazyMemberDefinition;
+        private readonly IMemberDefinition _memberDefinition;
+        private readonly Lazy<IComparableTypeDefinition> _lazyMemberTypeDefinition;
         private readonly Lazy<VariableDefinition> _lazyLocalVariable;
 
-        protected CompareByMemberDefinitionBase(IComparableModuleDefine comparableModuleDefine, IMemberDefinition propertyDefinition, TypeReference memberTypeReference)
+        protected CompareByMemberDefinitionBase(IComparableModuleDefine comparableModuleDefine, IMemberDefinition memberDefinition, TypeReference memberTypeReference)
         {
-            _lazyMemberDefinition = 
-                new Lazy<IComparableTypeDefinition>(() => comparableModuleDefine.FindComparableTypeDefinition(propertyDefinition, memberTypeReference));
+            _lazyMemberTypeDefinition = 
+                new Lazy<IComparableTypeDefinition>(
+                    () => comparableModuleDefine.FindComparableTypeDefinition(memberDefinition, memberTypeReference));
             _lazyLocalVariable = 
                 new Lazy<VariableDefinition>(() => MemberTypeDefinition.CreateVariableDefinition());
 
-            _propertyDefinition = propertyDefinition;
+            _memberDefinition = memberDefinition;
+
+            var compareBy = _memberDefinition.CustomAttributes
+                .Single(x => x.AttributeType.Name == nameof(CompareByAttribute));
+            if (compareBy.HasProperties)
+            {
+                Priority = (int)compareBy.Properties
+                    .Single(x => x.Name == nameof(CompareByAttribute.Priority))
+                    .Argument.Value;
+            }
+            else
+            {
+                // If the property has a default value, "HasProperties" will be false.
+                Priority = CompareByAttribute.DefaultPriority;
+            }
+
         }
 
-        protected IComparableTypeDefinition MemberTypeDefinition => _lazyMemberDefinition.Value;
+        protected IComparableTypeDefinition MemberTypeDefinition => _lazyMemberTypeDefinition.Value;
 
         protected MethodReference CompareToMethodReference => MemberTypeDefinition.GetCompareToMethodReference();
 
         public VariableDefinition LocalVariable => _lazyLocalVariable.Value;
         
-        public int Priority => _propertyDefinition.GetPriority();
-        
+        public int Priority { get; }
+
         public int DepthOfDependency => MemberTypeDefinition.DepthOfDependency;
         
         public abstract void AppendCompareTo(ILProcessor ilProcessor, ParameterDefinition parameterDefinition);
