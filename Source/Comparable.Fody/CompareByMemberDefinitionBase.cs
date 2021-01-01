@@ -7,7 +7,6 @@ namespace Comparable.Fody
 {
     public abstract class CompareByMemberDefinitionBase : ICompareByMemberDefinition
     {
-        private readonly IMemberDefinition _memberDefinition;
         private readonly Lazy<IComparableTypeDefinition> _lazyMemberTypeDefinition;
         private readonly Lazy<VariableDefinition> _lazyLocalVariable;
 
@@ -19,9 +18,7 @@ namespace Comparable.Fody
             _lazyLocalVariable = 
                 new Lazy<VariableDefinition>(() => MemberTypeDefinition.CreateVariableDefinition());
 
-            _memberDefinition = memberDefinition;
-
-            var compareBy = _memberDefinition.CustomAttributes
+            var compareBy = memberDefinition.CustomAttributes
                 .Single(x => x.AttributeType.Name == nameof(CompareByAttribute));
             if (compareBy.HasProperties)
             {
@@ -39,7 +36,7 @@ namespace Comparable.Fody
 
         protected IComparableTypeDefinition MemberTypeDefinition => _lazyMemberTypeDefinition.Value;
 
-        protected MethodReference CompareToMethodReference => MemberTypeDefinition.GetCompareToMethodReference();
+        protected MethodReference CompareToMethodReference => MemberTypeDefinition.GetCompareTo();
 
         public VariableDefinition LocalVariable => _lazyLocalVariable.Value;
         

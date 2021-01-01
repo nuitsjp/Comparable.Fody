@@ -43,13 +43,15 @@ namespace Comparable.Fody
                 .ForEach(x => x.ImplementCompareTo());
         }
 
-        public InterfaceImplementation ComparableInterface { get; private set; }
+        public InterfaceImplementation IComparable { get; private set; }
         
         public TypeReference Int32 => ModuleDefinition.TypeSystem.Int32;
 
         public TypeReference Object => ModuleDefinition.TypeSystem.Object;
 
         public MethodReference ArgumentExceptionConstructor { get; private set; }
+
+        private MethodReference CompareTo { get; set; }
 
         public IComparableTypeDefinition FindComparableTypeDefinition(IMemberDefinition memberDefinition, TypeReference memberTypeReference)
         {
@@ -74,13 +76,11 @@ namespace Comparable.Fody
             return ModuleDefinition.ImportReference(methodReference);
         }
 
-        private MethodReference CompareTo { get; set; }
-        
         private void FindReferences()
         {
-            var comparable = ModuleDefinition.ImportReference(FindTypeDefinition(nameof(IComparable)));
-            ComparableInterface = new InterfaceImplementation(comparable);
-            CompareTo = ModuleDefinition.ImportReference(comparable.Resolve().Methods.Single(x => x.Name == nameof(IComparable.CompareTo)));
+            var comparable = ModuleDefinition.ImportReference(FindTypeDefinition(nameof(System.IComparable)));
+            IComparable = new InterfaceImplementation(comparable);
+            CompareTo = ModuleDefinition.ImportReference(comparable.Resolve().Methods.Single(x => x.Name == nameof(System.IComparable.CompareTo)));
 
             var argumentExceptionType = typeof(ArgumentException);
             var constructorInfo = argumentExceptionType.GetConstructors()
@@ -98,7 +98,7 @@ namespace Comparable.Fody
             yield return "System.Diagnostics.Tools";
             yield return "System.Diagnostics.Debug";
             yield return "System.Runtime";
-            yield return "Comparable";
+            yield return "IComparable";
         }
     }
 }

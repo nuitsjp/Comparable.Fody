@@ -10,39 +10,39 @@ namespace Comparable.Fody
     public class ComparableTypeDefinition : IComparableTypeDefinition
     {
         private readonly IComparableModuleDefine _comparableModuleDefine;
-        private readonly TypeDefinition _typeDefinition;
-        private readonly List<ICompareByMemberDefinition> _memberDefinitions;
-        private MethodDefinition _compareToByObjectMethodDefinition;
+        private readonly TypeDefinition _thisType;
+        private readonly List<ICompareByMemberDefinition> _members;
+        private MethodDefinition _compareToByObject;
 
         public ComparableTypeDefinition(IComparableModuleDefine comparableModuleDefine, TypeDefinition typeDefinition)
         {
             _comparableModuleDefine = comparableModuleDefine;
-            _typeDefinition = typeDefinition;
+            _thisType = typeDefinition;
 
-            if (_typeDefinition.HasCompareAttribute())
+            if (_thisType.HasCompareAttribute())
             {
                 var fieldDefinitions =
-                    _typeDefinition
+                    _thisType
                         .Fields
                         .Where(x => x.HasCompareByAttribute())
                         .Select(x => new CompareByFieldDefinition(_comparableModuleDefine, x))
                         .Cast<ICompareByMemberDefinition>();
 
                 var propertyDefinitions =
-                    _typeDefinition
+                    _thisType
                         .Properties
                         .Where(x => x.HasCompareByAttribute())
                         .Select(x => new CompareByPropertyDefinition(_comparableModuleDefine, x))
                         .Cast<ICompareByMemberDefinition>();
 
-                _memberDefinitions = fieldDefinitions.Union(propertyDefinitions).ToList();
+                _members = fieldDefinitions.Union(propertyDefinitions).ToList();
 
-                if (!_memberDefinitions.Any())
+                if (!_members.Any())
                 {
                     throw new WeavingException($"Specify CompareByAttribute for the any property of Type {FullName}.");
                 }
 
-                if (1 < _memberDefinitions
+                if (1 < _members
                     .GroupBy(x => x.Priority)
                     .Max(x => x.Count()))
                 {
@@ -51,28 +51,28 @@ namespace Comparable.Fody
             }
             else
             {
-                _memberDefinitions = new ();
+                _members = new ();
             }
         }
 
-        public string FullName => _typeDefinition.FullName;
+        public string FullName => _thisType.FullName;
 
         private bool IsClass => !IsStruct;
-        public bool IsStruct => _typeDefinition.IsStruct();
+        public bool IsStruct => _thisType.IsStruct();
 
         public int DepthOfDependency =>
-            _memberDefinitions.Any()
-                ? _memberDefinitions.Max(x => x.DepthOfDependency) + 1
+            _members.Any()
+                ? _members.Max(x => x.DepthOfDependency) + 1
                 : 0;
 
-        public MethodReference GetCompareToMethodReference() => _comparableModuleDefine.ImportReference(_typeDefinition.GetCompareToMethodReference());
+        public MethodReference GetCompareTo() => _comparableModuleDefine.ImportReference(_thisType.GetCompareToMethodReference());
 
-        public VariableDefinition CreateVariableDefinition() => new(_typeDefinition);
+        public VariableDefinition CreateVariableDefinition() => new(_thisType);
 
 
         public void ImplementCompareTo()
         {
-            _typeDefinition.Interfaces.Add(_comparableModuleDefine.ComparableInterface);
+            _thisType.Interfaces.Add(_comparableModuleDefine.IComparable);
 
             ImplementCompareToByConcreteType();
             ImplementCompareToByObject();
@@ -81,7 +81,7 @@ namespace Comparable.Fody
 
         private void ImplementCompareToByConcreteType()
         {
-            _compareToByObjectMethodDefinition =
+            _compareToByObject =
                 new MethodDefinition(
                     nameof(IComparable.CompareTo),
                     MethodAttributes.Public
@@ -99,22 +99,22 @@ namespace Comparable.Fody
                 };
 
             // Init arguments.
-            var argumentObj = new ParameterDefinition("value", ParameterAttributes.None, _typeDefinition);
-            _compareToByObjectMethodDefinition.Parameters.Add(argumentObj);
+            var argumentObj = new ParameterDefinition("value", ParameterAttributes.None, _thisType);
+            _compareToByObject.Parameters.Add(argumentObj);
 
             // Init local variables.
             var localResult = new VariableDefinition(_comparableModuleDefine.Int32);
-            _compareToByObjectMethodDefinition.Body.Variables.Add(localResult);
-            foreach (var member in _memberDefinitions)
+            _compareToByObject.Body.Variables.Add(localResult);
+            foreach (var member in _members)
             {
-                _compareToByObjectMethodDefinition.Body.Variables.Add(member.LocalVariable);
+                _compareToByObject.Body.Variables.Add(member.LocalVariable);
             }
 
             // Labels for goto.
             var labelArgumentIsNotNull = Instruction.Create(OpCodes.Nop);
             var labelReturn = Instruction.Create(OpCodes.Nop);
 
-            var processor = _compareToByObjectMethodDefinition.Body.GetILProcessor();
+            var processor = _compareToByObject.Body.GetILProcessor();
 
             if (IsClass)
             {
@@ -133,11 +133,11 @@ namespace Comparable.Fody
             processor.Append(labelArgumentIsNotNull);
 
             // return Value.CompareToMethodReference(withSingleProperty.Value);
-            foreach (var member in _memberDefinitions)
+            foreach (var member in _members)
             {
                 member.AppendCompareTo(processor, argumentObj);
                 processor.Append(Instruction.Create(OpCodes.Stloc_S, localResult));
-                if (_memberDefinitions.Last() != member)
+                if (_members.Last() != member)
                 {
                     processor.Append(Instruction.Create(OpCodes.Ldloc_S, localResult));
                     processor.Append(Instruction.Create(OpCodes.Ldc_I4_0));
@@ -150,7 +150,7 @@ namespace Comparable.Fody
             processor.Append(Instruction.Create(OpCodes.Ldloc_S, localResult));
             processor.Append(Instruction.Create(OpCodes.Ret));
 
-            _typeDefinition.Methods.Add(_compareToByObjectMethodDefinition);
+            _thisType.Methods.Add(_compareToByObject);
         }
 
 
@@ -197,7 +197,7 @@ namespace Comparable.Fody
             // if (!(obj is StructWithSingleField))
             processor.Append(labelArgumentIsNotNull);
             processor.Append(Instruction.Create(OpCodes.Ldarg_1));
-            processor.Append(Instruction.Create(OpCodes.Isinst, _typeDefinition));
+            processor.Append(Instruction.Create(OpCodes.Isinst, _thisType));
             processor.Append(Instruction.Create(OpCodes.Ldnull));
             processor.Append(Instruction.Create(OpCodes.Cgt_Un));
             processor.Append(Instruction.Create(OpCodes.Ldc_I4_0));
@@ -214,13 +214,13 @@ namespace Comparable.Fody
             processor.Append(Instruction.Create(OpCodes.Ldarg_0));
             processor.Append(Instruction.Create(OpCodes.Ldarg_1));
             processor.Append(IsClass
-                ? Instruction.Create(OpCodes.Castclass, _typeDefinition)
-                : Instruction.Create(OpCodes.Unbox_Any, _typeDefinition));
+                ? Instruction.Create(OpCodes.Castclass, _thisType)
+                : Instruction.Create(OpCodes.Unbox_Any, _thisType));
 
-            processor.Append(Instruction.Create(OpCodes.Call, _compareToByObjectMethodDefinition));
+            processor.Append(Instruction.Create(OpCodes.Call, _compareToByObject));
             processor.Append(Instruction.Create(OpCodes.Ret));
 
-            _typeDefinition.Methods.Add(compareToDefinition);
+            _thisType.Methods.Add(compareToDefinition);
         }
     }
 }
