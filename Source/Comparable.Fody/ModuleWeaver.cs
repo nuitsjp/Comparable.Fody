@@ -31,7 +31,6 @@ namespace Comparable.Fody
 
             _comparableTypeDefinitions = ModuleDefinition
                 .Types
-                //.Where(x => new[] { "CompositeObject", "InnerObject" }.Contains(x.Name))
                 .Where(x => x.HasCompareAttribute())
                 .Select(x => new ComparableTypeDefinition(this, x))
                 .ToDictionary(x => x.FullName, x => x);
