@@ -1,44 +1,26 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Fody;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using MemberDefinitionExtensions = Comparable.Fody.MemberDefinitionExtensions;
 
 namespace Comparable.Fody
 {
-    public class CompareByPropertyDefinition : ICompareByMemberDefinition
+    public class CompareByPropertyDefinition : CompareByMemberDefinitionBase
     {
         public CompareByPropertyDefinition(IComparableModuleDefine comparableModuleDefine, PropertyDefinition propertyDefinition)
+            : base(comparableModuleDefine, propertyDefinition, propertyDefinition.PropertyType)
         {
             PropertyDefinition = propertyDefinition;
-            PropertyTypeDefinition = comparableModuleDefine.FindComparableTypeDefinition(propertyDefinition.PropertyType);
-            if (PropertyTypeDefinition.IsNotImplementIComparable)
-            {
-                throw new WeavingException(
-                    $"{propertyDefinition.Name} of {propertyDefinition.DeclaringType.FullName} does not implement IComparable. Members that specifies CompareByAttribute should implement IComparable.");
-            }
-            
-            CompareTo = comparableModuleDefine.ImportReference(
-                PropertyTypeDefinition.GetCompareToMethodReference());
-
-            LocalVariable = PropertyTypeDefinition.CreateVariableDefinition();
         }
 
         private PropertyDefinition PropertyDefinition { get; set; }
 
-        private IComparableTypeDefinition PropertyTypeDefinition { get; }
-
-        private MethodReference CompareTo { get; }
-
-        public VariableDefinition LocalVariable { get; }
-
-        public int Priority => PropertyDefinition.GetPriority();
-        
-        public void AppendCompareTo(ILProcessor ilProcessor, ParameterDefinition parameterDefinition)
+        public override void AppendCompareTo(ILProcessor ilProcessor, ParameterDefinition parameterDefinition)
         {
             ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
             ilProcessor.Append(Instruction.Create(OpCodes.Call, PropertyDefinition.GetMethod));
-            if (PropertyTypeDefinition.IsStruct)
+            if (MemberTypeDefinition.IsStruct)
             {
                 ilProcessor.Append(Instruction.Create(OpCodes.Stloc_S, LocalVariable));
                 ilProcessor.Append(Instruction.Create(OpCodes.Ldloca_S, LocalVariable));
@@ -55,9 +37,9 @@ namespace Comparable.Fody
                 ilProcessor.Append(Instruction.Create(OpCodes.Callvirt, PropertyDefinition.GetMethod));
             }
 
-            ilProcessor.Append(PropertyTypeDefinition.IsStruct
-                ? Instruction.Create(OpCodes.Call, CompareTo)
-                : Instruction.Create(OpCodes.Callvirt, CompareTo));
+            ilProcessor.Append(MemberTypeDefinition.IsStruct
+                ? Instruction.Create(OpCodes.Call, CompareToMethodReference)
+                : Instruction.Create(OpCodes.Callvirt, CompareToMethodReference));
         }
     }
 }

@@ -141,7 +141,7 @@ namespace Comparable.Fody
             // ImplementType implementType = (ImplementType)obj;
             processor.Append(labelArgumentIsNotNull);
 
-            // return Value.CompareTo(withSingleProperty.Value);
+            // return Value.CompareToMethodReference(withSingleProperty.Value);
             foreach (var member in MemberDefinitions)
             {
                 member.AppendCompareTo(processor, argumentObj);

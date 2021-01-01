@@ -46,17 +46,23 @@ namespace Comparable.Fody
 
         public MethodReference ArgumentExceptionConstructor { get; private set; }
 
-        public IComparableTypeDefinition FindComparableTypeDefinition(TypeReference typeReference)
+        public IComparableTypeDefinition FindComparableTypeDefinition(IMemberDefinition memberDefinition, TypeReference memberTypeReference)
         {
+            if (memberTypeReference.Resolve().IsNotImplementIComparable())
+            {
+                throw new WeavingException(
+                    $"{memberDefinition.Name} of {memberDefinition.DeclaringType.FullName} does not implement IComparable. Members that specifies CompareByAttribute should implement IComparable.");
+            }
+
             //if (_comparableTypeDefinitions.TryGetValue(typeReference.FullName, out var comparableTypeDefinition))
             //{
             //    return comparableTypeDefinition;
             //}
-            
+
             return new ImplementedComparableTypeDefinition(
-                ModuleDefinition.ImportReference(typeReference).Resolve());
+                ModuleDefinition.ImportReference(memberTypeReference).Resolve());
         }
-        
+
         public TypeReference ImportReference(TypeReference typeReference)
         {
             return ModuleDefinition.ImportReference(typeReference);
