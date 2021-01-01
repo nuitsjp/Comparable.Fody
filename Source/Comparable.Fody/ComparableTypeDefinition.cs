@@ -71,8 +71,15 @@ namespace Comparable.Fody
         public bool IsClass => !IsStruct;
         public bool IsStruct => TypeDefinition.IsStruct();
 
-        public int DepthOfDependency { get; }
-        
+        public int DepthOfDependency
+        {
+            get
+            {
+                var maxMemberDepth = MemberDefinitions.Max(x => x.DepthOfDependency);
+                return maxMemberDepth + 1;
+            }
+        }
+
         public bool IsNotImplementIComparable => TypeDefinition.IsNotImplementIComparable();
         public MethodReference GetCompareToMethodReference() => TypeDefinition.GetCompareToMethodReference();
         public VariableDefinition CreateVariableDefinition() => new(TypeDefinition);

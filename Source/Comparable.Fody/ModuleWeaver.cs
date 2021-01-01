@@ -31,11 +31,17 @@ namespace Comparable.Fody
 
             _comparableTypeDefinitions = ModuleDefinition
                 .Types
+                //.Where(x => new[] { "CompositeObject", "InnerObject" }.Contains(x.Name))
                 .Where(x => x.HasCompareAttribute())
                 .Select(x => new ComparableTypeDefinition(this, x))
                 .ToDictionary(x => x.FullName, x => x);
             
-            _comparableTypeDefinitions.ToList().ForEach(x => x.Value.ImplementCompareTo());
+            _comparableTypeDefinitions
+                .ToList()
+                .Select(x => x.Value)
+                .OrderBy(x => x.DepthOfDependency)
+                .ToList()
+                .ForEach(x => x.ImplementCompareTo());
         }
 
         public InterfaceImplementation ComparableInterface { get; private set; }
@@ -54,10 +60,10 @@ namespace Comparable.Fody
                     $"{memberDefinition.Name} of {memberDefinition.DeclaringType.FullName} does not implement IComparable. Members that specifies CompareByAttribute should implement IComparable.");
             }
 
-            //if (_comparableTypeDefinitions.TryGetValue(typeReference.FullName, out var comparableTypeDefinition))
-            //{
-            //    return comparableTypeDefinition;
-            //}
+            if (_comparableTypeDefinitions.TryGetValue(memberTypeReference.FullName, out var comparableTypeDefinition))
+            {
+                return comparableTypeDefinition;
+            }
 
             return new ImplementedComparableTypeDefinition(
                 ModuleDefinition.ImportReference(memberTypeReference).Resolve());
