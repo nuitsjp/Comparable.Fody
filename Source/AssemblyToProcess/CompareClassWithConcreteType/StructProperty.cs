@@ -2,14 +2,14 @@
 
 // ReSharper disable UnusedMember.Global
 
-namespace AssemblyToProcess.Class.ComparedInConcreteClass
+namespace AssemblyToProcess.CompareClassWithConcreteType
 {
     [Comparable]
-    public class ClassProperty
+    public class StructProperty
 
     {
         [CompareBy]
-        public string Value { get; set; }
+        public int Value { get; set; }
 
         public int NotCompareValue { get; set; }
     }

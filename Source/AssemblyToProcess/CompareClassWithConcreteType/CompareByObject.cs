@@ -1,7 +1,7 @@
 ﻿using System;
 using Comparable;
 
-namespace AssemblyToProcess.Class.ComparedInConcreteClass
+namespace AssemblyToProcess.CompareClassWithConcreteType
 {
     [Comparable]
     public class CompareByObject

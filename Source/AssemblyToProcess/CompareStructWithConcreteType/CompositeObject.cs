@@ -2,10 +2,10 @@
 
 // ReSharper disable UnusedMember.Global
 
-namespace AssemblyToProcess.Class.ComparedInConcreteClass
+namespace AssemblyToProcess.CompareStructWithConcreteType
 {
     [Comparable]
-    public class CompositeObject
+    public struct CompositeObject
 
     {
         [CompareBy]
@@ -15,7 +15,7 @@ namespace AssemblyToProcess.Class.ComparedInConcreteClass
     }
 
     [Comparable]
-    public class InnerObject
+    public struct InnerObject
 
     {
         [CompareBy]

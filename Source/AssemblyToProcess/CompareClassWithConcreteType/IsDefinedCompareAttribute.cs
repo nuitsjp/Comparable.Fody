@@ -2,10 +2,10 @@
 
 // ReSharper disable UnusedMember.Global
 
-namespace AssemblyToProcess.Struct
+namespace AssemblyToProcess.CompareClassWithConcreteType
 {
     [Comparable]
-    public struct IsDefinedCompareAttribute
+    public class IsDefinedCompareAttribute
     {
         [CompareBy]
         public int Value { get; set; }

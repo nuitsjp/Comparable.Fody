@@ -2,10 +2,10 @@
 
 // ReSharper disable UnusedMember.Global
 
-namespace AssemblyToProcess.Struct
+namespace AssemblyToProcess.CompareClassWithConcreteType
 {
     [Comparable]
-    public struct StructField
+    public class StructField
 
     {
         [CompareBy]

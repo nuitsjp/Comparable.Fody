@@ -1,7 +1,7 @@
 ﻿using System;
 using Comparable;
 
-namespace AssemblyToProcess.Struct
+namespace AssemblyToProcess.CompareStructWithConcreteType
 {
     [Comparable]
     public struct CompareByObject

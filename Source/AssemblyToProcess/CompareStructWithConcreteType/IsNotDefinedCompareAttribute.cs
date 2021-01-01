@@ -1,5 +1,5 @@
 ﻿// ReSharper disable UnusedMember.Global
-namespace AssemblyToProcess.Struct
+namespace AssemblyToProcess.CompareStructWithConcreteType
 {
     public struct IsNotDefinedCompareAttribute
     {

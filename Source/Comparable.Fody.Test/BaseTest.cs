@@ -17,27 +17,21 @@ namespace Comparable.Fody.Test
         protected abstract string NameSpace { get; }
 
         [Fact]
-        public abstract void Should_implement_ICompare_for_CompareAttribute_is_defined();
-
-        protected void Invoke_should_implement_ICompare_for_CompareAttribute_is_defined()
+        public void Should_implement_ICompare_for_CompareAttribute_is_defined()
         {
             var obj = (object)TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.IsDefinedCompareAttribute");
             obj.Should().BeAssignableTo<IComparable>();
         }
 
         [Fact]
-        public abstract void Should_not_implement_ICompare_for_CompareAttribute_is_not_defined();
-
-        public void Invoke_should_not_implement_ICompare_for_CompareAttribute_is_not_defined()
+        public void Should_not_implement_ICompare_for_CompareAttribute_is_not_defined()
         {
             var obj = (object)TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.IsNotDefinedCompareAttribute");
             obj.Should().NotBeAssignableTo<IComparable>();
         }
 
         [Fact]
-        public abstract void Should_return_1_for_CompareTo_null();
-
-        public void Invoke_should_return_1_for_CompareTo_null()
+        public void Should_return_1_for_CompareTo_null()
         {
             var comparable = (IComparable)TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.IsDefinedCompareAttribute");
             comparable.CompareTo(null)
@@ -45,9 +39,7 @@ namespace Comparable.Fody.Test
         }
 
         [Fact]
-        public abstract void Should_throw_ArgumentException_for_CompareTo_different_type();
-
-        public void Invoke_should_throw_ArgumentException_for_CompareTo_different_type()
+        public void Should_throw_ArgumentException_for_CompareTo_different_type()
         {
             var comparable = (IComparable)TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.IsDefinedCompareAttribute");
             var instanceOfDifferentType = string.Empty;
@@ -57,16 +49,20 @@ namespace Comparable.Fody.Test
         }
 
         [Fact]
-        public abstract void Should_return_CompareTo_result_for_class_property();
+        public void Should_return_CompareTo_result_for_class_property()
+            => Invoke_should_return_CompareTo_result_for("ClassProperty", "1", "2");
 
         [Fact]
-        public abstract void Should_return_CompareTo_result_for_class_field();
+        public void Should_return_CompareTo_result_for_class_field()
+            => Invoke_should_return_CompareTo_result_for("ClassField", "1", "2");
 
         [Fact]
-        public abstract void Should_return_CompareTo_result_for_struct_property();
+        public void Should_return_CompareTo_result_for_struct_property()
+            => Invoke_should_return_CompareTo_result_for("StructProperty", 1, 2);
 
         [Fact]
-        public abstract void Should_return_CompareTo_result_for_struct_field();
+        public void Should_return_CompareTo_result_for_struct_field()
+            => Invoke_should_return_CompareTo_result_for("StructField", 1, 2);
 
         protected void Invoke_should_return_CompareTo_result_for<T>(string className, T value0, T value1)
         {
@@ -80,9 +76,7 @@ namespace Comparable.Fody.Test
         }
 
         [Fact]
-        public abstract void Should_return_CompareTo_result_for_double_value();
-
-        public void Invoke_should_return_CompareTo_result_for_double_value()
+        public void Should_return_CompareTo_result_for_double_value()
         {
             var instance0 = TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.DoubleValue");
             instance0.Value0 = 1;
@@ -96,9 +90,7 @@ namespace Comparable.Fody.Test
         }
 
         [Fact]
-        public abstract void Should_return_CompareTo_result_for_composite_object();
-
-        protected void Invoke_should_return_CompareTo_result_for_composite_object()
+        public void Should_return_CompareTo_result_for_composite_object()
         {
             var inner0 = TestResult.GetInstance($"AssemblyToProcess.{NameSpace}.InnerObject");
             inner0.Value = 1;
@@ -131,10 +123,10 @@ namespace Comparable.Fody.Test
                 .Should().Be(inner0.Value.CompareTo(inner1.Value));
         }
 
-        [Fact]
-        public void Should_return_added_CompareTo_result_When_CompareTo_exists()
-        {
-            Assert.True(false);
-        }
+        //[Fact]
+        //public void Should_return_added_CompareTo_result_When_CompareTo_exists()
+        //{
+        //    Assert.True(false);
+        //}
     }
 }

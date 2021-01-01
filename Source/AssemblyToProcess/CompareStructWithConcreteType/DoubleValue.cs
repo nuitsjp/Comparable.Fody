@@ -2,7 +2,7 @@
 
 // ReSharper disable UnusedMember.Global
 
-namespace AssemblyToProcess.Struct
+namespace AssemblyToProcess.CompareStructWithConcreteType
 {
     [Comparable]
     public struct DoubleValue
