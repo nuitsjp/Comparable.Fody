@@ -9,7 +9,7 @@ namespace Comparable.Fody.Test
         private readonly ModuleWeaver _weavingTask = new ModuleWeaver();
 
         [Fact]
-        public void CompareByIsNotDefined()
+        public void CompareBy_is_not_defined()
         {
             _weavingTask.Invoking(x => x.ExecuteTestRun("CompareByIsNotDefined.dll", false))
                 .Should().Throw<WeavingException>()
@@ -17,7 +17,7 @@ namespace Comparable.Fody.Test
         }
 
         [Fact]
-        public void CompareIsNotDefined()
+        public void Compare_is_not_defined()
         {
             _weavingTask.Invoking(x => x.ExecuteTestRun("CompareIsNotDefined.dll", false))
                 .Should().Throw<WeavingException>()
@@ -25,7 +25,7 @@ namespace Comparable.Fody.Test
         }
 
         [Fact]
-        public void CompareByPropertyDoesNotImplementIComparable()
+        public void CompareBy_property_does_not_implement_IComparable()
         {
             _weavingTask.Invoking(x => x.ExecuteTestRun("PropertyIsNotIComparable.dll", false))
                 .Should().Throw<WeavingException>()
@@ -33,7 +33,7 @@ namespace Comparable.Fody.Test
         }
 
         [Fact]
-        public void CompareByFieldDoesNotImplementIComparable()
+        public void CompareBy_field_does_not_implement_IComparable()
         {
             _weavingTask.Invoking(x => x.ExecuteTestRun("FieldIsNotIComparable.dll", false))
                 .Should().Throw<WeavingException>()
@@ -42,7 +42,7 @@ namespace Comparable.Fody.Test
 
 
         [Fact]
-        public void MultipleCompareByWithEqualPriority()
+        public void Multiple_CompareBy_with_equal_priority()
         {
             _weavingTask.Invoking(x => x.ExecuteTestRun("MultipleCompareByWithEqualPriority.dll", false))
                 .Should().Throw<WeavingException>()
