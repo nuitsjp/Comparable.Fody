@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Comparable.Fody.Test
 {
-    public class BadCaseTest
+    public class UnableToWeaveTest
     {
         private readonly ModuleWeaver _weavingTask = new ModuleWeaver();
 
