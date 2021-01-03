@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace ILSample.Classes
+namespace AssemblyToProcess.CompareStructWithConcreteType
 {
-    public class StructField : IComparable
+    public readonly struct StructField : IComparable
     {
         private readonly int _value;
 
@@ -19,8 +19,6 @@ namespace ILSample.Classes
 
         public int CompareTo(StructField obj)
         {
-            if (obj is null) return 1;
-
             return _value.CompareTo(obj._value);
         }
     }

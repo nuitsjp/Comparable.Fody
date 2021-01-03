@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ILSample.Structs
+namespace AssemblyToProcess.CompareStructWithConcreteType
 {
     public struct ClassProperty : IComparable
     {

@@ -1,12 +1,12 @@
 ﻿using System;
 
-namespace ILSample.Classes
+namespace AssemblyToProcess.CompareClassWithObject
 {
     public class ClassField : IComparable
     {
-        private readonly string _value;
+        private readonly ClassValue _value;
 
-        public ClassField(string value)
+        public ClassField(ClassValue value)
         {
             _value = value;
         }

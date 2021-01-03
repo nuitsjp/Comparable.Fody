@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ILSample.Classes
+namespace AssemblyToProcess.CompareClassWithObject
 {
     public class HasMethodWithSameNameAsCompareTo : IComparable
     {

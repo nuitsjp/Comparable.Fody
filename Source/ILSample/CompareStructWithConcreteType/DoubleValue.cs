@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace ILSample.Classes
+namespace AssemblyToProcess.CompareStructWithConcreteType
 {
-    public class DoubleValue : IComparable
+    public struct DoubleValue : IComparable
     {
         private readonly int _value0;
 
@@ -16,12 +16,7 @@ namespace ILSample.Classes
             {
                 throw new ArgumentException("Object is not a DoubleValue");
             }
-            return CompareTo((DoubleValue)obj);
-        }
-
-        public int CompareTo(DoubleValue comparable)
-        {
-            if (comparable is null) return 1;
+            var comparable = (DoubleValue)obj;
 
             var compared = _value0.CompareTo(comparable._value0);
             if (compared != 0) return compared;

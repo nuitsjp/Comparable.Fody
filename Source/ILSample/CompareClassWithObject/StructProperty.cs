@@ -1,20 +1,20 @@
 ﻿using System;
 
-namespace ILSample.Classes
+namespace AssemblyToProcess.CompareClassWithObject
 {
     public class StructProperty : IComparable
     {
-        public int Value { get; set; }
+        public StructValue Value { get; set; }
 
-        public int CompareTo(object obj)
+        public int CompareTo(object value)
         {
-            if (obj is null) return 1;
+            if (value is null) return 1;
 
-            if (!(obj is StructProperty))
+            if (!(value is StructProperty))
             {
                 throw new ArgumentException("Object is not a StructProperty");
             }
-            return CompareTo((StructProperty)obj);
+            return CompareTo((StructProperty)value);
         }
 
         public int CompareTo(StructProperty obj)

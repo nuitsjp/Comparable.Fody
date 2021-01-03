@@ -28,6 +28,13 @@ namespace Comparable.Fody
             }
             ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_1));
             ilProcessor.Append(Instruction.Create(OpCodes.Ldfld, _thisField));
+
+            if (MemberTypeDefinition.IsStruct
+                && CompareTo.ByObject())
+            {
+                ilProcessor.Append(MemberTypeDefinition.Box());
+            }
+
             ilProcessor.Append(MemberTypeDefinition.IsStruct
                 ? Instruction.Create(OpCodes.Call, CompareTo)
                 : Instruction.Create(OpCodes.Callvirt, CompareTo));

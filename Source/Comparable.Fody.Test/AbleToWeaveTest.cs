@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using AssemblyToProcess;
 using FluentAssertions;
 using Fody;
 using Xunit;
@@ -18,7 +19,9 @@ namespace Comparable.Fody.Test
             new List<object[]>
             {
                 new object[]{"CompareClassWithConcreteType"},
+                new object[]{"CompareClassWithObject"},
                 new object[]{"CompareStructWithConcreteType"},
+                new object[]{"CompareStructWithObject"},
             };
 
         protected static TestResult TestResult { get; }
@@ -78,7 +81,7 @@ namespace Comparable.Fody.Test
         [MemberData(nameof(TestCases))]
         public void Should_return_CompareTo_result_for_struct_field(string @case)
             => Invoke_should_return_CompareTo_result_for(@case, "StructField", 1, 2);
-
+        
         protected void Invoke_should_return_CompareTo_result_for<T>(string @case, string className, T value0, T value1)
         {
             var instance0 = TestResult.GetInstance($"AssemblyToProcess.{@case}.{className}");
@@ -123,23 +126,17 @@ namespace Comparable.Fody.Test
                 .Should().Be(inner0.Value.CompareTo(inner1.Value));
         }
 
-        [Theory]
-        [MemberData(nameof(TestCases))]
-        public void Should_return_CompareTo_with_object_argument(string @case)
-        {
-            var inner0 = TestResult.GetInstance($"AssemblyToProcess.{@case}.CompareByObjectValue");
-            inner0.Value = 1;
-            var instance0 = TestResult.GetInstance($"AssemblyToProcess.{@case}.CompareByObject");
-            instance0.Value = inner0;
+        //[Fact]
+        //public void Generic()
+        //{
+        //    var instance0 = TestResult.GetGenericInstance($"AssemblyToProcess.CompareClassWithConcreteType.Property", typeof(string));
+        //    instance0.Value = "1";
+        //    var instance1 = TestResult.GetGenericInstance($"AssemblyToProcess.CompareClassWithConcreteType.Property", typeof(string));
+        //    instance1.Value = "2";
 
-            var inner1 = TestResult.GetInstance($"AssemblyToProcess.{@case}.CompareByObjectValue");
-            inner1.Value = 2;
-            var instance1 = TestResult.GetInstance($"AssemblyToProcess.{@case}.CompareByObject");
-            instance1.Value = inner1;
-
-            ((IComparable)instance0).CompareTo((object)instance1)
-                .Should().Be(inner0.Value.CompareTo(inner1.Value));
-        }
+        //    ((IComparable)instance0).CompareTo((object)instance1)
+        //        .Should().Be(instance0.Value.CompareTo(instance1.Value));
+        //}
 
         //[Fact]
         //public void Should_return_added_CompareTo_result_When_CompareTo_exists()

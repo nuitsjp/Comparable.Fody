@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace ILSample.Structs
+namespace AssemblyToProcess.CompareClassWithConcreteType
 {
-    public struct HasMethodWithSameNameAsCompareTo : IComparable
+    public class HasMethodWithSameNameAsCompareTo : IComparable
     {
         private readonly string _value;
 
@@ -30,6 +30,8 @@ namespace ILSample.Structs
 
         public int CompareTo(HasMethodWithSameNameAsCompareTo obj)
         {
+            if (obj is null) return 1;
+
             return _value.CompareTo(obj._value);
         }
     }

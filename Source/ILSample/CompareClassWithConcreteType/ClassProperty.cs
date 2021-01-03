@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ILSample.Classes
+namespace AssemblyToProcess.CompareClassWithConcreteType
 {
     public class ClassProperty : IComparable
     {

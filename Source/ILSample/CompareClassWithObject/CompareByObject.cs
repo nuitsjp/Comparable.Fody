@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace ILSample.Structs
+namespace AssemblyToProcess.CompareClassWithObject
 {
-    public struct CompareByObject : IComparable
+    public class CompareByObject : IComparable
     {
         public CompareByObjectValue Value { get; set; }
         public int CompareTo(object obj)
@@ -16,7 +16,7 @@ namespace ILSample.Structs
         }
     }
 
-    public struct CompareByObjectValue : IComparable
+    public class CompareByObjectValue : IComparable
     {
         public int Value { get; set; }
         public int CompareTo(object obj)

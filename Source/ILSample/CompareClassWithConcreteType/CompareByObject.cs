@@ -1,13 +1,19 @@
 ﻿using System;
-using Comparable;
 
 namespace AssemblyToProcess.CompareClassWithConcreteType
 {
-    [Comparable]
-    public class CompareByObject
+    public class CompareByObject : IComparable
     {
-        [CompareBy]
         public CompareByObjectValue Value { get; set; }
+        public int CompareTo(object obj)
+        {
+            return Value.CompareTo(((CompareByObject) obj).Value);
+        }
+
+        public int CompareTo(CompareByObject obj)
+        {
+            return Value.CompareTo(obj.Value);
+        }
     }
 
     public class CompareByObjectValue : IComparable
