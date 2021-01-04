@@ -55,15 +55,15 @@ namespace Comparable.Fody
 
         public IComparableTypeDefinition FindComparableTypeDefinition(IMemberDefinition memberDefinition, TypeReference memberTypeReference)
         {
+            if (_comparableTypeDefinitions.TryGetValue(memberTypeReference.FullName, out var comparableTypeDefinition))
+            {
+                return comparableTypeDefinition;
+            }
+
             if (memberTypeReference.IsNotImplementIComparable())
             {
                 throw new WeavingException(
                     $"{memberDefinition.Name} of {memberDefinition.DeclaringType.FullName} does not implement IComparable. Members that specifies CompareByAttribute should implement IComparable.");
-            }
-
-            if (_comparableTypeDefinitions.TryGetValue(memberTypeReference.FullName, out var comparableTypeDefinition))
-            {
-                return comparableTypeDefinition;
             }
 
             return new ComparableTypeDefinition(
