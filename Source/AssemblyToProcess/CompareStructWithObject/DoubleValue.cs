@@ -8,13 +8,13 @@ namespace AssemblyToProcess.CompareStructWithObject
     public struct DoubleValue
     {
         [CompareBy(Priority = 2)]
-        private ClassValue _value1;
+        private CompareClassWithObjectValue _value1;
 
         [CompareBy]
-        public StructValue Value0 { get; set; }
+        public CompareStructWithObjectValue Value0 { get; set; }
 
         // ReSharper disable once ConvertToAutoProperty
-        public ClassValue Value1
+        public CompareClassWithObjectValue Value1
         {
             get => _value1;
             set => _value1 = value;

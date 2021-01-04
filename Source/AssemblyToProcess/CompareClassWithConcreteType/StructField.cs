@@ -9,10 +9,10 @@ namespace AssemblyToProcess.CompareClassWithConcreteType
 
     {
         [CompareBy]
-        private int _value;
+        private CompareStructWithConcreteTypeValue _value;
 
         // ReSharper disable once ConvertToAutoProperty
-        public int Value
+        public CompareStructWithConcreteTypeValue Value
         {
             get => _value;
             set => _value = value;

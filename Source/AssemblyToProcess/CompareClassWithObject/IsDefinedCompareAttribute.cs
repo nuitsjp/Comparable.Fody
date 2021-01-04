@@ -8,6 +8,6 @@ namespace AssemblyToProcess.CompareClassWithObject
     public class IsDefinedCompareAttribute
     {
         [CompareBy]
-        public StructValue Value { get; set; }
+        public CompareStructWithObjectValue Value { get; set; }
     }
 }

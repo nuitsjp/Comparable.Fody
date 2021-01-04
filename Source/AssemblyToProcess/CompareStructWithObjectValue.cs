@@ -2,15 +2,15 @@
 
 namespace AssemblyToProcess
 {
-    public class ClassValue : IComparable
+    public struct CompareStructWithObjectValue : IComparable
     {
-        public string Value { get; set; }
-        
+        public int Value { get; set; }
+
         public int CompareTo(object obj)
         {
             if (obj is null) return 1;
 
-            if (obj is ClassValue classValue)
+            if (obj is CompareStructWithObjectValue classValue)
             {
                 return Value.CompareTo(classValue.Value);
             }
@@ -20,9 +20,9 @@ namespace AssemblyToProcess
             }
         }
 
-        public static implicit operator ClassValue(string value)
+        public static implicit operator CompareStructWithObjectValue(int value)
         {
-            return new() {Value = value};
+            return new() { Value = value };
         }
     }
 }

@@ -9,10 +9,10 @@ namespace AssemblyToProcess.CompareClassWithObject
 
     {
         [CompareBy]
-        private ClassValue _value;
+        private CompareClassWithObjectValue _value;
 
         // ReSharper disable once ConvertToAutoProperty
-        public ClassValue Value
+        public CompareClassWithObjectValue Value
         {
             get => _value;
             set => _value = value;

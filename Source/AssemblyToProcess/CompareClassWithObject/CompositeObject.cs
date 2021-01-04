@@ -19,7 +19,7 @@ namespace AssemblyToProcess.CompareClassWithObject
 
     {
         [CompareBy]
-        public StructValue Value { get; set; }
+        public CompareStructWithObjectValue Value { get; set; }
 
         public int NotCompareValue { get; set; }
     }

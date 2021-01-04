@@ -8,6 +8,6 @@ namespace AssemblyToProcess.CompareClassWithConcreteType
     public class IsDefinedCompareAttribute
     {
         [CompareBy]
-        public int Value { get; set; }
+        public CompareStructWithConcreteTypeValue Value { get; set; }
     }
 }

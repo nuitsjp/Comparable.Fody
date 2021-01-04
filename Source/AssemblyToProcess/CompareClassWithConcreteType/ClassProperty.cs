@@ -9,7 +9,7 @@ namespace AssemblyToProcess.CompareClassWithConcreteType
 
     {
         [CompareBy]
-        public string Value { get; set; }
+        public CompareClassWithConcreteTypeValue Value { get; set; }
 
         public int NotCompareValue { get; set; }
     }

@@ -3,6 +3,6 @@ namespace AssemblyToProcess.CompareStructWithConcreteType
 {
     public struct IsNotDefinedCompareAttribute
     {
-        public int Value { get; set; }
+        public CompareStructWithConcreteTypeValue Value { get; set; }
     }
 }

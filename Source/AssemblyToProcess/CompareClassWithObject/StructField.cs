@@ -9,13 +9,13 @@ namespace AssemblyToProcess.CompareClassWithObject
 
     {
         [CompareBy]
-        private StructValue _value;
+        private CompareStructWithObjectValue _withObjectValue;
 
         // ReSharper disable once ConvertToAutoProperty
-        public StructValue Value
+        public CompareStructWithObjectValue Value
         {
-            get => _value;
-            set => _value = value;
+            get => _withObjectValue;
+            set => _withObjectValue = value;
         }
 
         public int NotCompareValue { get; set; }

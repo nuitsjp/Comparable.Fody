@@ -3,6 +3,6 @@ namespace AssemblyToProcess.CompareStructWithObject
 {
     public struct IsNotDefinedCompareAttribute
     {
-        public StructValue Value { get; set; }
+        public CompareStructWithObjectValue Value { get; set; }
     }
 }

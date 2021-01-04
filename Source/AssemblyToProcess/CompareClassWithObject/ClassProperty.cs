@@ -9,7 +9,7 @@ namespace AssemblyToProcess.CompareClassWithObject
 
     {
         [CompareBy]
-        public ClassValue Value { get; set; }
+        public CompareClassWithObjectValue Value { get; set; }
 
         public int NotCompareValue { get; set; }
     }

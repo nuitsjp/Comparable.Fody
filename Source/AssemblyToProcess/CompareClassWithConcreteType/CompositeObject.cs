@@ -19,7 +19,7 @@ namespace AssemblyToProcess.CompareClassWithConcreteType
 
     {
         [CompareBy]
-        public int Value { get; set; }
+        public CompareStructWithConcreteTypeValue Value { get; set; }
 
         public int NotCompareValue { get; set; }
     }

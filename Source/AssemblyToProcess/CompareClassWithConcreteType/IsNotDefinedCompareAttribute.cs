@@ -3,6 +3,6 @@ namespace AssemblyToProcess.CompareClassWithConcreteType
 {
     public class IsNotDefinedCompareAttribute
     {
-        public int Value { get; set; }
+        public CompareStructWithConcreteTypeValue Value { get; set; }
     }
 }
