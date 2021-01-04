@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using Mono.Cecil;
 
 namespace Comparable.Fody
@@ -14,11 +15,29 @@ namespace Comparable.Fody
 
         internal static bool IsStruct(this TypeDefinition typeDefinition)
         {
-            return typeDefinition.BaseType.Name == nameof(ValueType);
+            return typeDefinition.BaseType is not null 
+                   && typeDefinition.BaseType.Name == nameof(ValueType);
         }
 
-        internal static bool TryGetIComparableTypeDefinition(this TypeReference typeReference, out TypeDefinition comparableTypeDefinition)
+        internal static bool TryGetIComparableTypeDefinition(this TypeReference typeReference, IComparableModuleDefine moduleDefine, out TypeDefinition comparableTypeDefinition)
         {
+            if (typeReference.IsGenericParameter)
+            {
+                var genericParameter = (GenericParameter) typeReference;
+                var comparableTypeDefinitions = genericParameter
+                    .Constraints
+                    .Select(x => x.ConstraintType.Resolve())
+                    .Where(x => x.IsImplementIComparable())
+                    .ToList();
+                if (comparableTypeDefinitions.Empty())
+                {
+                    comparableTypeDefinition = null;
+                    return false;
+                }
+
+                comparableTypeDefinition = moduleDefine.ImportReference(genericParameter.Constraints.First().ConstraintType).Resolve();
+                return true;
+            }
             var typeDefinition = typeReference.Resolve();
             if (typeDefinition.IsImplementIComparable())
             {
@@ -32,8 +51,10 @@ namespace Comparable.Fody
 
         private static bool IsImplementIComparable(this TypeDefinition typeDefinition)
         {
+            if (typeDefinition.FullName == typeof(IComparable).FullName) return true;
+
             if (typeDefinition.Interfaces
-                .Select(@interface => @interface.InterfaceType.FullName == nameof(IComparable)).Any())
+                .Select(@interface => @interface.InterfaceType.FullName == typeof(IComparable).FullName).Any())
             {
                 return true;
             }

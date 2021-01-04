@@ -60,7 +60,7 @@ namespace Comparable.Fody
                 return comparableTypeDefinition;
             }
 
-            if (memberTypeReference.TryGetIComparableTypeDefinition(out var memberTypeDefinition))
+            if (memberTypeReference.TryGetIComparableTypeDefinition(this, out var memberTypeDefinition))
             {
                 return new ComparableTypeDefinition(this, memberTypeDefinition);
             }
@@ -68,6 +68,11 @@ namespace Comparable.Fody
             throw new WeavingException(
                 $"{memberDefinition.Name} of {memberDefinition.DeclaringType.FullName} does not implement IComparable. Members that specifies CompareByAttribute should implement IComparable.");
 
+        }
+
+        public TypeReference ImportReference(TypeReference typeReference)
+        {
+            return ModuleDefinition.ImportReference(typeReference);
         }
 
         public MethodReference ImportReference(MethodReference methodReference)

@@ -1,20 +1,20 @@
-﻿//using System;
-//using Comparable;
+﻿using System;
+using Comparable;
 
-//namespace AssemblyToProcess.CompareClassWithConcreteType
-//{
-//    [Comparable]
-//    public class GenericField<T> where T : CompareClassWithConcreteTypeValue, IComparableValue
-//    {
-//        [CompareBy]
-//        private T _value;
+namespace AssemblyToProcess.CompareClassWithConcreteType
+{
+    //[Comparable]
+    public class GenericField<T> where T : IComparable
+    {
+        //[CompareBy]
+        private T _value;
 
-//        public T Value
-//        {
-//            get => _value;
-//            set => _value = value;
-//        }
-//    }
+        public T Value
+        {
+            get => _value;
+            set => _value = value;
+        }
+    }
 
-//    public interface IComparableValue : IComparable { }
-//}
+    public interface IComparableValue : IComparable { }
+}
