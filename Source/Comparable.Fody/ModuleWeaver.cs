@@ -60,15 +60,14 @@ namespace Comparable.Fody
                 return comparableTypeDefinition;
             }
 
-            if (memberTypeReference.IsNotImplementIComparable())
+            if (memberTypeReference.TryGetIComparableTypeDefinition(out var memberTypeDefinition))
             {
-                throw new WeavingException(
-                    $"{memberDefinition.Name} of {memberDefinition.DeclaringType.FullName} does not implement IComparable. Members that specifies CompareByAttribute should implement IComparable.");
+                return new ComparableTypeDefinition(this, memberTypeDefinition);
             }
 
-            return new ComparableTypeDefinition(
-                this,
-                ModuleDefinition.ImportReference(memberTypeReference).Resolve());
+            throw new WeavingException(
+                $"{memberDefinition.Name} of {memberDefinition.DeclaringType.FullName} does not implement IComparable. Members that specifies CompareByAttribute should implement IComparable.");
+
         }
 
         public MethodReference ImportReference(MethodReference methodReference)

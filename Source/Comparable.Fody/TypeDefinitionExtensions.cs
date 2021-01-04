@@ -17,13 +17,20 @@ namespace Comparable.Fody
             return typeDefinition.BaseType.Name == nameof(ValueType);
         }
 
-        internal static bool IsNotImplementIComparable(this TypeReference typeReference)
+        internal static bool TryGetIComparableTypeDefinition(this TypeReference typeReference, out TypeDefinition comparableTypeDefinition)
         {
             var typeDefinition = typeReference.Resolve();
-            return !IsImplementIComparable(typeDefinition);
+            if (typeDefinition.IsImplementIComparable())
+            {
+                comparableTypeDefinition = typeDefinition;
+                return true;
+            }
+
+            comparableTypeDefinition = null;
+            return false;
         }
 
-        private static bool IsImplementIComparable(TypeDefinition typeDefinition)
+        private static bool IsImplementIComparable(this TypeDefinition typeDefinition)
         {
             if (typeDefinition.Interfaces
                 .Select(@interface => @interface.InterfaceType.FullName == nameof(IComparable)).Any())
