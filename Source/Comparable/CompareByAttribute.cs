@@ -7,9 +7,8 @@ namespace Comparable
     {
         public const int DefaultPriority = 0;
 
-        public CompareByAttribute(int priority = DefaultPriority)
+        public CompareByAttribute()
         {
-            Priority = priority;
         }
         
         /// <summary>
