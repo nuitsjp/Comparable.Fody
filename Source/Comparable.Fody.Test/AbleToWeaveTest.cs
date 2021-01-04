@@ -84,38 +84,6 @@ namespace Comparable.Fody.Test
             };
 
         [Theory]
-        [MemberData(nameof(CompareWith))]
-        public void Should_return_CompareTo_result_for_class_property(string compare, string with)
-            => Invoke_should_return_CompareTo_result_for(compare, with, "ClassProperty", "1", "2");
-
-        [Theory]
-        [MemberData(nameof(CompareWith))]
-        public void Should_return_CompareTo_result_for_class_field(string compare, string with)
-            => Invoke_should_return_CompareTo_result_for(compare, with, "ClassField", "1", "2");
-
-        [Theory]
-        [MemberData(nameof(CompareWith))]
-        public void Should_return_CompareTo_result_for_struct_property(string compare, string with)
-            => Invoke_should_return_CompareTo_result_for(compare, with, "StructProperty", 1, 2);
-
-        [Theory]
-        [MemberData(nameof(CompareWith))]
-        public void Should_return_CompareTo_result_for_struct_field(string compare, string with)
-            => Invoke_should_return_CompareTo_result_for(compare, with, "StructField", 1, 2);
-        
-        protected void Invoke_should_return_CompareTo_result_for<T>(string compare, string with, string className, T value0, T value1)
-        {
-            var instance0 = TestResult.GetInstance($"AssemblyToProcess.Compare{compare}With{with}.{className}");
-            instance0.Value = value0;
-            var instance1 = TestResult.GetInstance($"AssemblyToProcess.Compare{compare}With{with}.{className}");
-            instance1.Value = value1;
-
-            ((IComparable)instance0).CompareTo((object)instance1)
-                .Should().Be(instance0.Value.CompareTo(instance1.Value));
-        }
-
-
-        [Theory]
         [MemberData(nameof(CompareWithByMember))]
         public void Should_return_CompareTo_result_for(string compare, string with, string member, string memberType)
         {
@@ -164,9 +132,9 @@ namespace Comparable.Fody.Test
         //[Fact]
         //public void Generic()
         //{
-        //    var instance0 = TestResult.GetGenericInstance($"AssemblyToProcess.CompareClassWithConcreteType.Property", typeof(string));
+        //    var instance0 = TestResult.GetGenericInstance($"AssemblyToProcess.CompareClassWithConcreteType.GenericField", typeof(string));
         //    instance0.Value = "1";
-        //    var instance1 = TestResult.GetGenericInstance($"AssemblyToProcess.CompareClassWithConcreteType.Property", typeof(string));
+        //    var instance1 = TestResult.GetGenericInstance($"AssemblyToProcess.CompareClassWithConcreteType.GenericField", typeof(string));
         //    instance1.Value = "2";
 
         //    ((IComparable)instance0).CompareTo((object)instance1)
