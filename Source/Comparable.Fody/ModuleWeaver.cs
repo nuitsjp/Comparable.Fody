@@ -55,7 +55,7 @@ namespace Comparable.Fody
 
         public IComparableTypeDefinition FindComparableTypeDefinition(IMemberDefinition memberDefinition, TypeReference memberTypeReference)
         {
-            if (memberTypeReference.Resolve().IsNotImplementIComparable())
+            if (memberTypeReference.IsNotImplementIComparable())
             {
                 throw new WeavingException(
                     $"{memberDefinition.Name} of {memberDefinition.DeclaringType.FullName} does not implement IComparable. Members that specifies CompareByAttribute should implement IComparable.");
