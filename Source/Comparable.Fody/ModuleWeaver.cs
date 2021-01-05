@@ -96,13 +96,13 @@ namespace Comparable.Fody
 
         public override IEnumerable<string> GetAssembliesForScanning()
         {
-            yield return "mscorlib";
-            yield return "System";
+            //yield return "mscorlib";
+            //yield return "System";
             yield return "netstandard";
-            yield return "System.Diagnostics.Tools";
-            yield return "System.Diagnostics.Debug";
-            yield return "System.Runtime";
-            yield return "IComparable";
+            //yield return "System.Diagnostics.Tools";
+            //yield return "System.Diagnostics.Debug";
+            //yield return "System.Runtime";
+            //yield return "IComparable";
         }
     }
 }

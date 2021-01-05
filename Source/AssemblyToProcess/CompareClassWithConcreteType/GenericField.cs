@@ -3,10 +3,10 @@ using Comparable;
 
 namespace AssemblyToProcess.CompareClassWithConcreteType
 {
-    //[Comparable]
+    [Comparable]
     public class GenericField<T> where T : IComparable
     {
-        //[CompareBy]
+        [CompareBy]
         private T _value;
 
         public T Value
