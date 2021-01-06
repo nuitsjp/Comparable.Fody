@@ -31,6 +31,7 @@ namespace Comparable.Fody
 
             _comparableTypeDefinitions = ModuleDefinition
                 .Types
+                .Where(x => x.FullName.Contains("GenericField"))
                 .Where(x => x.HasCompareAttribute())
                 .Select(x => new ComparableTypeDefinition(this, x))
                 .ToDictionary(x => x.FullName, x => x);

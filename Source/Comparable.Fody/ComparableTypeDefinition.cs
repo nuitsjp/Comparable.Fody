@@ -107,10 +107,15 @@ namespace Comparable.Fody
             // Init local variables.
             var localResult = new VariableDefinition(_comparableModuleDefine.Int32);
             _compareToByObject.Body.Variables.Add(localResult);
-            foreach (var member in _members)
-            {
-                _compareToByObject.Body.Variables.Add(member.LocalVariable);
-            }
+
+
+            var fieldType = _thisType.Fields.Single().FieldType;
+            _compareToByObject.Body.Variables.Add(new VariableDefinition(fieldType));
+
+            //foreach (var member in _members)
+            //{
+            //    _compareToByObject.Body.Variables.Add(member.LocalVariable);
+            //}
 
             // Labels for goto.
             var labelArgumentIsNotNull = Instruction.Create(OpCodes.Nop);

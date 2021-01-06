@@ -4,12 +4,12 @@ using Comparable;
 namespace AssemblyToProcess.CompareClassWithConcreteType
 {
     [Comparable]
-    public class GenericField<T> where T : IComparable
+    public class GenericField//<T> where T : IComparable
     {
         [CompareBy]
-        private T _value;
+        private IComparable _value;
 
-        public T Value
+        public IComparable Value
         {
             get => _value;
             set => _value = value;
