@@ -31,9 +31,8 @@ namespace Comparable.Fody
 
             _comparableTypeDefinitions = ModuleDefinition
                 .Types
-                .Where(x => x.FullName.Contains("GenericField"))
                 .Where(x => x.HasCompareAttribute())
-                .Select(x => new ComparableTypeDefinition(this, x))
+                .Select(x => new ComparableTypeDefinition(this, x, x))
                 .ToDictionary(x => x.FullName, x => x);
             
             _comparableTypeDefinitions
@@ -63,7 +62,7 @@ namespace Comparable.Fody
 
             if (memberTypeReference.TryGetIComparableTypeDefinition(this, out var memberTypeDefinition))
             {
-                return new ComparableTypeDefinition(this, memberTypeDefinition);
+                return new ComparableTypeDefinition(this, memberTypeDefinition, memberTypeReference);
             }
 
             throw new WeavingException(

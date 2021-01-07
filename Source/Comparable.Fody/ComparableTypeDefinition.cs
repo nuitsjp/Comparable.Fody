@@ -11,13 +11,15 @@ namespace Comparable.Fody
     {
         private readonly IComparableModuleDefine _comparableModuleDefine;
         private readonly TypeDefinition _thisType;
+        private readonly TypeReference _thisTypeReference;
         private readonly List<ICompareByMemberDefinition> _members;
         private MethodDefinition _compareToByObject;
 
-        public ComparableTypeDefinition(IComparableModuleDefine comparableModuleDefine, TypeDefinition typeDefinition)
+        public ComparableTypeDefinition(IComparableModuleDefine comparableModuleDefine, TypeDefinition typeDefinition, TypeReference typeReference)
         {
             _comparableModuleDefine = comparableModuleDefine;
             _thisType = typeDefinition;
+            _thisTypeReference = typeReference;
 
             if (_thisType.HasCompareAttribute())
             {
@@ -67,7 +69,7 @@ namespace Comparable.Fody
 
         public MethodReference GetCompareTo() => _comparableModuleDefine.ImportReference(_thisType.GetCompareToMethodReference());
 
-        public VariableDefinition CreateVariableDefinition() => new(_thisType);
+        public VariableDefinition CreateVariableDefinition() => new(_thisTypeReference);
 
         public Instruction Box() => Instruction.Create(OpCodes.Box, _thisType);
 
@@ -109,13 +111,10 @@ namespace Comparable.Fody
             _compareToByObject.Body.Variables.Add(localResult);
 
 
-            var fieldType = _thisType.Fields.Single().FieldType;
-            _compareToByObject.Body.Variables.Add(new VariableDefinition(fieldType));
-
-            //foreach (var member in _members)
-            //{
-            //    _compareToByObject.Body.Variables.Add(member.LocalVariable);
-            //}
+            foreach (var member in _members)
+            {
+                _compareToByObject.Body.Variables.Add(member.LocalVariable);
+            }
 
             // Labels for goto.
             var labelArgumentIsNotNull = Instruction.Create(OpCodes.Nop);
