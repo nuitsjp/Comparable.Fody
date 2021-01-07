@@ -4,6 +4,7 @@ using System.Linq;
 using Fody;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 
 namespace Comparable.Fody
 {
@@ -103,7 +104,7 @@ namespace Comparable.Fody
                 };
 
             // Init arguments.
-            var argumentObj = new ParameterDefinition("value", ParameterAttributes.None, _thisType);
+            var argumentObj = new ParameterDefinition("value", ParameterAttributes.None, GetGenericTypeReference());
             _compareToByObject.Parameters.Add(argumentObj);
 
             // Init local variables.
@@ -203,7 +204,8 @@ namespace Comparable.Fody
             // if (!(obj is StructWithSingleField))
             processor.Append(labelArgumentIsNotNull);
             processor.Append(Instruction.Create(OpCodes.Ldarg_1));
-            processor.Append(Instruction.Create(OpCodes.Isinst, _thisType));
+
+            processor.Append(Instruction.Create(OpCodes.Isinst, GetGenericTypeReference()));
             processor.Append(Instruction.Create(OpCodes.Ldnull));
             processor.Append(Instruction.Create(OpCodes.Cgt_Un));
             processor.Append(Instruction.Create(OpCodes.Ldc_I4_0));
@@ -220,13 +222,49 @@ namespace Comparable.Fody
             processor.Append(Instruction.Create(OpCodes.Ldarg_0));
             processor.Append(Instruction.Create(OpCodes.Ldarg_1));
             processor.Append(IsClass
-                ? Instruction.Create(OpCodes.Castclass, _thisType)
+                ? Instruction.Create(OpCodes.Castclass, GetGenericTypeReference())
                 : Instruction.Create(OpCodes.Unbox_Any, _thisType));
 
-            processor.Append(Instruction.Create(OpCodes.Call, _compareToByObject));
+            processor.Append(Instruction.Create(OpCodes.Call, GetGenericMethodReference()));
             processor.Append(Instruction.Create(OpCodes.Ret));
 
             _thisType.Methods.Add(compareToDefinition);
+        }
+
+        private MethodReference GetGenericMethodReference()
+        {
+            if (!_compareToByObject.ContainsGenericParameter) return _compareToByObject;
+
+            var reference = new MethodReference(_compareToByObject.Name, _compareToByObject.ReturnType)
+            {
+                DeclaringType = GetGenericTypeReference(),
+                HasThis = _compareToByObject.HasThis,
+                ExplicitThis = _compareToByObject.ExplicitThis,
+                CallingConvention = _compareToByObject.CallingConvention,
+            };
+
+            foreach (var parameter in _compareToByObject.Parameters)
+            {
+                reference.Parameters.Add(parameter);
+            }
+
+            foreach (var genericParameter in _compareToByObject.GenericParameters)
+            {
+                reference.GenericParameters.Add(new GenericParameter(genericParameter.Name, reference));
+            }
+
+            return reference;
+        }
+
+        private TypeReference GetGenericTypeReference()
+        {
+            if (_thisTypeReference.HasGenericParameters)
+            {
+                var parameters = _thisTypeReference.GenericParameters.Select(x => (TypeReference) x).ToArray();
+                return _thisTypeReference.MakeGenericInstanceType(parameters);
+            }
+
+            return _thisTypeReference;
         }
     }
 }

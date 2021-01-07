@@ -20,14 +20,14 @@ namespace Comparable.Fody
         public override void AppendCompareTo(ILProcessor ilProcessor, ParameterDefinition parameterDefinition)
         {
             ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
-            ilProcessor.Append(Instruction.Create(OpCodes.Ldfld, _thisField));
+            ilProcessor.Append(Instruction.Create(OpCodes.Ldfld, GetGenericFieldReference()));
             if (MemberTypeDefinition.IsStruct)
             {
                 ilProcessor.Append(Instruction.Create(OpCodes.Stloc_S, LocalVariable));
                 ilProcessor.Append(Instruction.Create(OpCodes.Ldloca_S, LocalVariable));
             }
             ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_1));
-            ilProcessor.Append(Instruction.Create(OpCodes.Ldfld, _thisField));
+            ilProcessor.Append(Instruction.Create(OpCodes.Ldfld, GetGenericFieldReference()));
 
             if (MemberTypeDefinition.IsStruct
                 && CompareTo.ByObject())
@@ -38,6 +38,18 @@ namespace Comparable.Fody
             ilProcessor.Append(MemberTypeDefinition.IsStruct
                 ? Instruction.Create(OpCodes.Call, CompareTo)
                 : Instruction.Create(OpCodes.Callvirt, CompareTo));
+        }
+
+        private FieldReference GetGenericFieldReference()
+        {
+            if (!_thisField.ContainsGenericParameter) return _thisField;
+
+            var declaringType = new GenericInstanceType(_thisField.DeclaringType);
+            foreach (var parameter in _thisField.DeclaringType.GenericParameters)
+            {
+                declaringType.GenericArguments.Add(parameter);
+            }
+            return new FieldReference(_thisField.Name, _thisField.FieldType, declaringType);
         }
     }
 }
