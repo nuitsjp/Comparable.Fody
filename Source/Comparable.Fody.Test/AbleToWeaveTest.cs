@@ -130,27 +130,18 @@ namespace Comparable.Fody.Test
         }
 
         [Theory]
-        [InlineData(typeof(CompareClassWithObjectValue))]
-        [InlineData(typeof(CompareStructWithObjectValue))]
-        [InlineData(typeof(IComparable))]
-        public void Generic(Type fieldType)
+        [InlineData("Class", typeof(CompareClassWithObjectValue))]
+        [InlineData("Class", typeof(CompareStructWithObjectValue))]
+        [InlineData("Class", typeof(IComparable))]
+        [InlineData("Struct", typeof(CompareClassWithObjectValue))]
+        [InlineData("Struct", typeof(CompareStructWithObjectValue))]
+        [InlineData("Struct", typeof(IComparable))]
+        public void Generic(string type, Type fieldType)
         {
-            var instance0 = TestResult.GetGenericInstance($"AssemblyToProcess.CompareGenericClassField`1", fieldType);
+            var instance0 = TestResult.GetGenericInstance($"AssemblyToProcess.CompareGeneric{type}Field`1", fieldType);
             instance0.Value = 1;
-            var instance1 = TestResult.GetGenericInstance($"AssemblyToProcess.CompareGenericClassField`1", fieldType);
+            var instance1 = TestResult.GetGenericInstance($"AssemblyToProcess.CompareGeneric{type}Field`1", fieldType);
             instance1.Value = 2;
-
-            ((IComparable)instance0).CompareTo((object)instance1)
-                .Should().Be(instance0.Value.CompareTo(instance1.Value));
-        }
-
-        [Fact]
-        public void OutOfModuleType()
-        {
-            var instance0 = TestResult.GetInstance($"AssemblyToProcess.CompareGenericClassField");
-            instance0.Value = "1";
-            var instance1 = TestResult.GetInstance($"AssemblyToProcess.CompareGenericClassField");
-            instance1.Value = "2";
 
             ((IComparable)instance0).CompareTo((object)instance1)
                 .Should().Be(instance0.Value.CompareTo(instance1.Value));

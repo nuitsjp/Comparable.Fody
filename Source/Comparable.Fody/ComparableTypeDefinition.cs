@@ -224,7 +224,7 @@ namespace Comparable.Fody
             processor.Append(Instruction.Create(OpCodes.Ldarg_1));
             processor.Append(IsClass
                 ? Instruction.Create(OpCodes.Castclass, GetGenericTypeReference())
-                : Instruction.Create(OpCodes.Unbox_Any, _thisType));
+                : Instruction.Create(OpCodes.Unbox_Any, GetGenericTypeReference()));
 
             processor.Append(Instruction.Create(OpCodes.Call, GetGenericMethodReference()));
             processor.Append(Instruction.Create(OpCodes.Ret));

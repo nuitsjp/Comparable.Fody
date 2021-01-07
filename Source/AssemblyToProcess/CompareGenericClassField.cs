@@ -17,17 +17,18 @@ namespace AssemblyToProcess
     }
 
     [Comparable]
-    public class CompareGenericClassField
+    public struct CompareGenericStructField<T> where T : IComparable
     {
         [CompareBy]
-        private IComparable _value;
+        private T _value;
 
-        public IComparable Value
+        public T Value
         {
             get => _value;
             set => _value = value;
         }
     }
+
 
     public interface IComparableValue : IComparable { }
 }
