@@ -20,7 +20,10 @@ namespace Comparable.Fody
         public override void AppendCompareTo(ILProcessor ilProcessor, ParameterDefinition parameterDefinition)
         {
             ilProcessor.Append(Instruction.Create(OpCodes.Ldarg_0));
-            ilProcessor.Append(Instruction.Create(OpCodes.Ldfld, GetGenericFieldReference()));
+            ilProcessor.Append(_thisField.ContainsGenericParameter
+                ? Instruction.Create(OpCodes.Ldflda, GetGenericFieldReference())
+                : Instruction.Create(OpCodes.Ldfld, GetGenericFieldReference()));
+
             if (MemberTypeDefinition.IsStruct)
             {
                 ilProcessor.Append(Instruction.Create(OpCodes.Stloc_S, LocalVariable));
@@ -33,6 +36,12 @@ namespace Comparable.Fody
                 && CompareTo.ByObject())
             {
                 ilProcessor.Append(MemberTypeDefinition.Box());
+            }
+
+            if (_thisField.ContainsGenericParameter)
+            {
+                ilProcessor.Append(MemberTypeDefinition.Box());
+                ilProcessor.Append(MemberTypeDefinition.Constrained());
             }
 
             ilProcessor.Append(MemberTypeDefinition.IsStruct

@@ -16,5 +16,7 @@ namespace Comparable.Fody
         VariableDefinition CreateVariableDefinition();
 
         Instruction Box();
+
+        Instruction Constrained();
     }
 }

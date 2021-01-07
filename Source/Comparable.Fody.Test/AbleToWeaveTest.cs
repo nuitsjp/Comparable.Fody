@@ -129,13 +129,16 @@ namespace Comparable.Fody.Test
                 .Should().Be(inner0.Value.CompareTo(inner1.Value));
         }
 
-        [Fact]
-        public void Generic()
+        [Theory]
+        [InlineData(typeof(CompareClassWithObjectValue))]
+        [InlineData(typeof(CompareStructWithObjectValue))]
+        [InlineData(typeof(IComparable))]
+        public void Generic(Type fieldType)
         {
-            var instance0 = TestResult.GetGenericInstance($"AssemblyToProcess.CompareClassWithConcreteType.GenericField`1", typeof(string));
-            instance0.Value = "1";
-            var instance1 = TestResult.GetGenericInstance($"AssemblyToProcess.CompareClassWithConcreteType.GenericField`1", typeof(string));
-            instance1.Value = "2";
+            var instance0 = TestResult.GetGenericInstance($"AssemblyToProcess.CompareGenericClassField`1", fieldType);
+            instance0.Value = 1;
+            var instance1 = TestResult.GetGenericInstance($"AssemblyToProcess.CompareGenericClassField`1", fieldType);
+            instance1.Value = 2;
 
             ((IComparable)instance0).CompareTo((object)instance1)
                 .Should().Be(instance0.Value.CompareTo(instance1.Value));
@@ -144,9 +147,9 @@ namespace Comparable.Fody.Test
         [Fact]
         public void OutOfModuleType()
         {
-            var instance0 = TestResult.GetInstance($"AssemblyToProcess.CompareClassWithConcreteType.GenericField");
+            var instance0 = TestResult.GetInstance($"AssemblyToProcess.CompareGenericClassField");
             instance0.Value = "1";
-            var instance1 = TestResult.GetInstance($"AssemblyToProcess.CompareClassWithConcreteType.GenericField");
+            var instance1 = TestResult.GetInstance($"AssemblyToProcess.CompareGenericClassField");
             instance1.Value = "2";
 
             ((IComparable)instance0).CompareTo((object)instance1)

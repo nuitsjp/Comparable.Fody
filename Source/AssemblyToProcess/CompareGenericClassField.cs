@@ -1,10 +1,10 @@
 ﻿using System;
 using Comparable;
 
-namespace AssemblyToProcess.CompareClassWithConcreteType
+namespace AssemblyToProcess
 {
     [Comparable]
-    public class GenericField<T> where T : IComparable
+    public class CompareGenericClassField<T> where T : IComparable
     {
         [CompareBy]
         private T _value;
@@ -17,7 +17,7 @@ namespace AssemblyToProcess.CompareClassWithConcreteType
     }
 
     [Comparable]
-    public class GenericField
+    public class CompareGenericClassField
     {
         [CompareBy]
         private IComparable _value;

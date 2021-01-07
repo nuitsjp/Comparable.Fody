@@ -72,7 +72,8 @@ namespace Comparable.Fody
 
         public VariableDefinition CreateVariableDefinition() => new(_thisTypeReference);
 
-        public Instruction Box() => Instruction.Create(OpCodes.Box, _thisType);
+        public Instruction Box() => Instruction.Create(OpCodes.Box, _thisTypeReference);
+        public Instruction Constrained() => Instruction.Create(OpCodes.Constrained, _thisTypeReference);
 
 
         public void ImplementCompareTo()
