@@ -35,7 +35,7 @@ namespace Comparable.Fody
                     return false;
                 }
 
-                comparableTypeDefinition = moduleDefine.ImportReference(genericParameter.Constraints.First().ConstraintType).Resolve();
+                comparableTypeDefinition = comparableTypeDefinitions.First();
                 return true;
             }
             var typeDefinition = typeReference.Resolve();
