@@ -94,6 +94,9 @@ namespace Comparable.Fody
 
             return typeReference;
         }
+        internal static bool IsGeneric(this TypeReference typeReference)
+            => typeReference.ContainsGenericParameter;
+
 
     }
 }
