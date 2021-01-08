@@ -142,7 +142,7 @@ namespace Comparable.Fody.Test
         [InlineData("Struct", "Field", typeof(CompareClassWithObjectValue))]
         [InlineData("Struct", "Field", typeof(CompareStructWithObjectValue))]
         [InlineData("Struct", "Field", typeof(IComparable))]
-        public void Generic(string type, string memberType, Type fieldType)
+        public void Should_return_CompareTo_result_for_generic(string type, string memberType, Type fieldType)
         {
             var instance0 = TestResult.GetGenericInstance($"AssemblyToProcess.CompareGeneric{type}{memberType}`1", fieldType);
             instance0.Value = 1;
