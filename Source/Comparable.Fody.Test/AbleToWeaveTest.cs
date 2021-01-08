@@ -130,17 +130,23 @@ namespace Comparable.Fody.Test
         }
 
         [Theory]
-        [InlineData("Class", typeof(CompareClassWithObjectValue))]
-        [InlineData("Class", typeof(CompareStructWithObjectValue))]
-        [InlineData("Class", typeof(IComparable))]
-        [InlineData("Struct", typeof(CompareClassWithObjectValue))]
-        [InlineData("Struct", typeof(CompareStructWithObjectValue))]
-        [InlineData("Struct", typeof(IComparable))]
-        public void Generic(string type, Type fieldType)
+        [InlineData("Class", "Property", typeof(CompareClassWithObjectValue))]
+        [InlineData("Class", "Property", typeof(CompareStructWithObjectValue))]
+        [InlineData("Class", "Property", typeof(IComparable))]
+        [InlineData("Class", "Field", typeof(CompareClassWithObjectValue))]
+        [InlineData("Class", "Field", typeof(CompareStructWithObjectValue))]
+        [InlineData("Class", "Field", typeof(IComparable))]
+        [InlineData("Struct", "Property", typeof(CompareClassWithObjectValue))]
+        [InlineData("Struct", "Property", typeof(CompareStructWithObjectValue))]
+        [InlineData("Struct", "Property", typeof(IComparable))]
+        [InlineData("Struct", "Field", typeof(CompareClassWithObjectValue))]
+        [InlineData("Struct", "Field", typeof(CompareStructWithObjectValue))]
+        [InlineData("Struct", "Field", typeof(IComparable))]
+        public void Generic(string type, string memberType, Type fieldType)
         {
-            var instance0 = TestResult.GetGenericInstance($"AssemblyToProcess.CompareGeneric{type}Field`1", fieldType);
+            var instance0 = TestResult.GetGenericInstance($"AssemblyToProcess.CompareGeneric{type}{memberType}`1", fieldType);
             instance0.Value = 1;
-            var instance1 = TestResult.GetGenericInstance($"AssemblyToProcess.CompareGeneric{type}Field`1", fieldType);
+            var instance1 = TestResult.GetGenericInstance($"AssemblyToProcess.CompareGeneric{type}{memberType}`1", fieldType);
             instance1.Value = 2;
 
             ((IComparable)instance0).CompareTo((object)instance1)

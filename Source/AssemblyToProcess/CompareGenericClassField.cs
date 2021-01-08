@@ -6,27 +6,30 @@ namespace AssemblyToProcess
     [Comparable]
     public class CompareGenericClassField<T> where T : IComparable
     {
-        [CompareBy]
-        private T _value;
-
-        public T Value
-        {
-            get => _value;
-            set => _value = value;
-        }
+        [field: CompareBy]
+        public T Value { get; set; }
     }
+
+    [Comparable]
+    public class CompareGenericClassProperty<T> where T : IComparable
+    {
+        [CompareBy]
+        public T Value { get; set; }
+    }
+
 
     [Comparable]
     public struct CompareGenericStructField<T> where T : IComparable
     {
-        [CompareBy]
-        private T _value;
+        [field: CompareBy]
+        public T Value { get; set; }
+    }
 
-        public T Value
-        {
-            get => _value;
-            set => _value = value;
-        }
+    [Comparable]
+    public struct CompareGenericStructProperty<T> where T : IComparable
+    {
+        [CompareBy]
+        public T Value { get; set; }
     }
 
 

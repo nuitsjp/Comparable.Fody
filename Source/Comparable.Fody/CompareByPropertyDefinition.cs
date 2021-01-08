@@ -2,6 +2,7 @@
 using Fody;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 using MemberDefinitionExtensions = Comparable.Fody.MemberDefinitionExtensions;
 
 namespace Comparable.Fody
@@ -49,11 +50,5 @@ namespace Comparable.Fody
                 ? Instruction.Create(OpCodes.Call, CompareTo)
                 : Instruction.Create(OpCodes.Callvirt, CompareTo));
         }
-    }
-
-    public static class MethodReferenceExtensions
-    {
-        public static bool ByObject(this MethodReference methodReference)
-            => methodReference.Parameters.Single().ParameterType.FullName == typeof(object).FullName;
     }
 }

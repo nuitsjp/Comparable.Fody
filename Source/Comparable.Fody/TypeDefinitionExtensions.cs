@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using Mono.Cecil;
+using Mono.Cecil.Rocks;
 
 namespace Comparable.Fody
 {
@@ -82,5 +83,17 @@ namespace Comparable.Fody
                     && methodDefinition.Parameters.Count == 1
                     && methodDefinition.Parameters.Single().ParameterType.FullName == typeof(Object).FullName);
         }
+
+        internal static TypeReference GetGenericTypeReference(this TypeReference typeReference)
+        {
+            if (typeReference.HasGenericParameters)
+            {
+                var parameters = typeReference.GenericParameters.Select(x => (TypeReference)x).ToArray();
+                return typeReference.MakeGenericInstanceType(parameters);
+            }
+
+            return typeReference;
+        }
+
     }
 }
