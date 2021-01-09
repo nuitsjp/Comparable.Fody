@@ -14,14 +14,6 @@ namespace AssemblyToProcess
             get => _value;
             set => _value = value;
         }
-
-        public int CompareToX(CompareGenericClassField<T> other)
-        {
-            //if (ReferenceEquals(this, other)) return 0;
-            if (ReferenceEquals(null, other)) return 1;
-
-            return _value.CompareTo(other._value);
-        }
     }
 
     [Comparable]

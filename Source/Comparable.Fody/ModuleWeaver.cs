@@ -49,6 +49,8 @@ namespace Comparable.Fody
 
         public TypeReference Object => ModuleDefinition.TypeSystem.Object;
 
+        public TypeReference GenericIComparable { get; private set; }
+
         public MethodReference ArgumentExceptionConstructor { get; private set; }
 
         private MethodReference CompareTo { get; set; }
@@ -92,6 +94,8 @@ namespace Comparable.Fody
                     x.GetParameters().Length == 1
                     && x.GetParameters().Single()?.ParameterType == typeof(string));
             ArgumentExceptionConstructor = ModuleDefinition.ImportReference(constructorInfo);
+
+            GenericIComparable = ModuleDefinition.ImportReference(FindTypeDefinition(typeof(IComparable<>).FullName));
         }
 
         public override IEnumerable<string> GetAssembliesForScanning()

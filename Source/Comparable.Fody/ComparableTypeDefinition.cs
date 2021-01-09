@@ -79,6 +79,9 @@ namespace Comparable.Fody
         public void ImplementCompareTo()
         {
             _thisType.Interfaces.Add(_comparableModuleDefine.IComparable);
+            _thisType.Interfaces.Add(
+                new InterfaceImplementation(
+                    _comparableModuleDefine.GenericIComparable.MakeGenericType(_thisType.GetGenericTypeReference())));
 
             ImplementCompareToByConcreteType();
             ImplementCompareToByObject();

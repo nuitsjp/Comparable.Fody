@@ -7,6 +7,9 @@ namespace Comparable.Fody
         TypeReference Int32 { get; }
         
         TypeReference Object { get; }
+
+        TypeReference GenericIComparable { get; }
+
         // ReSharper disable once InconsistentNaming
         InterfaceImplementation IComparable { get; }
         MethodReference ArgumentExceptionConstructor { get; }

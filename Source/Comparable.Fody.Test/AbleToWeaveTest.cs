@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using AssemblyNotToProcess;
 using FluentAssertions;
 using Fody;
@@ -32,6 +33,7 @@ namespace Comparable.Fody.Test
         {
             var obj = (object)TestResult.GetInstance($"AssemblyToProcess.Compare{compare}With{with}.IsDefinedCompareAttribute");
             obj.Should().BeAssignableTo<IComparable>();
+            obj.Should().BeAssignableTo(typeof(IComparable<>).MakeGenericType(obj.GetType()));
         }
 
         [Theory]
