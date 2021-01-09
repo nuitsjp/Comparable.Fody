@@ -19,6 +19,7 @@ namespace AssemblyToProcess.CompareStructWithConcreteType
 
         public int CompareTo(ClassProperty obj)
         {
+            // ReSharper disable once StringCompareToIsCultureSpecific
             return Value.CompareTo(obj.Value);
         }
     }

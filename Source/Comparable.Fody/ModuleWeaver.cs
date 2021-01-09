@@ -53,8 +53,6 @@ namespace Comparable.Fody
 
         public MethodReference ArgumentExceptionConstructor { get; private set; }
 
-        private MethodReference CompareTo { get; set; }
-
         public IComparableTypeDefinition FindComparableTypeDefinition(IMemberDefinition memberDefinition, TypeReference memberTypeReference)
         {
             if (_comparableTypeDefinitions.TryGetValue(memberTypeReference.FullName, out var comparableTypeDefinition))
@@ -72,11 +70,6 @@ namespace Comparable.Fody
 
         }
 
-        public TypeReference ImportReference(TypeReference typeReference)
-        {
-            return ModuleDefinition.ImportReference(typeReference);
-        }
-
         public MethodReference ImportReference(MethodReference methodReference)
         {
             return ModuleDefinition.ImportReference(methodReference);
@@ -86,7 +79,6 @@ namespace Comparable.Fody
         {
             var comparable = ModuleDefinition.ImportReference(FindTypeDefinition(nameof(System.IComparable)));
             IComparable = new InterfaceImplementation(comparable);
-            CompareTo = ModuleDefinition.ImportReference(comparable.Resolve().Methods.Single(x => x.Name == nameof(System.IComparable.CompareTo)));
 
             var argumentExceptionType = typeof(ArgumentException);
             var constructorInfo = argumentExceptionType.GetConstructors()
@@ -95,7 +87,7 @@ namespace Comparable.Fody
                     && x.GetParameters().Single()?.ParameterType == typeof(string));
             ArgumentExceptionConstructor = ModuleDefinition.ImportReference(constructorInfo);
 
-            GenericIComparable = ModuleDefinition.ImportReference(FindTypeDefinition(typeof(IComparable<>).FullName));
+            GenericIComparable = ModuleDefinition.ImportReference(FindTypeDefinition(typeof(IComparable<>).FullName!));
         }
 
         public override IEnumerable<string> GetAssembliesForScanning()

@@ -2,15 +2,17 @@
 
 namespace AssemblyToProcess.CompareStructWithConcreteType
 {
-    public struct HasMethodWithSameNameAsCompareTo : IComparable
+    public readonly struct HasMethodWithSameNameAsCompareTo : IComparable
     {
         private readonly string _value;
 
+        // ReSharper disable once UnusedMember.Global
         public HasMethodWithSameNameAsCompareTo(string value)
         {
             _value = value;
         }
 
+        // ReSharper disable once UnusedMember.Global
         public int CompareTo(object obj)
         {
             return int.MaxValue;
@@ -30,6 +32,7 @@ namespace AssemblyToProcess.CompareStructWithConcreteType
 
         public int CompareTo(HasMethodWithSameNameAsCompareTo obj)
         {
+            // ReSharper disable once StringCompareToIsCultureSpecific
             return _value.CompareTo(obj._value);
         }
     }

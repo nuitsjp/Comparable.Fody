@@ -113,6 +113,4 @@ namespace AssemblyToProcess
             return _value.CompareTo(other._value);
         }
     }
-
-    public interface IComparableValue : IComparable { }
 }

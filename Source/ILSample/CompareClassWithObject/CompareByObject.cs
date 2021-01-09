@@ -2,7 +2,7 @@
 
 namespace AssemblyToProcess.CompareClassWithObject
 {
-    public class CompareByObject : IComparable
+    public class CompareByObject : IComparable, IComparable<CompareByObject>
     {
         public CompareByObjectValue Value { get; set; }
         public int CompareTo(object obj)

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using Mono.Cecil;
 using Mono.Cecil.Rocks;
 
@@ -123,7 +122,7 @@ namespace Comparable.Fody
                     .Interfaces
                     .Select(x => x.InterfaceType)
                     .Where(x => x.IsGenericInstance)
-                    .Where(x => x.FullName.StartsWith(typeof(IComparable).FullName))
+                    .Where(x => x.FullName.StartsWith(typeof(IComparable).FullName!))
                     .ToList();
                 if (genericIComparables.Count == 1)
                 {

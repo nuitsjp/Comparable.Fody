@@ -1,19 +1,14 @@
 ﻿using AssemblyNotToProcess;
 using Comparable;
+// ReSharper disable UnusedMember.Global
 
 namespace AssemblyToProcess
 {
     [Comparable]
     public class CompareGenericClassField<T> where T : INestedComparable
     {
-        [CompareBy] private T _value;
-
-        
-        public T Value
-        {
-            get => _value;
-            set => _value = value;
-        }
+        [field: CompareBy]
+        public T Value { get; set; }
     }
 
     [Comparable]

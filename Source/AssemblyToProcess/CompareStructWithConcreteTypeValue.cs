@@ -2,7 +2,7 @@
 
 namespace AssemblyToProcess
 {
-    public struct CompareStructWithConcreteTypeValue : IComparable
+    public struct CompareStructWithConcreteTypeValue : IComparable, IComparable<CompareStructWithConcreteTypeValue>
     {
         public int Value { get; set; }
 

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-using Fody;
-using Mono.Cecil;
+﻿using Mono.Cecil;
 using Mono.Cecil.Cil;
 
 namespace Comparable.Fody

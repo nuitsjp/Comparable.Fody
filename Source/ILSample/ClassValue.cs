@@ -12,6 +12,7 @@ namespace AssemblyToProcess
 
             if (obj is ClassValue classValue)
             {
+                // ReSharper disable once StringCompareToIsCultureSpecific
                 return Value.CompareTo(classValue.Value);
             }
             else

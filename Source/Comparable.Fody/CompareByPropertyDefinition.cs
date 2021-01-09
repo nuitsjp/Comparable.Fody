@@ -1,9 +1,5 @@
-﻿using System.Linq;
-using Fody;
-using Mono.Cecil;
+﻿using Mono.Cecil;
 using Mono.Cecil.Cil;
-using Mono.Cecil.Rocks;
-using MemberDefinitionExtensions = Comparable.Fody.MemberDefinitionExtensions;
 
 namespace Comparable.Fody
 {

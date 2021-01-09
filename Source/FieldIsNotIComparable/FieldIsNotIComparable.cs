@@ -1,9 +1,9 @@
-﻿using System;
-using Comparable;
+﻿using Comparable;
 
 namespace FieldIsNotIComparable
 {
     [Comparable]
+    // ReSharper disable once UnusedMember.Global
     public class FieldIsNotIComparable
     {
         [CompareBy] 

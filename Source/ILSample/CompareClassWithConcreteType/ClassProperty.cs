@@ -21,6 +21,7 @@ namespace AssemblyToProcess.CompareClassWithConcreteType
         {
             if (obj is null) return 1;
 
+            // ReSharper disable once StringCompareToIsCultureSpecific
             return Value.CompareTo(obj.Value);
         }
     }

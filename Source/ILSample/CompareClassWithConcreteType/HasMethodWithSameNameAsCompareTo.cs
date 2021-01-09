@@ -11,6 +11,7 @@ namespace AssemblyToProcess.CompareClassWithConcreteType
             _value = value;
         }
 
+        // ReSharper disable once UnusedMember.Global
         public int CompareTo(object obj)
         {
             return int.MaxValue;
@@ -32,6 +33,7 @@ namespace AssemblyToProcess.CompareClassWithConcreteType
         {
             if (obj is null) return 1;
 
+            // ReSharper disable once StringCompareToIsCultureSpecific
             return _value.CompareTo(obj._value);
         }
     }

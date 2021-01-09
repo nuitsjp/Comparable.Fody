@@ -6,7 +6,7 @@ namespace Comparable.Fody.Test
 {
     public class UnableToWeaveTest
     {
-        private readonly ModuleWeaver _weavingTask = new ModuleWeaver();
+        private readonly ModuleWeaver _weavingTask = new();
 
         [Fact]
         public void CompareBy_is_not_defined()

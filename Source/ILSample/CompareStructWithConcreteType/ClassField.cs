@@ -6,6 +6,7 @@ namespace AssemblyToProcess.CompareStructWithConcreteType
     {
         private readonly string _value;
 
+        // ReSharper disable once UnusedMember.Global
         public ClassField(string value)
         {
             _value = value;
@@ -24,6 +25,7 @@ namespace AssemblyToProcess.CompareStructWithConcreteType
 
         public int CompareTo(ClassField obj)
         {
+            // ReSharper disable once StringCompareToIsCultureSpecific
             return _value.CompareTo(obj._value);
         }
     }
