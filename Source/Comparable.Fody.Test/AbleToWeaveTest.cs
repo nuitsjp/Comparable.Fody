@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using AssemblyToProcess;
+using AssemblyNotToProcess;
 using FluentAssertions;
 using Fody;
 using Xunit;
@@ -130,18 +130,14 @@ namespace Comparable.Fody.Test
         }
 
         [Theory]
-        [InlineData("Class", "Property", typeof(CompareClassWithObjectValue))]
-        [InlineData("Class", "Property", typeof(CompareStructWithObjectValue))]
-        [InlineData("Class", "Property", typeof(IComparable))]
-        [InlineData("Class", "Field", typeof(CompareClassWithObjectValue))]
-        [InlineData("Class", "Field", typeof(CompareStructWithObjectValue))]
-        [InlineData("Class", "Field", typeof(IComparable))]
-        [InlineData("Struct", "Property", typeof(CompareClassWithObjectValue))]
-        [InlineData("Struct", "Property", typeof(CompareStructWithObjectValue))]
-        [InlineData("Struct", "Property", typeof(IComparable))]
-        [InlineData("Struct", "Field", typeof(CompareClassWithObjectValue))]
-        [InlineData("Struct", "Field", typeof(CompareStructWithObjectValue))]
-        [InlineData("Struct", "Field", typeof(IComparable))]
+        [InlineData("Class", "Property", typeof(ValueClass))]
+        [InlineData("Class", "Property", typeof(ValueStruct))]
+        [InlineData("Class", "Field", typeof(ValueClass))]
+        [InlineData("Class", "Field", typeof(ValueStruct))]
+        [InlineData("Struct", "Property", typeof(ValueClass))]
+        [InlineData("Struct", "Property", typeof(ValueStruct))]
+        [InlineData("Struct", "Field", typeof(ValueClass))]
+        [InlineData("Struct", "Field", typeof(ValueStruct))]
         public void Should_return_CompareTo_result_for_generic(string type, string memberType, Type fieldType)
         {
             var instance0 = TestResult.GetGenericInstance($"AssemblyToProcess.CompareGeneric{type}{memberType}`1", fieldType);

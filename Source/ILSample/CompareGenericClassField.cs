@@ -1,8 +1,9 @@
 ﻿using System;
+using AssemblyNotToProcess;
 
 namespace AssemblyToProcess
 {
-    public class CompareGenericClassProperty<T> : IComparable, IComparable<CompareGenericClassProperty<T>> where T : IComparable
+    public class CompareGenericClassProperty<T> : IComparable, IComparable<CompareGenericClassProperty<T>> where T : INestedComparable
     {
         public T Value { get; set; }
 
@@ -28,7 +29,7 @@ namespace AssemblyToProcess
         }
     }
 
-    public class CompareGenericClassField<T> : IComparable, IComparable<CompareGenericClassField<T>> where T : IComparable
+    public class CompareGenericClassField<T> : IComparable, IComparable<CompareGenericClassField<T>> where T : INestedComparable
     {
         private T _value;
 
@@ -61,7 +62,7 @@ namespace AssemblyToProcess
     }
 
 
-    public struct CompareGenericStructProperty<T> : IComparable, IComparable<CompareGenericStructProperty<T>> where T : IComparable
+    public struct CompareGenericStructProperty<T> : IComparable, IComparable<CompareGenericStructProperty<T>> where T : INestedComparable
     {
         public T Value { get; set; }
 
@@ -84,7 +85,7 @@ namespace AssemblyToProcess
         }
     }
 
-    public struct CompareGenericStructField<T> : IComparable, IComparable<CompareGenericStructField<T>> where T : IComparable
+    public struct CompareGenericStructField<T> : IComparable, IComparable<CompareGenericStructField<T>> where T : INestedComparable
     {
         private T _value;
 

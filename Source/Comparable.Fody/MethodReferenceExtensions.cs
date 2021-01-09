@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Mono.Cecil;
 
 namespace Comparable.Fody
@@ -32,5 +33,23 @@ namespace Comparable.Fody
             return reference;
         }
 
+        public static MethodReference MakeGeneric(this MethodReference self, params TypeReference[] arguments)
+        {
+            var reference = new MethodReference(self.Name, self.ReturnType)
+            {
+                DeclaringType = self.DeclaringType.MakeGenericType(arguments),
+                HasThis = self.HasThis,
+                ExplicitThis = self.ExplicitThis,
+                CallingConvention = self.CallingConvention,
+            };
+
+            foreach (var parameter in self.Parameters)
+                reference.Parameters.Add(new ParameterDefinition(parameter.ParameterType));
+
+            foreach (var generic_parameter in self.GenericParameters)
+                reference.GenericParameters.Add(new GenericParameter(generic_parameter.Name, reference));
+
+            return reference;
+        }
     }
 }

@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AssemblyNotToProcess\AssemblyNotToProcess.csproj" />
     <ProjectReference Include="..\AssemblyToProcess\AssemblyToProcess.csproj" />
     <ProjectReference Include="..\Comparable.Fody\Comparable.Fody.csproj" />
     <ProjectReference Include="..\Comparable\Comparable.csproj" />

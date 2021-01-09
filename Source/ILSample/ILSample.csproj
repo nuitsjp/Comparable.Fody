@@ -7,4 +7,8 @@
     <RootNamespace>AssemblyToProcess</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AssemblyNotToProcess\AssemblyNotToProcess.csproj" />
+  </ItemGroup>
+
 </Project>
