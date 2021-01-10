@@ -16,6 +16,8 @@ namespace Comparable.Fody
 
         IComparableTypeDefinition FindComparableTypeDefinition(IMemberDefinition memberDefinition, TypeReference memberTypeReference);
 
+        IComparableTypeDefinition FindComparableTypeDefinition(IComparableTypeReference comparableTypeReference);
+
         MethodReference ImportReference(MethodReference methodReference);
     }
 }

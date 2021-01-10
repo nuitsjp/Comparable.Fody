@@ -19,11 +19,23 @@ namespace Comparable.Fody
                    && typeDefinition.BaseType.Name == nameof(ValueType);
         }
 
-        internal static bool TryGetIComparableTypeDefinition(this TypeReference typeReference, IComparableModuleDefine moduleDefine, out TypeDefinition comparableTypeDefinition)
+        internal static bool TryGetIComparableTypeDefinition(this TypeReference typeReference, out TypeDefinition comparableTypeDefinition)
         {
+            if (typeReference is TypeDefinition typeDefinition)
+            {
+                if (typeDefinition.IsImplementIComparable())
+                {
+                    comparableTypeDefinition = typeDefinition;
+                    return true;
+                }
+
+                comparableTypeDefinition = null;
+                return false;
+            }
+
             if (typeReference.IsGenericParameter)
             {
-                var genericParameter = (GenericParameter) typeReference;
+                var genericParameter = (GenericParameter)typeReference;
                 var comparableTypeDefinitions = genericParameter
                     .Constraints
                     .Select(x => x.ConstraintType.Resolve())
@@ -38,7 +50,8 @@ namespace Comparable.Fody
                 comparableTypeDefinition = comparableTypeDefinitions.First();
                 return true;
             }
-            var typeDefinition = typeReference.Resolve();
+
+            typeDefinition = typeReference.Resolve();
             if (typeDefinition.IsImplementIComparable())
             {
                 comparableTypeDefinition = typeDefinition;

@@ -28,6 +28,18 @@ namespace Comparable.Fody
 
             FindReferences();
 
+            var referenceProvider = new ReferenceProvider();
+            var comparableTypeReferences = ModuleDefinition
+                .Types
+                .Where(x => x.HasCompareAttribute())
+                .Select(referenceProvider.Resolve)
+                .OrderBy(x => x.Depth)
+                .ToList();
+
+            var hoges = comparableTypeReferences.Select(x => x.Resolve(this))
+                .ToList();
+
+
 
             _comparableTypeDefinitions = ModuleDefinition
                 .Types
@@ -60,7 +72,7 @@ namespace Comparable.Fody
                 return comparableTypeDefinition;
             }
 
-            if (memberTypeReference.TryGetIComparableTypeDefinition(this, out var memberTypeDefinition))
+            if (memberTypeReference.TryGetIComparableTypeDefinition(out var memberTypeDefinition))
             {
                 return new ComparableTypeDefinition(this, memberTypeDefinition, memberTypeReference);
             }
@@ -69,6 +81,9 @@ namespace Comparable.Fody
                 $"{memberDefinition.Name} of {memberDefinition.DeclaringType.FullName} does not implement IComparable. Members that specifies CompareByAttribute should implement IComparable.");
 
         }
+
+        public IComparableTypeDefinition FindComparableTypeDefinition(IComparableTypeReference comparableTypeReference)
+            => _comparableTypeDefinitions[comparableTypeReference.FullName];
 
         public MethodReference ImportReference(MethodReference methodReference)
         {
