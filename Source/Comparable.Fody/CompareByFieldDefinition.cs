@@ -8,8 +8,8 @@ namespace Comparable.Fody
 
         private readonly FieldDefinition _thisField;
 
-        public CompareByFieldDefinition(IComparableModuleDefine comparableModuleDefine, CompareByFieldReference fieldReference)
-            : base(fieldReference, comparableModuleDefine)
+        public CompareByFieldDefinition(CompareByFieldReference fieldReference, IComparableTypeDefinition fieldTypeDefinition)
+            : base(fieldTypeDefinition)
         {
             _thisField = fieldReference.FieldDefinition;
         }

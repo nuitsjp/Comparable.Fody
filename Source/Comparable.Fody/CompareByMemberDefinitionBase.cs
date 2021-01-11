@@ -1,19 +1,13 @@
-﻿using System;
-using System.Linq;
-using Mono.Cecil;
+﻿using Mono.Cecil;
 using Mono.Cecil.Cil;
 
 namespace Comparable.Fody
 {
     public abstract class CompareByMemberDefinitionBase : ICompareByMemberDefinition
     {
-        private readonly ICompareByMemberReference _memberReference;
-
-        protected CompareByMemberDefinitionBase(ICompareByMemberReference memberReference, IComparableModuleDefine comparableModuleDefine)
+        protected CompareByMemberDefinitionBase(IComparableTypeDefinition memberDefinition)
         {
-            _memberReference = memberReference;
-            MemberTypeDefinition =
-                comparableModuleDefine.FindComparableTypeDefinition(memberReference.MemberTypeReference);
+            MemberTypeDefinition = memberDefinition;
             LocalVariable = MemberTypeDefinition.CreateVariableDefinition();
         }
 
@@ -22,8 +16,6 @@ namespace Comparable.Fody
         protected MethodReference CompareTo => MemberTypeDefinition.GetCompareTo();
 
         public VariableDefinition LocalVariable { get; }
-
-        public int Priority => _memberReference.Priority;
 
         public int DepthOfDependency => MemberTypeDefinition.DepthOfDependency;
         

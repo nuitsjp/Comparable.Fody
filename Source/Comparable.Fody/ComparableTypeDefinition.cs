@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Fody;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
@@ -25,8 +24,6 @@ namespace Comparable.Fody
 
         }
 
-        public string FullName => _thisType.FullName;
-
         private bool IsClass => !IsStruct;
         public bool IsStruct => _thisType.IsStruct();
 
@@ -47,7 +44,7 @@ namespace Comparable.Fody
         {
             if (_members.Empty()) return;
 
-            _thisType.Interfaces.Add(_comparableModuleDefine.IComparable);
+            _thisType.Interfaces.Add(new InterfaceImplementation(_comparableModuleDefine.IComparable));
             _thisType.Interfaces.Add(
                 new InterfaceImplementation(
                     _comparableModuleDefine.GenericIComparable.MakeGenericType(_thisType.GetGenericTypeReference())));
@@ -186,7 +183,7 @@ namespace Comparable.Fody
             processor.Append(Instruction.Create(OpCodes.Brfalse_S, labelArgumentTypeMatched));
 
             // throw new ArgumentException("Object is not a WithSingleProperty");
-            processor.Append(Instruction.Create(OpCodes.Ldstr, $"Object is not a {FullName}."));
+            processor.Append(Instruction.Create(OpCodes.Ldstr, $"Object is not a {_thisType.FullName}."));
             processor.Append(Instruction.Create(OpCodes.Newobj, _comparableModuleDefine.ArgumentExceptionConstructor));
             processor.Append(Instruction.Create(OpCodes.Throw));
 

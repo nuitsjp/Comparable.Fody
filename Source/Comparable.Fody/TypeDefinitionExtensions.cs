@@ -148,7 +148,7 @@ namespace Comparable.Fody
                         .Where(x => x.IsGenericInstance)
                         .Cast<GenericInstanceType>()
                         .ToArray();
-                    if (genericComparables.Count() == 1)
+                    if (genericComparables.Length == 1)
                     {
                         var genericIComparable = genericComparables.Single();
                         var genericCompareTo = genericIComparable.Resolve()

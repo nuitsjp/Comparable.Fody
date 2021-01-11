@@ -7,8 +7,6 @@ namespace Comparable.Fody
         TypeReference TypeReference { get; }
         TypeDefinition TypeDefinition { get; }
 
-        string FullName { get; }
-
         int Depth { get; }
 
         IComparableTypeDefinition Resolve(IComparableModuleDefine comparableModuleDefine);

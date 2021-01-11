@@ -18,7 +18,7 @@ namespace Comparable.Fody
                 var fields =
                     selfDefinition
                         .Fields
-                        .Where(x => MemberDefinitionExtensions.HasCompareByAttribute(x))
+                        .Where(x => x.HasCompareByAttribute())
                         .Select(moduleDefine.Resolve);
 
                 var properties =
@@ -50,8 +50,6 @@ namespace Comparable.Fody
 
         public TypeReference TypeReference { get; }
         public TypeDefinition TypeDefinition { get; }
-
-        public string FullName => TypeReference.FullName;
 
         public int Depth =>
             _members.Empty() ? 0 : _members.Max(x => x.Depth) + 1;

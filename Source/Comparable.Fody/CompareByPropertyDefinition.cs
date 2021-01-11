@@ -8,8 +8,8 @@ namespace Comparable.Fody
 
         private readonly PropertyDefinition _thisProperty;
 
-        public CompareByPropertyDefinition(IComparableModuleDefine comparableModuleDefine, CompareByPropertyReference propertyReference)
-            : base(propertyReference, comparableModuleDefine)
+        public CompareByPropertyDefinition(CompareByPropertyReference propertyReference, IComparableTypeDefinition propertyTypeDefinition)
+            : base(propertyTypeDefinition)
         {
             _thisProperty = propertyReference.PropertyDefinition;
         }

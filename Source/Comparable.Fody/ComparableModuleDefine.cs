@@ -20,6 +20,12 @@ namespace Comparable.Fody
             _moduleDefinition = moduleDefinition;
         }
 
+        public TypeReference Int32 => _moduleDefinition.TypeSystem.Int32;
+        public TypeReference Object => _moduleDefinition.TypeSystem.Object;
+        public TypeReference IComparable { get; private set; }
+        public TypeReference GenericIComparable { get; private set; }
+        public MethodReference ArgumentExceptionConstructor { get; private set; }
+
         public IEnumerable<IComparableTypeDefinition> Resolve(IEnumerable<TypeDefinition> typeDefinitions)
         {
             FindReferences();
@@ -80,12 +86,7 @@ namespace Comparable.Fody
             return newTypeReference;
         }
 
-        public TypeReference Int32 => _moduleDefinition.TypeSystem.Int32;
-        public TypeReference Object => _moduleDefinition.TypeSystem.Object;
-        public TypeReference GenericIComparable { get; private set; }
-        public InterfaceImplementation IComparable { get; private set; }
-        public MethodReference ArgumentExceptionConstructor { get; private set; }
-        public IComparableTypeDefinition FindComparableTypeDefinition(IComparableTypeReference comparableTypeReference)
+        public IComparableTypeDefinition Resolve(IComparableTypeReference comparableTypeReference)
             => _comparableTypeDefinitions[comparableTypeReference];
 
         public MethodReference ImportReference(MethodReference methodReference)
@@ -93,8 +94,8 @@ namespace Comparable.Fody
 
         private void FindReferences()
         {
-            var comparable = _moduleDefinition.ImportReference(_moduleWeaver.FindTypeDefinition(nameof(System.IComparable)));
-            IComparable = new InterfaceImplementation(comparable);
+            IComparable = _moduleDefinition.ImportReference(_moduleWeaver.FindTypeDefinition(typeof(IComparable).FullName));
+            GenericIComparable = _moduleDefinition.ImportReference(_moduleWeaver.FindTypeDefinition(typeof(IComparable<>).FullName!));
 
             var argumentExceptionType = typeof(ArgumentException);
             var constructorInfo = argumentExceptionType.GetConstructors()
@@ -103,7 +104,6 @@ namespace Comparable.Fody
                     && x.GetParameters().Single()?.ParameterType == typeof(string));
             ArgumentExceptionConstructor = _moduleDefinition.ImportReference(constructorInfo);
 
-            GenericIComparable = _moduleDefinition.ImportReference(_moduleWeaver.FindTypeDefinition(typeof(IComparable<>).FullName!));
         }
 
     }

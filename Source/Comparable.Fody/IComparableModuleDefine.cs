@@ -9,21 +9,20 @@ namespace Comparable.Fody
         
         TypeReference Object { get; }
 
+        // ReSharper disable once InconsistentNaming
+        TypeReference IComparable { get; }
+
         TypeReference GenericIComparable { get; }
 
-        // ReSharper disable once InconsistentNaming
-        InterfaceImplementation IComparable { get; }
         MethodReference ArgumentExceptionConstructor { get; }
-
-        IComparableTypeDefinition FindComparableTypeDefinition(IComparableTypeReference comparableTypeReference);
 
         MethodReference ImportReference(MethodReference methodReference);
 
+        // ReSharper disable once UnusedMemberInSuper.Global
         IEnumerable<IComparableTypeDefinition> Resolve(IEnumerable<TypeDefinition> typeDefinitions);
-
         IComparableTypeReference Resolve(TypeReference typeReference);
         ICompareByMemberReference Resolve(FieldDefinition fieldDefinition);
         ICompareByMemberReference Resolve(PropertyDefinition propertyDefinition);
-
+        IComparableTypeDefinition Resolve(IComparableTypeReference comparableTypeReference);
     }
 }

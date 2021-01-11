@@ -5,8 +5,6 @@ namespace Comparable.Fody
 {
     public interface IComparableTypeDefinition
     {
-        string FullName { get; }
-
         bool IsStruct { get; }
         
         int DepthOfDependency { get; }

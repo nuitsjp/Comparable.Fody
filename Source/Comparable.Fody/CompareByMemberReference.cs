@@ -42,7 +42,7 @@ namespace Comparable.Fody
         public FieldDefinition FieldDefinition { get; }
 
         public override ICompareByMemberDefinition Resolve(IComparableModuleDefine moduleDefine)
-            => new CompareByFieldDefinition(moduleDefine, this);
+            => new CompareByFieldDefinition( this, moduleDefine.Resolve(MemberTypeReference));
     }
 
     public class CompareByPropertyReference : CompareByMemberReference
@@ -56,6 +56,6 @@ namespace Comparable.Fody
         public PropertyDefinition PropertyDefinition { get; }
 
         public override ICompareByMemberDefinition Resolve(IComparableModuleDefine moduleDefine)
-            => new CompareByPropertyDefinition(moduleDefine, this);
+            => new CompareByPropertyDefinition(this, moduleDefine.Resolve(MemberTypeReference));
     }
 }
