@@ -53,7 +53,41 @@ namespace Comparable.Fody
                     return comparableTypeReference;
                 }
 
-                var newTypeReference = new ComparableTypeReference(typeReference, typeDefinition, this);
+                List<ICompareByMemberReference> members;
+                if (typeDefinition.HasCompareAttribute())
+                {
+                    var fields =
+                        typeDefinition
+                            .Fields
+                            .Where(x => x.HasCompareByAttribute())
+                            .Select(Resolve);
+
+                    var properties =
+                        typeDefinition
+                            .Properties
+                            .Where(x => x.HasCompareByAttribute())
+                            .Select(Resolve);
+
+                    members = fields.Union(properties).ToList();
+
+                    if (members.Empty())
+                    {
+                        throw new WeavingException($"Specify CompareByAttribute for the any property of Type {typeDefinition.FullName}.");
+                    }
+
+                    if (1 < members
+                        .GroupBy(x => x.Priority)
+                        .Max(x => x.Count()))
+                    {
+                        throw new WeavingException($"Type {typeDefinition.FullName} defines multiple CompareBy with equal priority.");
+                    }
+                }
+                else
+                {
+                    members = new();
+                }
+
+                var newTypeReference = new ComparableTypeReference(typeReference, typeDefinition, members);
                 _typeReferences[typeDefinition] = newTypeReference;
                 return newTypeReference;
             }

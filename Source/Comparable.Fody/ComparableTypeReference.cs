@@ -9,43 +9,11 @@ namespace Comparable.Fody
     {
         private readonly List<ICompareByMemberReference> _members;
 
-        public ComparableTypeReference(TypeReference selfReference, TypeDefinition selfDefinition, IComparableModuleDefine moduleDefine)
+        public ComparableTypeReference(TypeReference selfReference, TypeDefinition selfDefinition, List<ICompareByMemberReference> members)
         {
             TypeReference = selfReference;
             TypeDefinition = selfDefinition;
-            if (selfDefinition.HasCompareAttribute())
-            {
-                var fields =
-                    selfDefinition
-                        .Fields
-                        .Where(x => x.HasCompareByAttribute())
-                        .Select(moduleDefine.Resolve);
-
-                var properties =
-                    selfDefinition
-                        .Properties
-                        .Where(x => x.HasCompareByAttribute())
-                        .Select(moduleDefine.Resolve);
-
-                _members = fields.Union(properties).ToList();
-
-                if (_members.Empty())
-                {
-                    throw new WeavingException($"Specify CompareByAttribute for the any property of Type {selfDefinition.FullName}.");
-                }
-
-                if (1 < _members
-                    .GroupBy(x => x.Priority)
-                    .Max(x => x.Count()))
-                {
-                    throw new WeavingException($"Type {selfDefinition.FullName} defines multiple CompareBy with equal priority.");
-                }
-            }
-            else
-            {
-                _members = new();
-            }
-
+            _members = members;
         }
 
         public TypeReference TypeReference { get; }
