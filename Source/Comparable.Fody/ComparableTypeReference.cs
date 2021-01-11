@@ -9,7 +9,7 @@ namespace Comparable.Fody
     {
         private readonly List<ICompareByMemberReference> _members;
 
-        public ComparableTypeReference(TypeReference selfReference, TypeDefinition selfDefinition, IReferenceProvider referenceProvider)
+        public ComparableTypeReference(TypeReference selfReference, TypeDefinition selfDefinition, IComparableModuleDefine moduleDefine)
         {
             TypeReference = selfReference;
             TypeDefinition = selfDefinition;
@@ -19,13 +19,13 @@ namespace Comparable.Fody
                     selfDefinition
                         .Fields
                         .Where(x => MemberDefinitionExtensions.HasCompareByAttribute(x))
-                        .Select(referenceProvider.Resolve);
+                        .Select(moduleDefine.Resolve);
 
                 var properties =
                     selfDefinition
                         .Properties
                         .Where(x => x.HasCompareByAttribute())
-                        .Select(referenceProvider.Resolve);
+                        .Select(moduleDefine.Resolve);
 
                 _members = fields.Union(properties).ToList();
 

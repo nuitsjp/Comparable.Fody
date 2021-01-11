@@ -5,9 +5,9 @@ namespace Comparable.Fody
 {
     public abstract class CompareByMemberReference : ICompareByMemberReference
     {
-        protected CompareByMemberReference(IMemberDefinition self, TypeReference memberTypeReference, IReferenceProvider referenceProvider)
+        protected CompareByMemberReference(IMemberDefinition self, TypeReference memberTypeReference, IComparableModuleDefine moduleDefine)
         {
-            MemberTypeReference = referenceProvider.Resolve(memberTypeReference);
+            MemberTypeReference = moduleDefine.Resolve(memberTypeReference);
             var compareBy = self.CustomAttributes
                 .Single(x => x.AttributeType.Name == nameof(CompareByAttribute));
             if (compareBy.HasProperties)
@@ -33,8 +33,8 @@ namespace Comparable.Fody
 
     public class CompareByFieldReference : CompareByMemberReference
     {
-        public CompareByFieldReference(FieldDefinition self, TypeReference memberTypeReference, IReferenceProvider referenceProvider) : 
-            base(self, memberTypeReference, referenceProvider)
+        public CompareByFieldReference(FieldDefinition self, TypeReference memberTypeReference, IComparableModuleDefine moduleDefine) : 
+            base(self, memberTypeReference, moduleDefine)
         {
             FieldDefinition = self;
         }
@@ -47,8 +47,8 @@ namespace Comparable.Fody
 
     public class CompareByPropertyReference : CompareByMemberReference
     {
-        public CompareByPropertyReference(PropertyDefinition self, TypeReference memberTypeReference, IReferenceProvider referenceProvider) :
-            base(self, memberTypeReference, referenceProvider)
+        public CompareByPropertyReference(PropertyDefinition self, TypeReference memberTypeReference, IComparableModuleDefine moduleDefine) :
+            base(self, memberTypeReference, moduleDefine)
         {
             PropertyDefinition = self;
         }

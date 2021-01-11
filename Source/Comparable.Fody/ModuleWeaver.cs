@@ -9,80 +9,30 @@ namespace Comparable.Fody
     /// <summary>
     /// Happy New Year 2021!
     /// </summary>
-    public class ModuleWeaver : BaseModuleWeaver, IComparableModuleDefine
+    public class ModuleWeaver : BaseModuleWeaver, IModuleWeaver
     {
-        private readonly Dictionary<IComparableTypeReference, IComparableTypeDefinition> _comparableTypeDefinitions = new();
-
         public override void Execute()
         {
-            var memberDefinition = ModuleDefinition
+            var memberDefinitions = ModuleDefinition
                 .Types
                 .SelectMany(x => x.Members())
                 .Where(x => x.HasCompareByAttribute())
-                .FirstOrDefault(x => !x.DeclaringType.HasCompareAttribute());
-            if (memberDefinition != null)
+                .Where(x => !x.DeclaringType.HasCompareAttribute())
+                .ToArray();
+            if (memberDefinitions.Any())
             {
-                throw new WeavingException($"Specify CompareAttribute for Type of {memberDefinition.DeclaringType.FullName}.");
+                throw new WeavingException($"Specify CompareAttribute for Type of {memberDefinitions.First().DeclaringType.FullName}.");
             }
 
-            FindReferences();
+            var moduleDefine = new ComparableModuleDefine(this, ModuleDefinition);
+            var comparableTypeDefinitions =
+                moduleDefine.Resolve(
+                    ModuleDefinition.Types.Where(x => x.HasCompareAttribute()));
 
-            var referenceProvider = new ReferenceProvider();
-            ModuleDefinition
-                .Types
-                .Where(x => x.HasCompareAttribute())
-                .ToList()
-                .ForEach(x => referenceProvider.Resolve(x));
-
-            var comparableTypeReferences = referenceProvider
-                .TypeReferences
-                .OrderBy(x => x.Depth)
-                .ToList();
-
-            foreach (var comparableTypeReference in comparableTypeReferences)
+            foreach (var comparableTypeDefinition in comparableTypeDefinitions.OrderBy(x => x.DepthOfDependency))
             {
-                var definition = comparableTypeReference.Resolve(this);
-                _comparableTypeDefinitions[comparableTypeReference] = definition;
+                comparableTypeDefinition.ImplementCompareTo();
             }
-
-            _comparableTypeDefinitions
-                .Select(x => x.Value)
-                .OrderBy(x => x.DepthOfDependency)
-                .ToList()
-                .ForEach(x => x.ImplementCompareTo());
-        }
-
-        public InterfaceImplementation IComparable { get; private set; }
-        
-        public TypeReference Int32 => ModuleDefinition.TypeSystem.Int32;
-
-        public TypeReference Object => ModuleDefinition.TypeSystem.Object;
-
-        public TypeReference GenericIComparable { get; private set; }
-
-        public MethodReference ArgumentExceptionConstructor { get; private set; }
-
-        public IComparableTypeDefinition FindComparableTypeDefinition(IComparableTypeReference comparableTypeReference)
-            => _comparableTypeDefinitions[comparableTypeReference];
-
-        public MethodReference ImportReference(MethodReference methodReference)
-        {
-            return ModuleDefinition.ImportReference(methodReference);
-        }
-
-        private void FindReferences()
-        {
-            var comparable = ModuleDefinition.ImportReference(FindTypeDefinition(nameof(System.IComparable)));
-            IComparable = new InterfaceImplementation(comparable);
-
-            var argumentExceptionType = typeof(ArgumentException);
-            var constructorInfo = argumentExceptionType.GetConstructors()
-                .Single(x =>
-                    x.GetParameters().Length == 1
-                    && x.GetParameters().Single()?.ParameterType == typeof(string));
-            ArgumentExceptionConstructor = ModuleDefinition.ImportReference(constructorInfo);
-
-            GenericIComparable = ModuleDefinition.ImportReference(FindTypeDefinition(typeof(IComparable<>).FullName!));
         }
 
         public override IEnumerable<string> GetAssembliesForScanning()

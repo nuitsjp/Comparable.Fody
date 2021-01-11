@@ -1,4 +1,5 @@
-﻿using Mono.Cecil;
+﻿using System.Collections.Generic;
+using Mono.Cecil;
 
 namespace Comparable.Fody
 {
@@ -17,5 +18,12 @@ namespace Comparable.Fody
         IComparableTypeDefinition FindComparableTypeDefinition(IComparableTypeReference comparableTypeReference);
 
         MethodReference ImportReference(MethodReference methodReference);
+
+        IEnumerable<IComparableTypeDefinition> Resolve(IEnumerable<TypeDefinition> typeDefinitions);
+
+        IComparableTypeReference Resolve(TypeReference typeReference);
+        ICompareByMemberReference Resolve(FieldDefinition fieldDefinition);
+        ICompareByMemberReference Resolve(PropertyDefinition propertyDefinition);
+
     }
 }
