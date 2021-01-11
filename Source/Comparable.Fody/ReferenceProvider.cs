@@ -9,6 +9,8 @@ namespace Comparable.Fody
         private readonly Dictionary<TypeDefinition, IComparableTypeReference> _typeReferences = new();
         private readonly Dictionary<IMemberDefinition, ICompareByMemberReference> _memberReferences = new();
 
+        public IEnumerable<IComparableTypeReference> TypeReferences => _typeReferences.Values;
+
         public IComparableTypeReference Resolve(TypeReference typeReference)
         {
             if (typeReference.TryGetIComparableTypeDefinition(out var typeDefinition))
@@ -34,7 +36,7 @@ namespace Comparable.Fody
                 return typeReference;
             }
 
-            var newTypeReference = new CompareByMemberReference(fieldDefinition, fieldDefinition.FieldType, this);
+            var newTypeReference = new CompareByFieldReference(fieldDefinition, fieldDefinition.FieldType, this);
             _memberReferences[fieldDefinition] = newTypeReference;
             return newTypeReference;
         }
@@ -46,7 +48,7 @@ namespace Comparable.Fody
                 return typeReference;
             }
 
-            var newTypeReference = new CompareByMemberReference(propertyDefinition, propertyDefinition.PropertyType, this);
+            var newTypeReference = new CompareByPropertyReference(propertyDefinition, propertyDefinition.PropertyType, this);
             _memberReferences[propertyDefinition] = newTypeReference;
             return newTypeReference;
         }

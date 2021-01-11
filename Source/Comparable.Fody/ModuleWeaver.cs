@@ -11,7 +11,7 @@ namespace Comparable.Fody
     /// </summary>
     public class ModuleWeaver : BaseModuleWeaver, IComparableModuleDefine
     {
-        private Dictionary<string, ComparableTypeDefinition> _comparableTypeDefinitions;
+        private readonly Dictionary<IComparableTypeReference, IComparableTypeDefinition> _comparableTypeDefinitions = new();
 
         public override void Execute()
         {
@@ -29,26 +29,24 @@ namespace Comparable.Fody
             FindReferences();
 
             var referenceProvider = new ReferenceProvider();
-            var comparableTypeReferences = ModuleDefinition
+            ModuleDefinition
                 .Types
                 .Where(x => x.HasCompareAttribute())
-                .Select(referenceProvider.Resolve)
+                .ToList()
+                .ForEach(x => referenceProvider.Resolve(x));
+
+            var comparableTypeReferences = referenceProvider
+                .TypeReferences
                 .OrderBy(x => x.Depth)
                 .ToList();
 
-            var hoges = comparableTypeReferences.Select(x => x.Resolve(this))
-                .ToList();
+            foreach (var comparableTypeReference in comparableTypeReferences)
+            {
+                var definition = comparableTypeReference.Resolve(this);
+                _comparableTypeDefinitions[comparableTypeReference] = definition;
+            }
 
-
-
-            _comparableTypeDefinitions = ModuleDefinition
-                .Types
-                .Where(x => x.HasCompareAttribute())
-                .Select(x => new ComparableTypeDefinition(this, x, x))
-                .ToDictionary(x => x.FullName, x => x);
-            
             _comparableTypeDefinitions
-                .ToList()
                 .Select(x => x.Value)
                 .OrderBy(x => x.DepthOfDependency)
                 .ToList()
@@ -65,25 +63,8 @@ namespace Comparable.Fody
 
         public MethodReference ArgumentExceptionConstructor { get; private set; }
 
-        public IComparableTypeDefinition FindComparableTypeDefinition(IMemberDefinition memberDefinition, TypeReference memberTypeReference)
-        {
-            if (_comparableTypeDefinitions.TryGetValue(memberTypeReference.FullName, out var comparableTypeDefinition))
-            {
-                return comparableTypeDefinition;
-            }
-
-            if (memberTypeReference.TryGetIComparableTypeDefinition(out var memberTypeDefinition))
-            {
-                return new ComparableTypeDefinition(this, memberTypeDefinition, memberTypeReference);
-            }
-
-            throw new WeavingException(
-                $"{memberDefinition.Name} of {memberDefinition.DeclaringType.FullName} does not implement IComparable. Members that specifies CompareByAttribute should implement IComparable.");
-
-        }
-
         public IComparableTypeDefinition FindComparableTypeDefinition(IComparableTypeReference comparableTypeReference)
-            => _comparableTypeDefinitions[comparableTypeReference.FullName];
+            => _comparableTypeDefinitions[comparableTypeReference];
 
         public MethodReference ImportReference(MethodReference methodReference)
         {

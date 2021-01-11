@@ -15,46 +15,14 @@ namespace Comparable.Fody
         private readonly List<ICompareByMemberDefinition> _members;
         private MethodDefinition _compareToByObject;
 
-        public ComparableTypeDefinition(IComparableModuleDefine comparableModuleDefine, TypeDefinition typeDefinition, TypeReference typeReference)
+        public ComparableTypeDefinition(IComparableTypeReference typeReference, IEnumerable<ICompareByMemberDefinition> members, IComparableModuleDefine comparableModuleDefine)
         {
+            _members = members.ToList();
+
             _comparableModuleDefine = comparableModuleDefine;
-            _thisType = typeDefinition;
-            _thisTypeReference = typeReference;
+            _thisType = typeReference.TypeDefinition;
+            _thisTypeReference = typeReference.TypeReference;
 
-            if (_thisType.HasCompareAttribute())
-            {
-                var fieldDefinitions =
-                    _thisType
-                        .Fields
-                        .Where(x => x.HasCompareByAttribute())
-                        .Select(x => new CompareByFieldDefinition(_comparableModuleDefine, x))
-                        .Cast<ICompareByMemberDefinition>();
-
-                var propertyDefinitions =
-                    _thisType
-                        .Properties
-                        .Where(x => x.HasCompareByAttribute())
-                        .Select(x => new CompareByPropertyDefinition(_comparableModuleDefine, x))
-                        .Cast<ICompareByMemberDefinition>();
-
-                _members = fieldDefinitions.Union(propertyDefinitions).ToList();
-
-                if (!_members.Any())
-                {
-                    throw new WeavingException($"Specify CompareByAttribute for the any property of Type {FullName}.");
-                }
-
-                if (1 < _members
-                    .GroupBy(x => x.Priority)
-                    .Max(x => x.Count()))
-                {
-                    throw new WeavingException($"Type {FullName} defines multiple CompareBy with equal priority.");
-                }
-            }
-            else
-            {
-                _members = new ();
-            }
         }
 
         public string FullName => _thisType.FullName;
@@ -77,6 +45,8 @@ namespace Comparable.Fody
 
         public void ImplementCompareTo()
         {
+            if (_members.Empty()) return;
+
             _thisType.Interfaces.Add(_comparableModuleDefine.IComparable);
             _thisType.Interfaces.Add(
                 new InterfaceImplementation(

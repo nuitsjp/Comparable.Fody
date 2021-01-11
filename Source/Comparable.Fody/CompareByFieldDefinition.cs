@@ -8,10 +8,10 @@ namespace Comparable.Fody
 
         private readonly FieldDefinition _thisField;
 
-        public CompareByFieldDefinition(IComparableModuleDefine comparableModuleDefine, FieldDefinition fieldDefinition)
-            : base(comparableModuleDefine, fieldDefinition, fieldDefinition.FieldType)
+        public CompareByFieldDefinition(IComparableModuleDefine comparableModuleDefine, CompareByFieldReference fieldReference)
+            : base(fieldReference, comparableModuleDefine)
         {
-            _thisField = fieldDefinition;
+            _thisField = fieldReference.FieldDefinition;
         }
 
         public override void AppendCompareTo(ILProcessor ilProcessor, ParameterDefinition parameterDefinition)

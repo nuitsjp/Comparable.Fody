@@ -3,13 +3,11 @@ using Mono.Cecil;
 
 namespace Comparable.Fody
 {
-    public class CompareByMemberReference : ICompareByMemberReference
+    public abstract class CompareByMemberReference : ICompareByMemberReference
     {
-        private readonly IComparableTypeReference _memberTypeReference;
-
-        public CompareByMemberReference(IMemberDefinition self, TypeReference memberTypeReference, IReferenceProvider referenceProvider)
+        protected CompareByMemberReference(IMemberDefinition self, TypeReference memberTypeReference, IReferenceProvider referenceProvider)
         {
-            _memberTypeReference = referenceProvider.Resolve(memberTypeReference);
+            MemberTypeReference = referenceProvider.Resolve(memberTypeReference);
             var compareBy = self.CustomAttributes
                 .Single(x => x.AttributeType.Name == nameof(CompareByAttribute));
             if (compareBy.HasProperties)
@@ -25,7 +23,39 @@ namespace Comparable.Fody
             }
 
         }
+
+        public IComparableTypeReference MemberTypeReference { get; }
         public int Priority { get; }
-        public int Depth => _memberTypeReference.Depth;
+        public int Depth => MemberTypeReference.Depth;
+
+        public abstract ICompareByMemberDefinition Resolve(IComparableModuleDefine moduleDefine);
+    }
+
+    public class CompareByFieldReference : CompareByMemberReference
+    {
+        public CompareByFieldReference(FieldDefinition self, TypeReference memberTypeReference, IReferenceProvider referenceProvider) : 
+            base(self, memberTypeReference, referenceProvider)
+        {
+            FieldDefinition = self;
+        }
+
+        public FieldDefinition FieldDefinition { get; }
+
+        public override ICompareByMemberDefinition Resolve(IComparableModuleDefine moduleDefine)
+            => new CompareByFieldDefinition(moduleDefine, this);
+    }
+
+    public class CompareByPropertyReference : CompareByMemberReference
+    {
+        public CompareByPropertyReference(PropertyDefinition self, TypeReference memberTypeReference, IReferenceProvider referenceProvider) :
+            base(self, memberTypeReference, referenceProvider)
+        {
+            PropertyDefinition = self;
+        }
+
+        public PropertyDefinition PropertyDefinition { get; }
+
+        public override ICompareByMemberDefinition Resolve(IComparableModuleDefine moduleDefine)
+            => new CompareByPropertyDefinition(moduleDefine, this);
     }
 }

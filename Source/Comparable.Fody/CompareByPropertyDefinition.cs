@@ -8,10 +8,10 @@ namespace Comparable.Fody
 
         private readonly PropertyDefinition _thisProperty;
 
-        public CompareByPropertyDefinition(IComparableModuleDefine comparableModuleDefine, PropertyDefinition propertyDefinition)
-            : base(comparableModuleDefine, propertyDefinition, propertyDefinition.PropertyType)
+        public CompareByPropertyDefinition(IComparableModuleDefine comparableModuleDefine, CompareByPropertyReference propertyReference)
+            : base(propertyReference, comparableModuleDefine)
         {
-            _thisProperty = propertyDefinition;
+            _thisProperty = propertyReference.PropertyDefinition;
         }
 
         public override void AppendCompareTo(ILProcessor ilProcessor, ParameterDefinition parameterDefinition)

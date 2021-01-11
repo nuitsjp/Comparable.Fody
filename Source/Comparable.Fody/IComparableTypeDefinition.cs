@@ -11,6 +11,8 @@ namespace Comparable.Fody
         
         int DepthOfDependency { get; }
 
+        void ImplementCompareTo();
+
         MethodReference GetCompareTo();
 
         VariableDefinition CreateVariableDefinition();

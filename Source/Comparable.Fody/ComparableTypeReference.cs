@@ -7,14 +7,12 @@ namespace Comparable.Fody
 {
     public class ComparableTypeReference : IComparableTypeReference
     {
-        private readonly TypeReference _selfReference;
-        private readonly TypeDefinition _selfDefinition;
         private readonly List<ICompareByMemberReference> _members;
 
         public ComparableTypeReference(TypeReference selfReference, TypeDefinition selfDefinition, IReferenceProvider referenceProvider)
         {
-            _selfReference = selfReference;
-            _selfDefinition = selfDefinition;
+            TypeReference = selfReference;
+            TypeDefinition = selfDefinition;
             if (selfDefinition.HasCompareAttribute())
             {
                 var fields =
@@ -50,12 +48,15 @@ namespace Comparable.Fody
 
         }
 
-        public string FullName => _selfReference.FullName;
+        public TypeReference TypeReference { get; }
+        public TypeDefinition TypeDefinition { get; }
+
+        public string FullName => TypeReference.FullName;
 
         public int Depth =>
             _members.Empty() ? 0 : _members.Max(x => x.Depth) + 1;
 
         public IComparableTypeDefinition Resolve(IComparableModuleDefine comparableModuleDefine)
-            => new ComparableTypeDefinition(comparableModuleDefine, _selfDefinition, _selfReference);
+            => new ComparableTypeDefinition(this, _members.Select(x => x.Resolve(comparableModuleDefine)), comparableModuleDefine);
     }
 }
