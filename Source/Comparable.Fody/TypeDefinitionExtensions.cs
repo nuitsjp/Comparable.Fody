@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Rocks;
@@ -202,6 +203,8 @@ namespace Comparable.Fody
         internal static bool IsGeneric(this TypeReference typeReference)
             => typeReference.ContainsGenericParameter;
 
-
+        public static IEnumerable<IMemberDefinition> Members(this TypeDefinition self)
+            => self.Fields
+                .Union(self.Properties.Cast<IMemberDefinition>());
     }
 }

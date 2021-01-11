@@ -17,8 +17,7 @@ namespace Comparable.Fody
         {
             var memberDefinition = ModuleDefinition
                 .Types
-                .SelectMany(x => x.Fields.Cast<IMemberDefinition>())
-                .Union(ModuleDefinition.Types.SelectMany(x => x.Properties.Cast<IMemberDefinition>()))
+                .SelectMany(x => x.Members())
                 .Where(x => x.HasCompareByAttribute())
                 .FirstOrDefault(x => !x.DeclaringType.HasCompareAttribute());
             if (memberDefinition != null)
