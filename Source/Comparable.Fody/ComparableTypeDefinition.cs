@@ -11,7 +11,6 @@ namespace Comparable.Fody
         private readonly TypeDefinition _thisType;
         private readonly TypeReference _thisTypeReference;
         private readonly List<ICompareByMemberDefinition> _members;
-        private MethodDefinition _compareToByObject;
 
         public ComparableTypeDefinition(IComparableTypeReference typeReference, IEnumerable<ICompareByMemberDefinition> members)
         {
@@ -47,14 +46,14 @@ namespace Comparable.Fody
                 new InterfaceImplementation(
                     References.GenericIComparable.MakeGenericType(_thisType.GetGenericTypeReference())));
 
-            ImplementCompareToByConcreteType();
-            ImplementCompareToByObject();
+            var compareToByConcreteType = ImplementCompareToByConcreteType();
+            ImplementCompareToByObject(compareToByConcreteType);
         }
 
 
-        private void ImplementCompareToByConcreteType()
+        private MethodDefinition ImplementCompareToByConcreteType()
         {
-            _compareToByObject =
+            var compareToByConcreteType =
                 new MethodDefinition(
                     nameof(IComparable.CompareTo),
                     MethodAttributes.Public
@@ -73,23 +72,23 @@ namespace Comparable.Fody
 
             // Init arguments.
             var argumentObj = new ParameterDefinition("value", ParameterAttributes.None, _thisTypeReference.GetGenericTypeReference());
-            _compareToByObject.Parameters.Add(argumentObj);
+            compareToByConcreteType.Parameters.Add(argumentObj);
 
             // Init local variables.
             var localResult = new VariableDefinition(References.Int32);
-            _compareToByObject.Body.Variables.Add(localResult);
+            compareToByConcreteType.Body.Variables.Add(localResult);
 
 
             foreach (var member in _members)
             {
-                _compareToByObject.Body.Variables.Add(member.LocalVariable);
+                compareToByConcreteType.Body.Variables.Add(member.LocalVariable);
             }
 
             // Labels for goto.
             var labelArgumentIsNotNull = Instruction.Create(OpCodes.Nop);
             var labelReturn = Instruction.Create(OpCodes.Nop);
 
-            var processor = _compareToByObject.Body.GetILProcessor();
+            var processor = compareToByConcreteType.Body.GetILProcessor();
 
             if (IsClass)
             {
@@ -125,11 +124,12 @@ namespace Comparable.Fody
             processor.Append(Instruction.Create(OpCodes.Ldloc_S, localResult));
             processor.Append(Instruction.Create(OpCodes.Ret));
 
-            _thisType.Methods.Add(_compareToByObject);
+            _thisType.Methods.Add(compareToByConcreteType);
+            return compareToByConcreteType;
         }
 
 
-        private void ImplementCompareToByObject()
+        private void ImplementCompareToByObject(MethodReference compareToByConcreteType)
         {
             var compareToDefinition =
                 new MethodDefinition(
@@ -193,7 +193,7 @@ namespace Comparable.Fody
                 ? Instruction.Create(OpCodes.Castclass, _thisTypeReference.GetGenericTypeReference())
                 : Instruction.Create(OpCodes.Unbox_Any, _thisTypeReference.GetGenericTypeReference()));
 
-            processor.Append(Instruction.Create(OpCodes.Call, _compareToByObject.GetGenericMethodReference()));
+            processor.Append(Instruction.Create(OpCodes.Call, compareToByConcreteType.GetGenericMethodReference()));
             processor.Append(Instruction.Create(OpCodes.Ret));
 
             _thisType.Methods.Add(compareToDefinition);
