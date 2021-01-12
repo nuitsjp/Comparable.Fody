@@ -86,7 +86,7 @@ namespace Comparable.Fody
                 return typeReference;
             }
 
-            var newTypeReference = new CompareByFieldReference(fieldDefinition, fieldDefinition.FieldType, this);
+            var newTypeReference = new CompareByFieldReference(fieldDefinition, Resolve(fieldDefinition.FieldType));
             _memberReferences[fieldDefinition] = newTypeReference;
             return newTypeReference;
         }
@@ -98,7 +98,7 @@ namespace Comparable.Fody
                 return typeReference;
             }
 
-            var newTypeReference = new CompareByPropertyReference(propertyDefinition, propertyDefinition.PropertyType, this);
+            var newTypeReference = new CompareByPropertyReference(propertyDefinition, Resolve(propertyDefinition.PropertyType));
             _memberReferences[propertyDefinition] = newTypeReference;
             return newTypeReference;
         }

@@ -4,8 +4,8 @@ namespace Comparable.Fody
 {
     public class CompareByFieldReference : CompareByMemberReference
     {
-        public CompareByFieldReference(FieldDefinition self, TypeReference memberTypeReference, IComparableModuleDefine moduleDefine) : 
-            base(self, memberTypeReference, moduleDefine)
+        public CompareByFieldReference(FieldDefinition self, IComparableTypeReference memberTypeReference) : 
+            base(self, memberTypeReference)
         {
             FieldDefinition = self;
         }

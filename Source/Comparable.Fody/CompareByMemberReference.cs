@@ -5,9 +5,9 @@ namespace Comparable.Fody
 {
     public abstract class CompareByMemberReference : ICompareByMemberReference
     {
-        protected CompareByMemberReference(IMemberDefinition self, TypeReference memberTypeReference, IComparableModuleDefine moduleDefine)
+        protected CompareByMemberReference(IMemberDefinition self, IComparableTypeReference memberTypeReference)
         {
-            MemberTypeReference = moduleDefine.Resolve(memberTypeReference);
+            MemberTypeReference = memberTypeReference;
             var compareBy = self.CustomAttributes
                 .Single(x => x.AttributeType.Name == nameof(CompareByAttribute));
             if (compareBy.HasProperties)
