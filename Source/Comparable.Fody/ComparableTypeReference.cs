@@ -23,6 +23,6 @@ namespace Comparable.Fody
             _members.Empty() ? 0 : _members.Max(x => x.Depth) + 1;
 
         public IComparableTypeDefinition Resolve(IComparableModuleDefine comparableModuleDefine)
-            => new ComparableTypeDefinition(this, _members.Select(x => x.Resolve(comparableModuleDefine)), comparableModuleDefine);
+            => new ComparableTypeDefinition(this, _members.Select(x => x.Resolve(comparableModuleDefine)));
     }
 }

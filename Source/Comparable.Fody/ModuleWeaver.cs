@@ -11,6 +11,7 @@ namespace Comparable.Fody
     {
         public override void Execute()
         {
+            Fody.References.Initialize(this);
             var memberDefinitions = ModuleDefinition
                 .Types
                 .SelectMany(x => x.Members())
@@ -22,9 +23,8 @@ namespace Comparable.Fody
                 throw new WeavingException($"Specify CompareAttribute for Type of {memberDefinitions.First().DeclaringType.FullName}.");
             }
 
-            var moduleDefine = new ComparableModuleDefine(this, ModuleDefinition);
             var comparableTypeDefinitions =
-                moduleDefine.Resolve(
+                new ComparableModuleDefine().Resolve(
                     ModuleDefinition.Types.Where(x => x.HasCompareAttribute()));
 
             foreach (var comparableTypeDefinition in comparableTypeDefinitions.OrderBy(x => x.DepthOfDependency))

@@ -8,17 +8,15 @@ namespace Comparable.Fody
 {
     public class ComparableTypeDefinition : IComparableTypeDefinition
     {
-        private readonly IComparableModuleDefine _comparableModuleDefine;
         private readonly TypeDefinition _thisType;
         private readonly TypeReference _thisTypeReference;
         private readonly List<ICompareByMemberDefinition> _members;
         private MethodDefinition _compareToByObject;
 
-        public ComparableTypeDefinition(IComparableTypeReference typeReference, IEnumerable<ICompareByMemberDefinition> members, IComparableModuleDefine comparableModuleDefine)
+        public ComparableTypeDefinition(IComparableTypeReference typeReference, IEnumerable<ICompareByMemberDefinition> members)
         {
             _members = members.ToList();
 
-            _comparableModuleDefine = comparableModuleDefine;
             _thisType = typeReference.TypeDefinition;
             _thisTypeReference = typeReference.TypeReference;
 
@@ -32,7 +30,7 @@ namespace Comparable.Fody
                 ? _members.Max(x => x.DepthOfDependency) + 1
                 : 0;
 
-        public MethodReference GetCompareTo() => _comparableModuleDefine.ImportReference(_thisType.GetCompareToMethodReference());
+        public MethodReference GetCompareTo() => _thisTypeReference.Module.ImportReference(_thisType.GetCompareToMethodReference());
 
         public VariableDefinition CreateVariableDefinition() => new(_thisTypeReference);
 
@@ -44,10 +42,10 @@ namespace Comparable.Fody
         {
             if (_members.Empty()) return;
 
-            _thisType.Interfaces.Add(new InterfaceImplementation(_comparableModuleDefine.IComparable));
+            _thisType.Interfaces.Add(new InterfaceImplementation(References.IComparable));
             _thisType.Interfaces.Add(
                 new InterfaceImplementation(
-                    _comparableModuleDefine.GenericIComparable.MakeGenericType(_thisType.GetGenericTypeReference())));
+                    References.GenericIComparable.MakeGenericType(_thisType.GetGenericTypeReference())));
 
             ImplementCompareToByConcreteType();
             ImplementCompareToByObject();
@@ -64,7 +62,7 @@ namespace Comparable.Fody
                     | MethodAttributes.HideBySig
                     | MethodAttributes.NewSlot
                     | MethodAttributes.Virtual,
-                    _comparableModuleDefine.Int32)
+                    _thisTypeReference.Module.TypeSystem.Int32)
                 {
                     Body =
                     {
@@ -78,7 +76,7 @@ namespace Comparable.Fody
             _compareToByObject.Parameters.Add(argumentObj);
 
             // Init local variables.
-            var localResult = new VariableDefinition(_comparableModuleDefine.Int32);
+            var localResult = new VariableDefinition(References.Int32);
             _compareToByObject.Body.Variables.Add(localResult);
 
 
@@ -141,7 +139,7 @@ namespace Comparable.Fody
                     | MethodAttributes.HideBySig
                     | MethodAttributes.NewSlot
                     | MethodAttributes.Virtual,
-                    _comparableModuleDefine.Int32)
+                    References.Int32)
                 {
                     Body =
                     {
@@ -152,7 +150,7 @@ namespace Comparable.Fody
 
             // Init arguments.
             var argumentObj =
-                new ParameterDefinition("obj", ParameterAttributes.None, _comparableModuleDefine.Object);
+                new ParameterDefinition("obj", ParameterAttributes.None, References.Object);
             compareToDefinition.Parameters.Add(argumentObj);
 
             // Labels for goto.
@@ -184,7 +182,7 @@ namespace Comparable.Fody
 
             // throw new ArgumentException("Object is not a WithSingleProperty");
             processor.Append(Instruction.Create(OpCodes.Ldstr, $"Object is not a {_thisType.FullName}."));
-            processor.Append(Instruction.Create(OpCodes.Newobj, _comparableModuleDefine.ArgumentExceptionConstructor));
+            processor.Append(Instruction.Create(OpCodes.Newobj, References.ArgumentExceptionConstructor));
             processor.Append(Instruction.Create(OpCodes.Throw));
 
             processor.Append(labelArgumentTypeMatched);
