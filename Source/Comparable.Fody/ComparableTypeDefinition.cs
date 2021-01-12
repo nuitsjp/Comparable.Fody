@@ -76,8 +76,6 @@ namespace Comparable.Fody
             // Init local variables.
             var localResult = new VariableDefinition(References.Int32);
             compareToByConcreteType.Body.Variables.Add(localResult);
-
-
             foreach (var member in _members)
             {
                 compareToByConcreteType.Body.Variables.Add(member.LocalVariable);
