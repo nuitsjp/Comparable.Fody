@@ -7,9 +7,9 @@ namespace Comparable.Fody
 {
     public class ComparableModuleDefine : IComparableModuleDefine
     {
-        private readonly Dictionary<TypeDefinition, IComparableTypeReference> _typeReferences = new();
-        private readonly Dictionary<IMemberDefinition, ICompareByMemberReference> _memberReferences = new();
+        private readonly Dictionary<TypeDefinition, IComparableTypeReference> _comparableTypeReferences = new();
         private readonly Dictionary<IComparableTypeReference, IComparableTypeDefinition> _comparableTypeDefinitions = new();
+        private readonly Dictionary<IMemberDefinition, ICompareByMemberReference> _memberReferences = new();
 
         public IEnumerable<IComparableTypeDefinition> Resolve(IEnumerable<TypeDefinition> typeDefinitions)
         {
@@ -18,7 +18,7 @@ namespace Comparable.Fody
                 Resolve(typeDefinition);
             }
 
-            foreach (var comparableTypeReference in _typeReferences.Values.OrderBy(x => x.Depth))
+            foreach (var comparableTypeReference in _comparableTypeReferences.Values.OrderBy(x => x.Depth))
             {
                 var definition = comparableTypeReference.Resolve(this);
                 _comparableTypeDefinitions[comparableTypeReference] = definition;
@@ -31,7 +31,7 @@ namespace Comparable.Fody
         {
             if (typeReference.TryGetIComparableTypeDefinition(out var typeDefinition))
             {
-                if (_typeReferences.TryGetValue(typeDefinition, out var comparableTypeReference))
+                if (_comparableTypeReferences.TryGetValue(typeDefinition, out var comparableTypeReference))
                 {
                     return comparableTypeReference;
                 }
@@ -71,7 +71,7 @@ namespace Comparable.Fody
                 }
 
                 var newTypeReference = new ComparableTypeReference(typeReference, typeDefinition, members);
-                _typeReferences[typeDefinition] = newTypeReference;
+                _comparableTypeReferences[typeDefinition] = newTypeReference;
                 return newTypeReference;
             }
 

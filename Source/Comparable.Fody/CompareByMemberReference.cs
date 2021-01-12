@@ -30,32 +30,4 @@ namespace Comparable.Fody
 
         public abstract ICompareByMemberDefinition Resolve(IComparableModuleDefine moduleDefine);
     }
-
-    public class CompareByFieldReference : CompareByMemberReference
-    {
-        public CompareByFieldReference(FieldDefinition self, TypeReference memberTypeReference, IComparableModuleDefine moduleDefine) : 
-            base(self, memberTypeReference, moduleDefine)
-        {
-            FieldDefinition = self;
-        }
-
-        public FieldDefinition FieldDefinition { get; }
-
-        public override ICompareByMemberDefinition Resolve(IComparableModuleDefine moduleDefine)
-            => new CompareByFieldDefinition( this, moduleDefine.Resolve(MemberTypeReference));
-    }
-
-    public class CompareByPropertyReference : CompareByMemberReference
-    {
-        public CompareByPropertyReference(PropertyDefinition self, TypeReference memberTypeReference, IComparableModuleDefine moduleDefine) :
-            base(self, memberTypeReference, moduleDefine)
-        {
-            PropertyDefinition = self;
-        }
-
-        public PropertyDefinition PropertyDefinition { get; }
-
-        public override ICompareByMemberDefinition Resolve(IComparableModuleDefine moduleDefine)
-            => new CompareByPropertyDefinition(this, moduleDefine.Resolve(MemberTypeReference));
-    }
 }
