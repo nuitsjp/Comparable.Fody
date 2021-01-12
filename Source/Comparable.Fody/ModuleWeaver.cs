@@ -27,7 +27,7 @@ namespace Comparable.Fody
                 new ComparableModuleDefine().Resolve(
                     ModuleDefinition.Types.Where(x => x.HasCompareAttribute()));
 
-            foreach (var comparableTypeDefinition in comparableTypeDefinitions.OrderBy(x => x.DepthOfDependency))
+            foreach (var comparableTypeDefinition in comparableTypeDefinitions.OrderBy(x => x.Depth))
             {
                 comparableTypeDefinition.ImplementCompareTo();
             }

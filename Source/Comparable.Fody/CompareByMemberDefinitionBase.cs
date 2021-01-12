@@ -17,7 +17,7 @@ namespace Comparable.Fody
 
         public VariableDefinition LocalVariable { get; }
 
-        public int DepthOfDependency => MemberTypeDefinition.DepthOfDependency;
+        public int Depth => MemberTypeDefinition.Depth;
         
         public abstract void AppendCompareTo(ILProcessor ilProcessor, ParameterDefinition parameterDefinition);
     }

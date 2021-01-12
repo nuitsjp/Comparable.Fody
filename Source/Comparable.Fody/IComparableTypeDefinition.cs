@@ -7,7 +7,7 @@ namespace Comparable.Fody
     {
         bool IsStruct { get; }
         
-        int DepthOfDependency { get; }
+        int Depth { get; }
 
         void ImplementCompareTo();
 

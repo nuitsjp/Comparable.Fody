@@ -23,9 +23,9 @@ namespace Comparable.Fody
         private bool IsClass => !IsStruct;
         public bool IsStruct => _typeDefinition.IsStruct();
 
-        public int DepthOfDependency =>
+        public int Depth =>
             _members.Any()
-                ? _members.Max(x => x.DepthOfDependency) + 1
+                ? _members.Max(x => x.Depth) + 1
                 : 0;
 
         public MethodReference GetCompareTo() => _typeReference.Module.ImportReference(_typeDefinition.GetCompareToMethodReference());

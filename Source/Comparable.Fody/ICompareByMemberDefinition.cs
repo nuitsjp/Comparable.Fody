@@ -6,7 +6,7 @@ namespace Comparable.Fody
     public interface ICompareByMemberDefinition
     {
         VariableDefinition LocalVariable { get; }
-        int DepthOfDependency { get; }
+        int Depth { get; }
 
         void AppendCompareTo(ILProcessor ilProcessor, ParameterDefinition parameterDefinition);
     }
