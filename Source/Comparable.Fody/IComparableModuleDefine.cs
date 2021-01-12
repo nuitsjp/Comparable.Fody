@@ -7,7 +7,6 @@ namespace Comparable.Fody
     {
         // ReSharper disable once UnusedMemberInSuper.Global
         IEnumerable<IComparableTypeDefinition> Resolve(IEnumerable<TypeDefinition> typeDefinitions);
-        IComparableTypeReference Resolve(TypeReference typeReference);
         IComparableTypeDefinition Resolve(IComparableTypeReference comparableTypeReference);
     }
 }

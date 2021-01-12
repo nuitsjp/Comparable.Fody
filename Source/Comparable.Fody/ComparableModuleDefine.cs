@@ -27,7 +27,7 @@ namespace Comparable.Fody
             return _comparableTypeDefinitions.Values;
         }
 
-        public IComparableTypeReference Resolve(TypeReference typeReference)
+        private IComparableTypeReference Resolve(TypeReference typeReference)
         {
             if (typeReference.TryGetIComparableTypeDefinition(out var typeDefinition))
             {
