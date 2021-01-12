@@ -2,7 +2,6 @@
 {
     public interface ICompareByMemberReference
     {
-        IComparableTypeReference MemberTypeReference { get; }
         int Priority { get; }
         int Depth { get; }
 

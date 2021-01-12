@@ -24,7 +24,7 @@ namespace Comparable.Fody
 
         }
 
-        public IComparableTypeReference MemberTypeReference { get; }
+        protected IComparableTypeReference MemberTypeReference { get; }
         public int Priority { get; }
         public int Depth => MemberTypeReference.Depth;
 
