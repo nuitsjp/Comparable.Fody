@@ -102,78 +102,69 @@ namespace Comparable.Fody
         /// <returns></returns>
         internal static MethodReference GetCompareToMethodReference(this TypeDefinition typeDefinition)
         {
-            try
+            // Since the Generic implementation is more efficient to process, we will get a CompareTo that takes the implementation class as an argument.
+            MethodReference compareTo = typeDefinition.Methods
+                .SingleOrDefault(methodDefinition =>
+                    methodDefinition.Name == nameof(IComparable.CompareTo)
+                    && methodDefinition.Parameters.Count == 1
+                    && methodDefinition.Parameters.Single().ParameterType.FullName == typeDefinition.FullName);
+            if (compareTo is not null) return compareTo;
+
+            // If there is no Generic implementation, get a non-Generic implementation.
+            compareTo = typeDefinition.Methods
+                .SingleOrDefault(methodDefinition =>
+                    methodDefinition.Name == nameof(IComparable.CompareTo)
+                    && methodDefinition.Parameters.Count == 1
+                    && methodDefinition.Parameters.Single().ParameterType.FullName == typeof(Object).FullName);
+            if (compareTo is not null) return compareTo;
+
+            // If the implementation does not exist
+            if (typeDefinition.IsInterface)
             {
-                // Since the Generic implementation is more efficient to process, we will get a CompareTo that takes the implementation class as an argument.
-                MethodReference compareTo = typeDefinition.Methods
-                    .SingleOrDefault(methodDefinition =>
-                        methodDefinition.Name == nameof(IComparable.CompareTo)
-                        && methodDefinition.Parameters.Count == 1
-                        && methodDefinition.Parameters.Single().ParameterType.FullName == typeDefinition.FullName);
-                if (compareTo is not null) return compareTo;
+                // For interface
+                var comparables = typeDefinition
+                    .Interfaces
+                    .Select(x => x.InterfaceType)
+                    .Where(x => x.FullName.StartsWith(typeof(IComparable).FullName!))
+                    .ToList();
 
-                // If there is no Generic implementation, get a non-Generic implementation.
-                compareTo = typeDefinition.Methods
-                    .SingleOrDefault(methodDefinition =>
-                        methodDefinition.Name == nameof(IComparable.CompareTo)
-                        && methodDefinition.Parameters.Count == 1
-                        && methodDefinition.Parameters.Single().ParameterType.FullName == typeof(Object).FullName);
-                if (compareTo is not null) return compareTo;
-
-                // If the implementation does not exist
-                if (typeDefinition.IsInterface)
+                if (comparables.Empty())
                 {
-                    // For interface
-                    var comparables = typeDefinition
-                        .Interfaces
-                        .Select(x => x.InterfaceType)
-                        .Where(x => x.FullName.StartsWith(typeof(IComparable).FullName!))
-                        .ToList();
-
-                    if (comparables.Empty())
+                    // If IComparable is not implemented, it will recursively search for the parent.
+                    foreach (var interfaceReference in typeDefinition.Interfaces.Select(x => x.InterfaceType))
                     {
-                        // If IComparable is not implemented, it will recursively search for the parent.
-                        foreach (var interfaceReference in typeDefinition.Interfaces.Select(x => x.InterfaceType))
-                        {
-                            compareTo = interfaceReference.Resolve().GetCompareToMethodReference();
-                            if (compareTo is not null) return compareTo;
-                        }
-
-                        // When searching for an Interface recursively, if the destination does not implement IComparable, null is returned.
-                        return null;
+                        compareTo = interfaceReference.Resolve().GetCompareToMethodReference();
+                        if (compareTo is not null) return compareTo;
                     }
 
-                    // Getting a Generic IComparable
-                    var genericComparables = comparables
-                        .Where(x => x.IsGenericInstance)
-                        .Cast<GenericInstanceType>()
-                        .ToArray();
-                    if (genericComparables.Length == 1)
-                    {
-                        var genericIComparable = genericComparables.Single();
-                        var genericCompareTo = genericIComparable.Resolve()
-                            .Methods
-                            .Single(x => x.Name == nameof(IComparable.CompareTo));
-                        return genericCompareTo.MakeGeneric(genericIComparable.GenericArguments.ToArray());
-                    }
-
-                    // If there are multiple generic IComparables, get them from non-generic IComparables.
-                    return comparables
-                        .SingleOrDefault(x => !x.IsGenericInstance)
-                        ?.Resolve()
-                        .GetCompareToMethodReference();
+                    // When searching for an Interface recursively, if the destination does not implement IComparable, null is returned.
+                    return null;
                 }
 
-                // For class.
-                // If typeDefinition is not an interface, recursively search the Base class
-                return typeDefinition.BaseType.Resolve().GetCompareToMethodReference();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
+                // Getting a Generic IComparable
+                var genericComparables = comparables
+                    .Where(x => x.IsGenericInstance)
+                    .Cast<GenericInstanceType>()
+                    .ToArray();
+                if (genericComparables.Length == 1)
+                {
+                    var genericIComparable = genericComparables.Single();
+                    var genericCompareTo = genericIComparable.Resolve()
+                        .Methods
+                        .Single(x => x.Name == nameof(IComparable.CompareTo));
+                    return genericCompareTo.MakeGeneric(genericIComparable.GenericArguments.ToArray());
+                }
+
+                // If there are multiple generic IComparables, get them from non-generic IComparables.
+                return comparables
+                    .SingleOrDefault(x => !x.IsGenericInstance)
+                    ?.Resolve()
+                    .GetCompareToMethodReference();
             }
 
+            // For class.
+            // If typeDefinition is not an interface, recursively search the Base class
+            return typeDefinition.BaseType.Resolve().GetCompareToMethodReference();
         }
 
         internal static TypeReference GetGenericTypeReference(this TypeReference typeReference)
