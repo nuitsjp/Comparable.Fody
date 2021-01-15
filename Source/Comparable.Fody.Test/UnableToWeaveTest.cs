@@ -48,5 +48,13 @@ namespace Comparable.Fody.Test
                 .Should().Throw<WeavingException>()
                 .WithMessage("Type MultipleCompareByWithEqualPriority.MultipleCompareByWithEqualPriority defines multiple CompareBy with equal priority.");
         }
+
+        [Fact]
+        public void CompareTo_already_exists()
+        {
+            _weavingTask.Invoking(x => x.ExecuteTestRun("CompareToAlreadyExists.dll", false))
+                .Should().Throw<WeavingException>()
+                .WithMessage("Type CompareToAlreadyExists.CompareToAlreadyExists has a CompareTo that already exists.");
+        }
     }
 }

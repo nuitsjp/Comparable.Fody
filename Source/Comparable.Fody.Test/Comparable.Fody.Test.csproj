@@ -29,6 +29,7 @@
     <ProjectReference Include="..\Comparable\Comparable.csproj" />
     <ProjectReference Include="..\CompareByIsNotDefined\CompareByIsNotDefined.csproj" />
     <ProjectReference Include="..\CompareIsNotDefined\CompareIsNotDefined.csproj" />
+    <ProjectReference Include="..\CompareToAlreadyExists\CompareToAlreadyExists.csproj" />
     <ProjectReference Include="..\FieldIsNotIComparable\FieldIsNotIComparable.csproj" />
     <ProjectReference Include="..\MultipleCompareByWithEqualPriority\MultipleCompareByWithEqualPriority.csproj" />
     <ProjectReference Include="..\PropertyIsNotIComparable\PropertyIsNotIComparable.csproj" />

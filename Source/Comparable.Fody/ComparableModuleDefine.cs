@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Fody;
 using Mono.Cecil;
@@ -39,6 +40,16 @@ namespace Comparable.Fody
                 List<ICompareByMemberReference> members;
                 if (typeDefinition.HasCompareAttribute())
                 {
+                    var compareTo = typeDefinition.Methods
+                        .SingleOrDefault(methodDefinition =>
+                            methodDefinition.Name == nameof(IComparable.CompareTo)
+                            && methodDefinition.Parameters.Count == 1
+                            && methodDefinition.Parameters.Single().ParameterType.FullName == typeof(object).FullName);
+                    if (compareTo is not null)
+                    {
+                        throw new WeavingException($"Type {typeReference.FullName} has a CompareTo that already exists.");
+                    }
+
                     var fields =
                         typeDefinition
                             .Fields
