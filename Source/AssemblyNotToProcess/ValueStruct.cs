@@ -2,7 +2,7 @@
 
 namespace AssemblyNotToProcess
 {
-    public class ValueStruct : INestedComparable
+    public class ValueStruct : IDummy, INestedComparable
     {
         public string Value { get; set; }
         public int CompareTo(object obj)
