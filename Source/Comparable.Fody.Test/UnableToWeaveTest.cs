@@ -56,5 +56,13 @@ namespace Comparable.Fody.Test
                 .Should().Throw<WeavingException>()
                 .WithMessage("Type CompareToAlreadyExists.CompareToAlreadyExists has a CompareTo that already exists.");
         }
+
+        [Fact]
+        public void CompareTo_by_generic_already_exists()
+        {
+            _weavingTask.Invoking(x => x.ExecuteTestRun("CompareToByGenericAlreadyExists.dll", false))
+                .Should().Throw<WeavingException>()
+                .WithMessage("Type CompareToByGenericAlreadyExists.CompareToByGenericAlreadyExists has a CompareTo that already exists.");
+        }
     }
 }

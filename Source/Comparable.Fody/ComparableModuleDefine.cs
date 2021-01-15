@@ -50,6 +50,16 @@ namespace Comparable.Fody
                         throw new WeavingException($"Type {typeReference.FullName} has a CompareTo that already exists.");
                     }
 
+                    var compareToByGeneric = typeDefinition.Methods
+                        .SingleOrDefault(methodDefinition =>
+                            methodDefinition.Name == nameof(IComparable.CompareTo)
+                            && methodDefinition.Parameters.Count == 1
+                            && methodDefinition.Parameters.Single().ParameterType.FullName == typeDefinition.FullName);
+                    if (compareToByGeneric is not null)
+                    {
+                        throw new WeavingException($"Type {typeReference.FullName} has a CompareTo that already exists.");
+                    }
+
                     var fields =
                         typeDefinition
                             .Fields
